@@ -215,6 +215,8 @@ public class RayTraceUtils
 
     private static boolean traceToPlacementBox(SchematicPlacement placement, Vec3d start, Vec3d end)
     {
+        net.minecraft.util.math.Vec3d startVanilla = start.toVanilla();
+        net.minecraft.util.math.Vec3d endVanilla = end.toVanilla();
         ImmutableMap<String, SelectionBox> boxes = placement.getSubRegionBoxes(EnabledCondition.ENABLED);
         boolean hitSomething = false;
 
@@ -224,11 +226,11 @@ public class RayTraceUtils
             SelectionBox box = entry.getValue();
 
             AxisAlignedBB bb = PositionUtils.createEnclosingAABB(box.getCorner1(), box.getCorner2());
-            RayTraceResult trace = bb.calculateIntercept(start.toVanilla(), end.toVanilla());
+            RayTraceResult trace = bb.calculateIntercept(startVanilla, endVanilla);
 
             if (trace != null)
             {
-                double dist = trace.hitVec.distanceTo(start.toVanilla());
+                double dist = trace.hitVec.distanceTo(startVanilla);
 
                 if (closestBoxDistance < 0 || dist < closestBoxDistance)
                 {
