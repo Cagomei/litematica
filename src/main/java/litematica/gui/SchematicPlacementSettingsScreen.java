@@ -113,6 +113,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         this.togglePlacementEnabledButton = OnOffButton.onOff(18, "litematica.button.schematic_placement_settings.enabled",
                                                               this.placement::isEnabled, this::toggleEnabled);
         this.originEditWidget = new BlockPosEditWidget(90, 72, 2, true, placement.getPosition(), this::setOrigin);
+        this.originEditWidget.setUpdateImmediateFromTextInput(true);
 
         this.lockXCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");
         this.lockYCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");

@@ -84,6 +84,7 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
         BlockPos pos = this.subRegion.getPosition();
         pos = litematica.util.PositionUtils.getTransformedBlockPos(pos, placement.getMirror(), placement.getRotation()).add(placement.getPosition());
         this.originEditWidget = new BlockPosEditWidget(90, 72, 2, true, pos, this::setOrigin);
+        this.originEditWidget.setUpdateImmediateFromTextInput(true);
 
         this.lockXCoordCheckbox = new CheckBoxWidget(null, null, () -> this.isCoordinateLocked(Coordinate.X), (val) -> this.setCoordinateLocked(val, Coordinate.X));
         this.lockYCoordCheckbox = new CheckBoxWidget(null, null, () -> this.isCoordinateLocked(Coordinate.Y), (val) -> this.setCoordinateLocked(val, Coordinate.Y));
@@ -219,6 +220,9 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
     protected void resetSubRegion()
     {
         this.manager.resetSubRegionToSchematicValues(this.placement, this.subRegion.getName());
+        BlockPos pos = this.subRegion.getPosition();
+        pos = litematica.util.PositionUtils.getTransformedBlockPos(pos, this.placement.getMirror(), this.placement.getRotation()).add(this.placement.getPosition());
+        this.originEditWidget.setPosNoUpdate(pos);
         this.updateWidgetStates();
     }
 
