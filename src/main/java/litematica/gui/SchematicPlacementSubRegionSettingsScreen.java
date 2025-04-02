@@ -222,6 +222,9 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
     protected void resetSubRegion()
     {
         this.manager.resetSubRegionToSchematicValues(this.placement, this.subRegion.getName());
+        BlockPos pos = this.subRegion.getPosition();
+        pos = litematica.util.PositionUtils.getTransformedBlockPos(pos, this.placement.getMirror(), this.placement.getRotation()).add(this.placement.getPosition());
+        this.originEditWidget.setPosNoUpdate(pos);
         this.updateWidgetStates();
     }
 
