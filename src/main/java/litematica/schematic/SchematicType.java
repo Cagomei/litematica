@@ -110,6 +110,11 @@ public class SchematicType<S extends ISchematic>
         return this.inMemoryIcon;
     }
 
+    public Icon getIcon(boolean inMemoryOnly)
+    {
+        return inMemoryOnly ? this.inMemoryIcon : this.defaultIcon;
+    }
+
     public boolean getHasName()
     {
         return this.hasName;
@@ -288,6 +293,7 @@ public class SchematicType<S extends ISchematic>
                 this.extension == null ||
                 this.extensionValidator == null ||
                 this.defaultIcon == null ||
+                this.displayName == null ||
                 this.inMemoryIcon == null)
             {
                 throw new IllegalArgumentException("SchematicType.Builder#build(): Some of the values were null!");

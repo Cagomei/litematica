@@ -37,7 +37,6 @@ import litematica.gui.widget.list.entry.SchematicPlacementSubRegionEntryWidget;
 import litematica.materials.MaterialListPlacement;
 import litematica.render.OverlayRenderer;
 import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -119,10 +118,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         this.lockYCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");
         this.lockZCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");
         this.bbColorWidget = new ColorIndicatorWidget(16, 16, () -> this.placement.getBoundingBoxColor().intValue, this::setBoundingBoxColor);
-
-        SchematicType<?> type = placement.getSchematic().getType();
-        Icon icon = placement.isSchematicInMemoryOnly() ? type.getInMemoryIcon() : type.getIcon();
-        this.schematicTypeIcon = new IconWidget(icon);
+        this.schematicTypeIcon = new IconWidget(placement.getSchematic().getType().getIcon(placement.isSchematicInMemoryOnly()));
 
         this.copyPasteSettingsButton.setRenderButtonBackgroundTexture(true);
         this.changeSchematicButton.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.change_schematic");

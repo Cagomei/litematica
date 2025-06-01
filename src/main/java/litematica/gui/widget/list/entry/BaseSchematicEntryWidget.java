@@ -17,7 +17,6 @@ import malilib.util.FileNameUtils;
 import malilib.util.StringUtils;
 import litematica.gui.widget.AbstractSchematicInfoWidget;
 import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
 
 public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<ISchematic>
 {
@@ -29,14 +28,13 @@ public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<ISchematic
         super(schematic, constructData);
 
         this.dateFormat = AbstractSchematicInfoWidget.createDateFormat();
-        this.modificationNoticeIcon = new IconWidget(DefaultIcons.EXCLAMATION_11);
+
         String timeStr = this.dateFormat.format(new Date(schematic.getMetadata().getTimeModified()));
-        this.modificationNoticeIcon.translateAndAddHoverString("litematica.hover.schematic_list.modified_on", timeStr);
-
-        SchematicType<?> type = schematic.getType();
-        Icon icon = schematic.getFile() == null ? type.getInMemoryIcon() : type.getIcon();
-
+        Icon icon = schematic.getType().getIcon(schematic.getFile() == null);
         boolean modified = schematic.getMetadata().wasModifiedSinceSaved();
+
+        this.modificationNoticeIcon = new IconWidget(DefaultIcons.EXCLAMATION_11);
+        this.modificationNoticeIcon.translateAndAddHoverString("litematica.hover.schematic_list.modified_on", timeStr);
         this.iconOffset.setXOffset(3);
         this.textOffset.setXOffset(icon.getWidth() + 6);
         this.textSettings.setTextColor(modified ? 0xFFFF9010 : 0xFFFFFFFF);

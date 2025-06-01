@@ -103,8 +103,7 @@ public class SchematicPlacementEntryWidget extends BaseOrderableListEditEntryWid
 
         if (schematic != null)
         {
-            SchematicType<?> type = schematic.getType();
-            icon = placement.isSchematicInMemoryOnly() ? type.getInMemoryIcon() : type.getIcon();
+            icon = schematic.getType().getIcon(placement.isSchematicInMemoryOnly());
         }
         else if (placement.getSchematicFile() != null)
         {
