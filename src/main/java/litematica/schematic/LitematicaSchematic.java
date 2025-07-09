@@ -56,12 +56,6 @@ public class LitematicaSchematic extends SchematicBase
     }
 
     @Override
-    public int getSubRegionCount()
-    {
-        return this.subRegions.size();
-    }
-
-    @Override
     public void clear()
     {
         this.subRegions.clear();

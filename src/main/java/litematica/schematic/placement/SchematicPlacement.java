@@ -87,7 +87,7 @@ public class SchematicPlacement extends BasePlacement
         this(schematicFile, origin, name, enabled);
 
         this.schematic = schematic;
-        this.subRegionCount = schematic != null ? schematic.getSubRegionCount() : 1;
+        this.subRegionCount = schematic != null ? schematic.getRegions().size() : 1;
     }
 
     public boolean isSchematicLoaded()
@@ -437,7 +437,7 @@ public class SchematicPlacement extends BasePlacement
         this.resetAllSubRegionsToSchematicValues();
         this.configureModifiedSubRegions();
         this.checkSubRegionsModified();
-        this.subRegionCount = this.schematic.getSubRegionCount();
+        this.subRegionCount = this.schematic.getRegions().size();
     }
 
     protected void checkSubRegionsModified()

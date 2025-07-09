@@ -40,14 +40,6 @@ public interface ISchematic
     SchematicType<?> getType();
 
     /**
-     * @return the number of (sub-)regions in this schematic
-     */
-    default int getSubRegionCount()
-    {
-        return 1;
-    }
-
-    /**
      * @return the enclosing size of all the (sub-)regions in this schematic
      */
     Vec3i getEnclosingSize();
