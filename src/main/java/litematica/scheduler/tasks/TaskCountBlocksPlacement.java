@@ -10,7 +10,7 @@ import malilib.util.position.BlockPos;
 import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.materials.IMaterialList;
-import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacement;
 import litematica.selection.SelectionBox;
 import litematica.util.value.BlockInfoListType;
 import litematica.world.SchematicWorldHandler;

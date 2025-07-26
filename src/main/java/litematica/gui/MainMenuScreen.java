@@ -10,7 +10,7 @@ import malilib.util.StringUtils;
 import litematica.Reference;
 import litematica.data.DataManager;
 import litematica.gui.util.LitematicaIcons;
-import litematica.schematic.projects.SchematicProject;
+import litematica.schematic.old.projects.SchematicProject;
 import litematica.selection.AreaSelectionType;
 
 public class MainMenuScreen extends BaseScreen

@@ -19,8 +19,8 @@ import malilib.util.game.wrap.GameWrap;
 import malilib.util.game.wrap.NbtWrap;
 import malilib.util.nbt.NbtUtils;
 import litematica.scheduler.TaskScheduler;
-import litematica.schematic.ISchematic;
-import litematica.schematic.util.SchematicSaveSettings;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.util.SchematicSaveSettings;
 import litematica.selection.AreaSelection;
 import litematica.task.MultiplayerCreateSchematicTask;
 

@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import litematica.Reference;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicMetadata;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicMetadata;
 
 public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<ISchematic>
 {

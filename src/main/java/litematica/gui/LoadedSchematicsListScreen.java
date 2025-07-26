@@ -13,7 +13,7 @@ import litematica.data.SchematicHolder;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;
 import litematica.gui.widget.list.entry.SchematicEntryWidget;
-import litematica.schematic.ISchematic;
+import litematica.schematic.old.ISchematic;
 
 public class LoadedSchematicsListScreen extends BaseListScreen<DataListWidget<ISchematic>>
 {

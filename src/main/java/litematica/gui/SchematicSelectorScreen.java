@@ -9,7 +9,7 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntryType;
 import malilib.overlay.message.MessageDispatcher;
 import litematica.Reference;
 import litematica.data.SchematicHolder;
-import litematica.schematic.ISchematic;
+import litematica.schematic.old.ISchematic;
 
 public class SchematicSelectorScreen extends BaseSchematicBrowserScreen
 {

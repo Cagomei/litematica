@@ -21,7 +21,7 @@ import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.render.infohud.IInfoHudRenderer;
 import litematica.render.infohud.InfoHud;
-import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacement;
 import litematica.util.PositionUtils.ChunkPosComparator;
 import litematica.util.value.ReplaceBehavior;
 import litematica.world.SchematicWorldHandler;

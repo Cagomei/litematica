@@ -4,7 +4,7 @@ import java.util.Collection;
 import com.google.common.collect.ImmutableList;
 
 import malilib.util.StringUtils;
-import litematica.schematic.ISchematic;
+import litematica.schematic.old.ISchematic;
 
 public class MaterialListSchematic extends MaterialListBase
 {

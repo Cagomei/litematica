@@ -11,8 +11,8 @@ import net.minecraft.util.ScreenShotHelper;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.render.infohud.InfoHud;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicMetadata;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicMetadata;
 
 /**
  * This task doesn't actually do/run anything on its own.

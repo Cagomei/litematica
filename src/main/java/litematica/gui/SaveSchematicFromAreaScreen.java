@@ -16,10 +16,10 @@ import litematica.config.Configs;
 import litematica.data.SchematicHolder;
 import litematica.network.SchematicSavePacketHandler;
 import litematica.scheduler.TaskScheduler;
-import litematica.schematic.ISchematic;
-import litematica.schematic.LitematicaSchematic;
-import litematica.schematic.util.SchematicCreationUtils;
-import litematica.schematic.util.SchematicSaveSettings;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.LitematicaSchematic;
+import litematica.schematic.old.util.SchematicCreationUtils;
+import litematica.schematic.old.util.SchematicSaveSettings;
 import litematica.selection.AreaSelection;
 import litematica.task.CreateSchematicTask;
 

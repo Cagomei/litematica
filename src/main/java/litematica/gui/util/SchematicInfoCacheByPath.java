@@ -11,9 +11,9 @@ import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import malilib.util.nbt.NbtUtils;
 import litematica.Reference;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicMetadata;
-import litematica.schematic.SchematicType;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicMetadata;
+import litematica.schematic.old.SchematicType;
 
 public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
 {

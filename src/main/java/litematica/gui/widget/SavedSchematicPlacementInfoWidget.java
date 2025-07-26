@@ -13,7 +13,7 @@ import malilib.overlay.message.MessageHelpers;
 import malilib.render.text.StyledTextLine;
 import malilib.util.position.BlockPos;
 import litematica.gui.util.SchematicPlacementInfoCache;
-import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacement;
 
 public class SavedSchematicPlacementInfoWidget extends ContainerWidget
 {

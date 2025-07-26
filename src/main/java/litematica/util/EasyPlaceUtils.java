@@ -50,7 +50,7 @@ import litematica.config.Configs;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
 import litematica.materials.MaterialCache;
-import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.SchematicPlacementManager;
 import litematica.tool.ToolMode;
 import litematica.util.RayTraceUtils.RayTraceWrapper;
 import litematica.world.SchematicWorldHandler;

@@ -18,10 +18,10 @@ import malilib.util.position.BlockRotation;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
-import litematica.schematic.ISchematic;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
-import litematica.schematic.placement.SubRegionPlacement;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.SubRegionPlacement;
 
 public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
 {

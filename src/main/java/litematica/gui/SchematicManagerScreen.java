@@ -19,11 +19,11 @@ import litematica.data.DataManager;
 import litematica.data.SchematicHolder;
 import litematica.scheduler.TaskScheduler;
 import litematica.scheduler.tasks.SetSchematicPreviewTask;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicMetadata;
-import litematica.schematic.SchematicType;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicMetadata;
+import litematica.schematic.old.SchematicType;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
 
 public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 {

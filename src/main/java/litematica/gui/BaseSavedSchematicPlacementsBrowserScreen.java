@@ -12,7 +12,7 @@ import malilib.util.StringUtils;
 import litematica.data.DataManager;
 import litematica.gui.widget.SavedSchematicPlacementInfoWidget;
 import litematica.gui.widget.list.entry.SchematicPlacementBrowserEntryWidget;
-import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacement;
 import litematica.util.LitematicaDirectories;
 
 public abstract class BaseSavedSchematicPlacementsBrowserScreen extends BaseListScreen<BaseFileBrowserWidget>

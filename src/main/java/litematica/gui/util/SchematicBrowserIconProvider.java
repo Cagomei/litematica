@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import malilib.gui.icon.FileBrowserIconProvider;
 import malilib.gui.icon.Icon;
-import litematica.schematic.SchematicType;
+import litematica.schematic.old.SchematicType;
 
 public class SchematicBrowserIconProvider implements FileBrowserIconProvider
 {

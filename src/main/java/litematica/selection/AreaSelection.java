@@ -23,7 +23,7 @@ import malilib.util.position.Direction;
 import malilib.util.position.IntBoundingBox;
 import litematica.config.Configs;
 import litematica.render.infohud.StatusInfoRenderer;
-import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacement;
 import litematica.util.PositionUtils;
 
 public class AreaSelection

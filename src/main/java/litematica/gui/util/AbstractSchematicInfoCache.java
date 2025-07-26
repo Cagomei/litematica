@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 
 import malilib.util.data.Identifier;
 import malilib.util.game.wrap.GameWrap;
-import litematica.schematic.SchematicMetadata;
+import litematica.schematic.old.SchematicMetadata;
 
 public abstract class AbstractSchematicInfoCache<T>
 {

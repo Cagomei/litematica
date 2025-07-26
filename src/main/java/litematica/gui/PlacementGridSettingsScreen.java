@@ -7,9 +7,9 @@ import malilib.gui.widget.button.GenericButton;
 import malilib.gui.widget.button.OnOffButton;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
-import litematica.schematic.placement.GridSettings;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.GridSettings;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
 
 public class PlacementGridSettingsScreen extends BaseScreen
 {

@@ -36,12 +36,12 @@ import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.SchematicPlacementSubRegionEntryWidget;
 import litematica.materials.MaterialListPlacement;
 import litematica.render.OverlayRenderer;
-import litematica.schematic.ISchematic;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
-import litematica.schematic.placement.SubRegionPlacement;
-import litematica.schematic.verifier.SchematicVerifier;
-import litematica.schematic.verifier.SchematicVerifierManager;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.SubRegionPlacement;
+import litematica.schematic.old.verifier.SchematicVerifier;
+import litematica.schematic.old.verifier.SchematicVerifierManager;
 
 public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWidget<SubRegionPlacement>>
 {

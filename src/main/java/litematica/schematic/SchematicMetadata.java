@@ -2,34 +2,34 @@ package litematica.schematic;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.nbt.NBTTagCompound;
-
 import malilib.util.data.Constants;
-import malilib.util.game.wrap.NbtWrap;
+import malilib.util.game.MinecraftVersion;
+import malilib.util.nbt.CompoundData;
+import malilib.util.nbt.DataView;
 import malilib.util.nbt.NbtUtils;
 import malilib.util.position.Vec3i;
 
 public class SchematicMetadata
 {
-    protected String name = "?";
+    protected String schematicName = "?";
     protected String author = "?";
     protected String description = "";
     protected Vec3i enclosingSize = Vec3i.ZERO;
     protected long timeCreated;
     protected long timeModified;
-    protected long minecraftDataVersion;
+    protected MinecraftVersion minecraftVersion = MinecraftVersion.MC_UNKNOWN;
     protected int schematicVersion;
     protected int regionCount;
     protected int entityCount;
     protected int blockEntityCount;
     protected long totalVolume = -1;
     protected long totalBlocks = -1;
-    protected boolean modifiedSinceSaved;
-    @Nullable protected int[] thumbnailPixelData;
+    @Nullable
+    protected int[] thumbnailPixelData;
 
-    public String getName()
+    public String getSchematicName()
     {
-        return this.name;
+        return this.schematicName;
     }
 
     public String getAuthor()
@@ -93,40 +93,19 @@ public class SchematicMetadata
         return this.schematicVersion;
     }
 
-    public long getMinecraftDataVersion()
+    public MinecraftVersion getMinecraftVersion()
     {
-        return this.minecraftDataVersion;
+        return this.minecraftVersion;
     }
 
-    // TODO
-    public String getMinecraftVersion()
-    {
-        return "???";
-    }
-
-    public boolean hasBeenModified()
+    public boolean wasModified()
     {
         return this.timeCreated != this.timeModified;
     }
 
-    public boolean wasModifiedSinceSaved()
+    public void setSchematicName(String schematicName)
     {
-        return this.modifiedSinceSaved;
-    }
-
-    public void setModifiedSinceSaved()
-    {
-        this.modifiedSinceSaved = true;
-    }
-
-    public void clearModifiedSinceSaved()
-    {
-        this.modifiedSinceSaved = false;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
+        this.schematicName = schematicName;
     }
 
     public void setAuthor(String author)
@@ -147,6 +126,16 @@ public class SchematicMetadata
     public void setRegionCount(int regionCount)
     {
         this.regionCount = regionCount;
+    }
+
+    public void setEntityCount(int entityCount)
+    {
+        this.entityCount = entityCount;
+    }
+
+    public void setBlockEntityCount(int blockEntityCount)
+    {
+        this.blockEntityCount = blockEntityCount;
     }
 
     public void setTotalVolume(long totalVolume)
@@ -191,9 +180,19 @@ public class SchematicMetadata
         }
     }
 
+    public void setSchematicVersion(int schematicVersion)
+    {
+        this.schematicVersion = schematicVersion;
+    }
+
+    public void setMinecraftVersion(MinecraftVersion minecraftVersion)
+    {
+        this.minecraftVersion = minecraftVersion;
+    }
+
     public void copyFrom(SchematicMetadata other)
     {
-        this.name = other.name;
+        this.schematicName = other.schematicName;
         this.author = other.author;
         this.description = other.description;
         this.enclosingSize = other.enclosingSize;
@@ -202,7 +201,6 @@ public class SchematicMetadata
         this.regionCount = other.regionCount;
         this.totalVolume = other.totalVolume;
         this.totalBlocks = other.totalBlocks;
-        this.modifiedSinceSaved = false;
 
         if (other.thumbnailPixelData != null)
         {
@@ -215,71 +213,50 @@ public class SchematicMetadata
         }
     }
 
-    public NBTTagCompound toTag()
+    public CompoundData write()
     {
-        NBTTagCompound nbt = new NBTTagCompound();
+        CompoundData tag = new CompoundData();
 
-        NbtWrap.putString(nbt, "Name", this.name);
-        NbtWrap.putString(nbt, "Author", this.author);
-        NbtWrap.putString(nbt, "Description", this.description);
+        tag.putString("Name", this.schematicName);
+        tag.putString("Author", this.author);
+        tag.putString("Description", this.description);
+        tag.putCompound("EnclosingSize", NbtUtils.createBlockPosTag(this.enclosingSize));
 
-        if (this.regionCount > 0)
+        tag.putLong("TimeCreated", this.timeCreated);
+        tag.putLong("TimeModified", this.timeModified);
+        tag.putInt("SchematicVersion", this.schematicVersion);
+
+        if (this.minecraftVersion != null)
         {
-            NbtWrap.putInt(nbt, "RegionCount", this.regionCount);
+            tag.putString("McVersion", this.minecraftVersion.displayName);
+            tag.putInt("McDataVersion", this.minecraftVersion.dataVersion);
+            tag.putInt("McProtocolVersion", this.minecraftVersion.protocolVersion);
         }
 
-        if (this.totalVolume > 0)
-        {
-            NbtWrap.putLong(nbt, "TotalVolume", this.totalVolume);
-        }
-
-        if (this.totalBlocks >= 0)
-        {
-            NbtWrap.putLong(nbt, "TotalBlocks", this.totalBlocks);
-        }
-
-        if (this.timeCreated > 0)
-        {
-            NbtWrap.putLong(nbt, "TimeCreated", this.timeCreated);
-        }
-
-        if (this.timeModified > 0)
-        {
-            NbtWrap.putLong(nbt, "TimeModified", this.timeModified);
-        }
-
-        NbtWrap.putTag(nbt, "EnclosingSize", NbtUtils.createBlockPosTag(this.enclosingSize));
+        tag.putInt("RegionCount", this.regionCount);
+        tag.putInt("EntityCount", this.entityCount);
+        tag.putInt("BlockEntityCount", this.blockEntityCount);
+        tag.putLong("TotalVolume", this.totalVolume);
+        tag.putLong("TotalBlocks", this.totalBlocks);
 
         if (this.thumbnailPixelData != null)
         {
-            NbtWrap.putIntArray(nbt, "PreviewImageData", this.thumbnailPixelData);
+            tag.putIntArray("PreviewImageData", this.thumbnailPixelData);
         }
 
-        return nbt;
+        return tag;
     }
 
-    public void fromTag(NBTTagCompound tag)
+    public void read(DataView dataIn)
     {
-        this.name = NbtWrap.getStringOrDefault(tag, "Name", this.name);
-        this.author = NbtWrap.getStringOrDefault(tag, "Author", this.author);
-        this.description = NbtWrap.getStringOrDefault(tag, "Description", this.description);
-        this.regionCount = NbtWrap.getIntOrDefault(tag, "RegionCount", this.regionCount);
-        this.timeCreated = NbtWrap.getLongOrDefault(tag, "TimeCreated", this.timeCreated);
-        this.timeModified = NbtWrap.getLongOrDefault(tag, "TimeModified", this.timeModified);
+        this.schematicName = dataIn.getStringOrDefault("Name", "?");
+        this.author = dataIn.getStringOrDefault("Author", "?");
+        this.description = dataIn.getStringOrDefault("Description", "");
 
-        if (NbtWrap.contains(tag, "TotalVolume", Constants.NBT.TAG_ANY_NUMERIC))
+        if (dataIn.contains("EnclosingSize", Constants.NBT.TAG_COMPOUND))
         {
-            this.totalVolume = NbtWrap.getLong(tag, "TotalVolume");
-        }
-
-        if (NbtWrap.contains(tag, "TotalBlocks", Constants.NBT.TAG_ANY_NUMERIC))
-        {
-            this.totalBlocks = NbtWrap.getLong(tag, "TotalBlocks");
-        }
-
-        if (NbtWrap.containsCompound(tag, "EnclosingSize"))
-        {
-            Vec3i size = NbtUtils.readBlockPos(NbtWrap.getCompound(tag, "EnclosingSize"));
+            // TODO readOrDefault ZERO
+            Vec3i size = NbtUtils.readBlockPos(dataIn.getCompound("EnclosingSize"));
 
             if (size != null)
             {
@@ -287,13 +264,19 @@ public class SchematicMetadata
             }
         }
 
-        if (NbtWrap.containsIntArray(tag, "PreviewImageData"))
-        {
-            this.thumbnailPixelData = NbtWrap.getIntArray(tag, "PreviewImageData");
-        }
-        else
-        {
-            this.thumbnailPixelData = null;
-        }
+        this.timeCreated = dataIn.getLongOrDefault("TimeCreated", -1);
+        this.timeModified = dataIn.getLongOrDefault("TimeModified", -1);
+        this.schematicVersion = dataIn.getIntOrDefault("SchematicVersion", -1);
+
+        int mcDataVersion = dataIn.getIntOrDefault("McDataVersion", -1);
+        this.minecraftVersion = MinecraftVersion.getVersionOrCreateSnapshotVersionByDataVersion(mcDataVersion);
+
+        this.regionCount = dataIn.getIntOrDefault("RegionCount", -1);
+        this.entityCount = dataIn.getIntOrDefault("EntityCount", -1);
+        this.blockEntityCount = dataIn.getIntOrDefault("BlockEntityCount", -1);
+        this.totalVolume = dataIn.getLongOrDefault("TotalVolume", -1);
+        this.totalBlocks = dataIn.getLongOrDefault("TotalBlocks", -1);
+
+        this.thumbnailPixelData = dataIn.getIntArrayOrDefault("PreviewImageData", null);
     }
 }

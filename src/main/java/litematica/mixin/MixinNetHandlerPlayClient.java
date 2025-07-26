@@ -9,7 +9,7 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketChunkData;
 
 import litematica.config.Configs;
-import litematica.schematic.verifier.SchematicVerifierManager;
+import litematica.schematic.old.verifier.SchematicVerifierManager;
 import litematica.world.SchematicWorldRenderingNotifier;
 
 @Mixin(NetHandlerPlayClient.class)

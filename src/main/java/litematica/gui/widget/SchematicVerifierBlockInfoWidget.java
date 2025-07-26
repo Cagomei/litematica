@@ -23,7 +23,7 @@ import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.RegistryUtils;
 import litematica.config.Configs;
 import litematica.materials.MaterialCache;
-import litematica.schematic.verifier.VerifierResultType;
+import litematica.schematic.old.verifier.VerifierResultType;
 
 public class SchematicVerifierBlockInfoWidget extends ContainerWidget
 {

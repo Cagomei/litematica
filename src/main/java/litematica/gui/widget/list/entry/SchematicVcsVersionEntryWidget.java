@@ -3,7 +3,7 @@ package litematica.gui.widget.list.entry;
 import malilib.gui.widget.list.entry.BaseDataListEntryWidget;
 import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.render.text.StyledTextLine;
-import litematica.schematic.projects.SchematicVersion;
+import litematica.schematic.old.projects.SchematicVersion;
 
 public class SchematicVcsVersionEntryWidget extends BaseDataListEntryWidget<SchematicVersion>
 {

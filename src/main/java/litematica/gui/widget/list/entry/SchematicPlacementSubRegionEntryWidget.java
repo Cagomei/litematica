@@ -16,10 +16,10 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
 import litematica.gui.SchematicPlacementSubRegionSettingsScreen;
-import litematica.schematic.ISchematicRegion;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
-import litematica.schematic.placement.SubRegionPlacement;
+import litematica.schematic.old.ISchematicRegion;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.SubRegionPlacement;
 import litematica.util.PositionUtils;
 
 public class SchematicPlacementSubRegionEntryWidget extends BaseDataListEntryWidget<SubRegionPlacement>

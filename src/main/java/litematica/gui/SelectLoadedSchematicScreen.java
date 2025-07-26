@@ -11,7 +11,7 @@ import malilib.gui.widget.list.DataListWidget;
 import litematica.data.SchematicHolder;
 import litematica.gui.widget.SchematicInfoWidgetBySchematic;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;
-import litematica.schematic.ISchematic;
+import litematica.schematic.old.ISchematic;
 
 public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<ISchematic>>
 {

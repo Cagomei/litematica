@@ -16,7 +16,7 @@ import malilib.render.text.StyledTextLine;
 import malilib.util.FileNameUtils;
 import malilib.util.StringUtils;
 import litematica.gui.widget.AbstractSchematicInfoWidget;
-import litematica.schematic.ISchematic;
+import litematica.schematic.old.ISchematic;
 
 public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<ISchematic>
 {

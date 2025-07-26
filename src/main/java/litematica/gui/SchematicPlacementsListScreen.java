@@ -14,8 +14,8 @@ import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.SchematicPlacementEntryWidget;
-import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.old.placement.SchematicPlacementManager;
 
 public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget<SchematicPlacement>>
 {

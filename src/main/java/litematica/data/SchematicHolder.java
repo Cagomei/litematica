@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicType;
 
 public class SchematicHolder
 {

@@ -13,8 +13,8 @@ import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.gui.util.SchematicBrowserIconProvider;
 import litematica.gui.widget.SchematicInfoWidgetByPath;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicType;
 import litematica.util.LitematicaDirectories;
 
 public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWidget>

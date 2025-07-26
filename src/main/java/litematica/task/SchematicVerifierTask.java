@@ -15,9 +15,9 @@ import malilib.util.position.IntBoundingBox;
 import malilib.util.position.PositionUtils;
 import litematica.config.Configs;
 import litematica.scheduler.tasks.TaskProcessChunkBase;
-import litematica.schematic.verifier.BlockStatePair;
-import litematica.schematic.verifier.SchematicVerifier;
-import litematica.schematic.verifier.VerifierResultType;
+import litematica.schematic.old.verifier.BlockStatePair;
+import litematica.schematic.old.verifier.SchematicVerifier;
+import litematica.schematic.old.verifier.VerifierResultType;
 import litematica.world.SchematicWorldHandler;
 import litematica.world.WorldSchematic;
 

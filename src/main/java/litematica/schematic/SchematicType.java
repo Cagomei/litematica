@@ -5,78 +5,84 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
-
-import net.minecraft.nbt.NBTTagCompound;
 
 import malilib.gui.icon.Icon;
 import malilib.util.FileNameUtils;
+import malilib.util.nbt.CompoundData;
 import malilib.util.nbt.NbtUtils;
 import litematica.gui.util.LitematicaIcons;
+import litematica.schematic.old.LitematicaSchematic;
+import litematica.schematic.old.SchematicaSchematic;
+import litematica.schematic.old.SpongeSchematic;
+import litematica.schematic.old.VanillaStructure;
 
-public class SchematicType<S extends ISchematic>
+public class SchematicType
 {
-    public static final SchematicType<LitematicaSchematic> LITEMATICA = SchematicType.<LitematicaSchematic>builder()
-            .setDisplayName("Litematica")
-            .setFactory(LitematicaSchematic::new)
-            .setDataValidator(LitematicaSchematic::isValidSchematic)
-            .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
-            .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equals)
-            .setDefaultIcon(LitematicaIcons.SCHEMATIC_LITEMATIC)
-            .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_LITEMATIC)
-            .setHasName(true)
-            .build();
+    public static final SchematicType LITEMATICA = SchematicType.builder()
+         .setDisplayName("Litematica")
+         .setFactory(LitematicaSchematic::new)
+         .setDataValidator(LitematicaSchematic::isValidSchematic)
+         .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
+         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equals)
+         .setDefaultIcon(LitematicaIcons.SCHEMATIC_LITEMATIC)
+         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_LITEMATIC)
+         .setHasName(true)
+         .build();
 
-    public static final SchematicType<SchematicaSchematic> SCHEMATICA = SchematicType.<SchematicaSchematic>builder()
-            .setDisplayName("Schematica/MCEdit")
-            .setFactory(SchematicaSchematic::new)
-            .setDataValidator(SchematicaSchematic::isValidSchematic)
-            .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
-            .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equals)
-            .setDefaultIcon(LitematicaIcons.SCHEMATIC_SCHEMATICA)
-            .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA)
-            .setHasName(true)
-            .build();
+    public static final SchematicType SCHEMATICA = SchematicType.builder()
+         .setDisplayName("Schematica/MCEdit")
+         .setFactory(SchematicaSchematic::new)
+         .setDataValidator(SchematicaSchematic::isValidSchematic)
+         .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
+         .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equals)
+         .setDefaultIcon(LitematicaIcons.SCHEMATIC_SCHEMATICA)
+         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA)
+         .setHasName(true)
+         .build();
 
-    public static final SchematicType<SpongeSchematic> SPONGE = SchematicType.<SpongeSchematic>builder()
-            .setDisplayName("Sponge")
-            .setFactory(SpongeSchematic::new)
-            .setDataValidator(SpongeSchematic::isValidSchematic)
-            .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
-            .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equals(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equals(ext))
-            .setDefaultIcon(LitematicaIcons.SCHEMATIC_SPONGE)
-            .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SPONGE)
-            .setHasName(true)
-            .build();
+    public static final SchematicType SPONGE = SchematicType.builder()
+         .setDisplayName("Sponge")
+         .setFactory(SpongeSchematic::new)
+         .setDataValidator(SpongeSchematic::isValidSchematic)
+         .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
+         .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equals(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equals(ext))
+         .setDefaultIcon(LitematicaIcons.SCHEMATIC_SPONGE)
+         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SPONGE)
+         .setHasName(true)
+         .build();
 
-    public static final SchematicType<VanillaStructure> VANILLA = SchematicType.<VanillaStructure>builder()
-            .setDisplayName("Vanilla Structure")
-            .setFactory(VanillaStructure::new)
-            .setDataValidator(VanillaStructure::isValidSchematic)
-            .setExtension(VanillaStructure.FILE_NAME_EXTENSION)
-            .setExtensionValidator(VanillaStructure.FILE_NAME_EXTENSION::equals)
-            .setDefaultIcon(LitematicaIcons.SCHEMATIC_VANILLA)
-            .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA)
-            .setHasName(true)
-            .build();
+    public static final SchematicType VANILLA = SchematicType.builder()
+        .setDisplayName("Vanilla Structure")
+        .setFactory(VanillaStructure::new)
+        .setDataValidator(VanillaStructure::isValidSchematic)
+        .setExtension(VanillaStructure.FILE_NAME_EXTENSION)
+        .setExtensionValidator(VanillaStructure.FILE_NAME_EXTENSION::equals)
+        .setDefaultIcon(LitematicaIcons.SCHEMATIC_VANILLA)
+        .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA)
+        .setHasName(true)
+        .build();
 
-    public static final ImmutableList<SchematicType<?>> KNOWN_TYPES = ImmutableList.of(LITEMATICA, SCHEMATICA, SPONGE, VANILLA);
+    public static ImmutableList<SchematicType> KNOWN_TYPES = ImmutableList.of(LITEMATICA, SCHEMATICA, SPONGE, VANILLA);
 
-    public static final Predicate<Path> SCHEMATIC_FILE_FILTER = p -> Files.isRegularFile(p) && Files.isReadable(p) && getPossibleTypesFromFileName(p).isEmpty() == false;
+    public static final Predicate<Path> SCHEMATIC_FILE_FILTER = p -> Files.isRegularFile(p) &&
+                                                                     Files.isReadable(p) &&
+                                                                     getPossibleTypesFromFileName(p).isEmpty() == false;
 
     private final String extension;
     private final Icon defaultIcon;
     private final Icon inMemoryIcon;
-    private final Function<Path, S> factory;
+    private final Supplier<Schematic> factory;
     private final Function<String, Boolean> extensionValidator;
-    private final Function<NBTTagCompound, Boolean> dataValidator;
+    private final Function<CompoundData, Boolean> dataValidator;
     private final String displayName;
     private final boolean hasName;
 
-    private SchematicType(String displayName, Function<Path, S> factory, Function<NBTTagCompound, Boolean> dataValidator,
+    private SchematicType(String displayName, Supplier<Schematic> factory, Function<CompoundData, Boolean> dataValidator,
                           String extension, Function<String, Boolean> extensionValidator,
                           Icon defaultIcon, Icon inMemoryIcon, boolean hasName)
     {
@@ -125,44 +131,44 @@ public class SchematicType<S extends ISchematic>
         return this.extensionValidator.apply(extension).booleanValue();
     }
 
-    public boolean isValidData(NBTTagCompound tag)
+    public boolean isValidData(CompoundData dataIn)
     {
-        return this.dataValidator.apply(tag).booleanValue();
+        return this.dataValidator.apply(dataIn).booleanValue();
     }
 
     /**
-     * Creates a new schematic, with the provided file passed to the constructor of the schematic.
-     * This does not read anything from the file.
+     * Creates a new schematic instance of the given type.
+     * @return the created new schematic instance
      */
-    public S createSchematic(@Nullable Path file)
+    public Schematic createSchematic()
     {
-        return this.factory.apply(file);
+        return this.factory.get();
     }
 
-    @Nullable
-    public S createSchematicAndReadFromTag(@Nullable Path file, NBTTagCompound tag)
+    // TODO remove this?
+    public Optional<Schematic> createSchematicAndReadFromTag(CompoundData dataIn)
     {
-        S schematic = this.factory.apply(file);
+        Schematic schematic = this.factory.get();
 
-        if (schematic.fromTag(tag))
+        if (schematic.read(dataIn))
         {
-            return schematic;
+            return Optional.of(schematic);
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    public static List<SchematicType<?>> getPossibleTypesFromFileName(Path file)
+    public static List<SchematicType> getPossibleTypesFromFileName(Path file)
     {
         return getPossibleTypesFromFileName(file.getFileName().toString());
     }
 
-    public static List<SchematicType<?>> getPossibleTypesFromFileName(String fileName)
+    public static List<SchematicType> getPossibleTypesFromFileName(String fileName)
     {
         String extension = "." + FileNameUtils.getFileNameExtension(fileName.toLowerCase(Locale.ROOT));
-        List<SchematicType<?>> list = new ArrayList<>();
+        List<SchematicType> list = new ArrayList<>();
 
-        for (SchematicType<?> type : KNOWN_TYPES)
+        for (SchematicType type : KNOWN_TYPES)
         {
             if (type.isValidExtension(extension))
             {
@@ -173,120 +179,129 @@ public class SchematicType<S extends ISchematic>
         return list;
     }
 
-    @Nullable
-    public static SchematicType<?> getType(Path file, NBTTagCompound tag)
+    public static Optional<SchematicType> getType(Path file, CompoundData dataIn)
     {
-        List<SchematicType<?>> possibleTypes = getPossibleTypesFromFileName(file);
+        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(file);
 
         if (possibleTypes.isEmpty() == false)
         {
-            for (SchematicType<?> type : possibleTypes)
+            for (SchematicType type : possibleTypes)
             {
-                if (type.isValidData(tag))
+                if (type.isValidData(dataIn))
                 {
-                    return type;
+                    return Optional.of(type);
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    @Nullable
-    public static ISchematic tryCreateSchematicFrom(Path file)
+    public static Optional<Schematic> tryCreateSchematicFrom(Path file)
     {
-        List<SchematicType<?>> possibleTypes = getPossibleTypesFromFileName(file);
+        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(file);
 
         if (possibleTypes.isEmpty() == false)
         {
-            NBTTagCompound tag = NbtUtils.readNbtFromFile(file);
+            CompoundData data = NbtUtils.readNbtFromFile(file);
 
-            if (tag != null)
+            if (data != null)
             {
-                SchematicType<?> type = getType(file, tag);
+                Optional<SchematicType> typeOpt = getType(file, data);
 
-                if (type != null)
+                if (typeOpt.isPresent())
                 {
-                    return type.createSchematicAndReadFromTag(file, tag);
+                    return typeOpt.get().createSchematicAndReadFromTag(data);
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
-    @Nullable
-    public static ISchematic tryCreateSchematicFrom(Path file, NBTTagCompound tag)
+    public static Optional<Schematic> tryCreateSchematicFrom(Path file, CompoundData dataIn)
     {
-        SchematicType<?> type = getType(file, tag);
-        return type != null ? type.createSchematicAndReadFromTag(file, tag) : null;
+        Optional<SchematicType> typeOpt = getType(file, dataIn);
+        return typeOpt.isPresent() ? typeOpt.get().createSchematicAndReadFromTag(dataIn) : Optional.empty();
     }
 
-    public static <S extends ISchematic> Builder<S> builder()
+    public static void registerType(SchematicType type)
     {
-        return new Builder<>();
+        if (KNOWN_TYPES.contains(type))
+        {
+            return;
+        }
+
+        ArrayList<SchematicType> types = new ArrayList<>(KNOWN_TYPES);
+        types.add(type);
+        KNOWN_TYPES = ImmutableList.copyOf(types);
     }
 
-    public static class Builder<S extends ISchematic>
+    public static SchematicType.Builder builder()
+    {
+        return new SchematicType.Builder();
+    }
+
+    public static class Builder
     {
         private String extension = null;
         private Icon defaultIcon = null;
         private Icon inMemoryIcon = null;
-        private Function<Path, S> factory = null;
+        private Supplier<Schematic> factory = null;
         private Function<String, Boolean> extensionValidator = null;
-        private Function<NBTTagCompound, Boolean> dataValidator = null;
+        private Function<CompoundData, Boolean> dataValidator = null;
         private String displayName = "?";
         private boolean hasName = false;
 
-        public Builder<S> setDataValidator(Function<NBTTagCompound, Boolean> dataValidator)
+        public SchematicType.Builder setDataValidator(Function<CompoundData, Boolean> dataValidator)
         {
             this.dataValidator = dataValidator;
             return this;
         }
 
-        public Builder<S> setDisplayName(String displayName)
+        public SchematicType.Builder setDisplayName(String displayName)
         {
             this.displayName = displayName;
             return this;
         }
 
-        public Builder<S> setExtension(String extension)
+        public SchematicType.Builder setExtension(String extension)
         {
             this.extension = extension;
             return this;
         }
 
-        public Builder<S> setExtensionValidator(Function<String, Boolean> extensionValidator)
+        public SchematicType.Builder setExtensionValidator(Function<String, Boolean> extensionValidator)
         {
             this.extensionValidator = extensionValidator;
             return this;
         }
 
-        public Builder<S> setFactory(Function<Path, S> factory)
+        public SchematicType.Builder setFactory(Supplier<Schematic> factory)
         {
             this.factory = factory;
             return this;
         }
 
-        public Builder<S> setHasName(boolean hasName)
+        public SchematicType.Builder setHasName(boolean hasName)
         {
             this.hasName = hasName;
             return this;
         }
 
-        public Builder<S> setDefaultIcon(Icon defaultIcon)
+        public SchematicType.Builder setDefaultIcon(Icon defaultIcon)
         {
             this.defaultIcon = defaultIcon;
             return this;
         }
 
-        public Builder<S> setInMemoryIcon(Icon inMemoryIcon)
+        public SchematicType.Builder setInMemoryIcon(Icon inMemoryIcon)
         {
             this.inMemoryIcon = inMemoryIcon;
             return this;
         }
 
-        public SchematicType<S> build()
+        public SchematicType build()
         {
             if (this.factory == null ||
                 this.dataValidator == null ||
@@ -299,9 +314,9 @@ public class SchematicType<S extends ISchematic>
                 throw new IllegalArgumentException("SchematicType.Builder#build(): Some of the values were null!");
             }
 
-            return new SchematicType<>(this.displayName, this.factory, this.dataValidator,
-                                       this.extension, this.extensionValidator,
-                                       this.defaultIcon, this.inMemoryIcon, this.hasName);
+            return new SchematicType(this.displayName, this.factory, this.dataValidator,
+                                     this.extension, this.extensionValidator,
+                                     this.defaultIcon, this.inMemoryIcon, this.hasName);
         }
     }
 }

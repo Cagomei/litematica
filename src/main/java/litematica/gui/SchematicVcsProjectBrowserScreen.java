@@ -20,7 +20,7 @@ import malilib.util.StringUtils;
 import litematica.Reference;
 import litematica.data.DataManager;
 import litematica.gui.widget.SchematicVcsProjectInfoWidget;
-import litematica.schematic.projects.SchematicProject;
+import litematica.schematic.old.projects.SchematicProject;
 import litematica.util.LitematicaDirectories;
 
 public class SchematicVcsProjectBrowserScreen extends BaseListScreen<BaseFileBrowserWidget>

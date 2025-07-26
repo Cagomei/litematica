@@ -21,9 +21,9 @@ import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.gui.MaterialListScreen;
-import litematica.schematic.ISchematic;
-import litematica.schematic.ISchematicRegion;
-import litematica.schematic.container.ILitematicaBlockStateContainer;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.ISchematicRegion;
+import litematica.schematic.old.container.ILitematicaBlockStateContainer;
 
 public class MaterialListUtils
 {

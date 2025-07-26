@@ -15,9 +15,9 @@ import litematica.Reference;
 import litematica.data.DataManager;
 import litematica.gui.widget.SchematicVcsProjectInfoWidget;
 import litematica.gui.widget.list.entry.SchematicVcsVersionEntryWidget;
-import litematica.schematic.projects.SchematicProject;
-import litematica.schematic.projects.SchematicVersion;
-import litematica.schematic.util.SchematicCreationUtils;
+import litematica.schematic.old.projects.SchematicProject;
+import litematica.schematic.old.projects.SchematicVersion;
+import litematica.schematic.old.util.SchematicCreationUtils;
 import litematica.selection.AreaSelectionManager;
 
 public class SchematicVcsProjectManagerScreen extends BaseListScreen<DataListWidget<SchematicVersion>>

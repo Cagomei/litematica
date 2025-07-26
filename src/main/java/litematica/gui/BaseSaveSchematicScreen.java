@@ -17,8 +17,8 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.FileNameUtils;
 import malilib.util.FileUtils;
 import litematica.config.Configs;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicType;
 
 public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
 {

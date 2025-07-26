@@ -23,7 +23,7 @@ import litematica.config.Configs;
 import litematica.gui.SchematicInfoConfigScreen;
 import litematica.gui.util.AbstractSchematicInfoCache;
 import litematica.gui.util.AbstractSchematicInfoCache.SchematicInfo;
-import litematica.schematic.SchematicMetadata;
+import litematica.schematic.old.SchematicMetadata;
 
 public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 {

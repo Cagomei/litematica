@@ -7,9 +7,9 @@ import malilib.gui.widget.RadioButtonWidget;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.data.DataManager;
-import litematica.schematic.ISchematic;
-import litematica.schematic.SchematicType;
-import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.old.ISchematic;
+import litematica.schematic.old.SchematicType;
+import litematica.schematic.old.placement.SchematicPlacementManager;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {
