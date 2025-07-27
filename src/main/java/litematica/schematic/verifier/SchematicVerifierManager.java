@@ -1,4 +1,4 @@
-package litematica.schematic.old.verifier;
+package litematica.schematic.verifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import malilib.util.position.BlockPos;
 import malilib.util.position.ChunkPos;
 import litematica.data.DataManager;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 
 public class SchematicVerifierManager
 {

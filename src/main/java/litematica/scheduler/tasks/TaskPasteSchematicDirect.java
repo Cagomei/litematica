@@ -6,8 +6,8 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.game.wrap.WorldWrap;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.LayerRange;
-import litematica.schematic.old.placement.SchematicPlacement;
-import litematica.schematic.old.util.SchematicPlacingUtils;
+import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.util.SchematicPlacingUtils;
 
 public class TaskPasteSchematicDirect extends TaskBase
 {

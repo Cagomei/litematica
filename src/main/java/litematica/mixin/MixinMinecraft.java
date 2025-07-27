@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import litematica.data.DataManager;
-import litematica.schematic.old.util.SchematicEditUtils;
+import litematica.schematic.util.SchematicEditUtils;
 import litematica.util.EasyPlaceUtils;
 
 @Mixin(net.minecraft.client.Minecraft.class)

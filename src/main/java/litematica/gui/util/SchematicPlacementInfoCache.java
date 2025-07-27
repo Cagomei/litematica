@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import javax.annotation.Nullable;
 
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 
 public class SchematicPlacementInfoCache
 {

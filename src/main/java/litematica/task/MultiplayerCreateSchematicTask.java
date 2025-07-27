@@ -32,7 +32,7 @@ import litematica.schematic.old.SchematicBase;
 import litematica.schematic.old.SchematicMetadata;
 import litematica.schematic.old.SchematicType;
 import litematica.schematic.old.container.LitematicaBlockStateContainerFull;
-import litematica.schematic.old.util.SchematicCreationUtils;
+import litematica.schematic.util.SchematicCreationUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.SelectionBox;
 import litematica.util.PositionUtils;

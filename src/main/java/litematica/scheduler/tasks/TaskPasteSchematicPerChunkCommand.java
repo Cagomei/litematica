@@ -26,7 +26,7 @@ import malilib.util.position.ChunkPos;
 import malilib.util.position.IntBoundingBox;
 import malilib.util.position.LayerRange;
 import litematica.config.Configs;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 import litematica.util.value.ReplaceBehavior;
 import litematica.world.SchematicWorldHandler;
 import litematica.world.WorldSchematic;

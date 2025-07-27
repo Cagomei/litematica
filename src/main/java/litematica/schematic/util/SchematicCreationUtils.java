@@ -1,4 +1,4 @@
-package litematica.schematic.old.util;
+package litematica.schematic.util;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.old.SchematicMetadata;
 import litematica.schematic.old.SchematicType;
 import litematica.schematic.old.container.ILitematicaBlockStateContainer;
-import litematica.schematic.old.projects.SchematicProject;
+import litematica.schematic.projects.SchematicProject;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.CornerDefinedBox;

@@ -6,7 +6,7 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.scheduler.TaskScheduler;
 import litematica.scheduler.tasks.TaskCountBlocksPlacement;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 
 public class MaterialListPlacement extends MaterialListBase
 {

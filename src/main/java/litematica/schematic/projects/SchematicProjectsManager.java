@@ -1,4 +1,4 @@
-package litematica.schematic.old.projects;
+package litematica.schematic.projects;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

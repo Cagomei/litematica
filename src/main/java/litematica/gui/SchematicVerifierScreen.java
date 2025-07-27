@@ -30,10 +30,10 @@ import litematica.gui.widget.list.entry.SchematicVerifierCategoryEntryWidget;
 import litematica.gui.widget.list.entry.SchematicVerifierResultEntryWidget;
 import litematica.render.infohud.InfoHud;
 import litematica.render.infohud.RenderPhase;
-import litematica.schematic.old.verifier.BlockStatePairCount;
-import litematica.schematic.old.verifier.SchematicVerifier;
-import litematica.schematic.old.verifier.VerifierResultType;
-import litematica.schematic.old.verifier.VerifierStatus;
+import litematica.schematic.verifier.BlockStatePairCount;
+import litematica.schematic.verifier.SchematicVerifier;
+import litematica.schematic.verifier.VerifierResultType;
+import litematica.schematic.verifier.VerifierStatus;
 import litematica.util.value.BlockInfoListType;
 
 public class SchematicVerifierScreen extends BaseListScreen<DataListWidget<BlockStatePairCount>>

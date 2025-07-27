@@ -27,6 +27,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import litematica.Litematica;
+import litematica.schematic.SubRegion;
 import litematica.schematic.old.container.ILitematicaBlockStateContainer;
 import litematica.schematic.old.container.LitematicaBlockStateContainerFull;
 import litematica.selection.SelectionBox;

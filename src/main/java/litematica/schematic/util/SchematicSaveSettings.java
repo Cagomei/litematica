@@ -1,4 +1,4 @@
-package litematica.schematic.old.util;
+package litematica.schematic.util;
 
 import malilib.util.data.BooleanStorageWithDefault;
 import malilib.util.data.SimpleBooleanStorageWithDefault;

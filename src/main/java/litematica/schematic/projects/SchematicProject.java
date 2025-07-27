@@ -1,4 +1,4 @@
-package litematica.schematic.old.projects;
+package litematica.schematic.projects;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,9 +22,9 @@ import litematica.data.DataManager;
 import litematica.scheduler.TaskScheduler;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.LitematicaSchematic;
-import litematica.schematic.old.placement.SchematicPlacement;
-import litematica.schematic.old.util.SchematicCreationUtils;
-import litematica.schematic.old.util.SchematicPlacingUtils;
+import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.util.SchematicCreationUtils;
+import litematica.schematic.util.SchematicPlacingUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.AreaSelectionSimple;

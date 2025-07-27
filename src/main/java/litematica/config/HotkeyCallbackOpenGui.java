@@ -23,10 +23,10 @@ import litematica.gui.SchematicPlacementSubRegionSettingsScreen;
 import litematica.gui.SchematicPlacementsListScreen;
 import litematica.gui.SchematicVerifierScreen;
 import litematica.materials.MaterialListBase;
-import litematica.schematic.old.placement.SchematicPlacement;
-import litematica.schematic.old.placement.SubRegionPlacement;
-import litematica.schematic.old.verifier.SchematicVerifier;
-import litematica.schematic.old.verifier.SchematicVerifierManager;
+import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.placement.SubRegionPlacement;
+import litematica.schematic.verifier.SchematicVerifier;
+import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.selection.AreaSelectionManager;
 
 public class HotkeyCallbackOpenGui implements HotkeyCallback

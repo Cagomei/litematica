@@ -1,4 +1,4 @@
-package litematica.schematic.old;
+package litematica.schematic;
 
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;

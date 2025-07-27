@@ -9,7 +9,7 @@ import malilib.util.StringUtils;
 import litematica.data.DataManager;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.SchematicType;
-import litematica.schematic.old.placement.SchematicPlacementManager;
+import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {

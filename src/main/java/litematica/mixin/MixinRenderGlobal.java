@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import malilib.util.position.BlockPos;
 import litematica.config.Configs;
 import litematica.render.LitematicaRenderer;
-import litematica.schematic.old.verifier.SchematicVerifierManager;
+import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.world.SchematicWorldRenderingNotifier;
 
 @Mixin(net.minecraft.client.renderer.RenderGlobal.class)

@@ -1,4 +1,4 @@
-package litematica.schematic.old.placement;
+package litematica.schematic.placement;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -48,8 +48,8 @@ import litematica.render.LitematicaRenderer;
 import litematica.render.OverlayRenderer;
 import litematica.render.infohud.StatusInfoRenderer;
 import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.util.SchematicPlacingUtils;
-import litematica.schematic.old.verifier.SchematicVerifierManager;
+import litematica.schematic.util.SchematicPlacingUtils;
+import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.util.Nags;
 import litematica.util.PositionUtils;
 import litematica.util.RayTraceUtils;

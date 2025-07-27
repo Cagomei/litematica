@@ -1,4 +1,4 @@
-package litematica.schematic.old.verifier;
+package litematica.schematic.verifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +32,7 @@ import litematica.data.DataManager;
 import litematica.render.infohud.IInfoHudRenderer;
 import litematica.render.infohud.RenderPhase;
 import litematica.scheduler.TaskScheduler;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 import litematica.selection.SelectionBox;
 import litematica.task.SchematicVerifierTask;
 import litematica.util.PositionUtils;

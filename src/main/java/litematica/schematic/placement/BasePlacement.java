@@ -1,4 +1,4 @@
-package litematica.schematic.old.placement;
+package litematica.schematic.placement;
 
 import com.google.gson.JsonObject;
 

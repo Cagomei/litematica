@@ -3,8 +3,8 @@ package litematica.gui.widget.list.entry;
 import malilib.gui.widget.list.entry.BaseListEntryWidget;
 import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.render.text.StyledTextLine;
-import litematica.schematic.old.verifier.SchematicVerifier;
-import litematica.schematic.old.verifier.VerifierResultType;
+import litematica.schematic.verifier.SchematicVerifier;
+import litematica.schematic.verifier.VerifierResultType;
 
 public class SchematicVerifierCategoryEntryWidget extends BaseListEntryWidget
 {

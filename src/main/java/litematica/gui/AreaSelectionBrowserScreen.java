@@ -19,7 +19,7 @@ import litematica.Reference;
 import litematica.data.DataManager;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.AreaSelectionEntryWidget;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.AreaSelectionType;
 import litematica.util.LitematicaDirectories;

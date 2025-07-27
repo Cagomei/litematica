@@ -1,4 +1,4 @@
-package litematica.schematic.old.util;
+package litematica.schematic.util;
 
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
@@ -15,8 +15,8 @@ import malilib.util.position.Vec3i;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.ISchematicRegion;
 import litematica.schematic.old.container.ILitematicaBlockStateContainer;
-import litematica.schematic.old.placement.SchematicPlacement;
-import litematica.schematic.old.placement.SubRegionPlacement;
+import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.placement.SubRegionPlacement;
 import litematica.util.PositionUtils;
 
 public class SchematicUtils

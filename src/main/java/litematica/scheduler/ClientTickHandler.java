@@ -3,7 +3,7 @@ package litematica.scheduler;
 import malilib.gui.util.GuiUtils;
 import malilib.util.game.wrap.GameWrap;
 import litematica.data.DataManager;
-import litematica.schematic.old.verifier.SchematicVerifierManager;
+import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.util.EasyPlaceUtils;
 
 public class ClientTickHandler implements malilib.event.ClientTickHandler

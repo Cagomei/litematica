@@ -13,7 +13,7 @@ import malilib.util.position.IntBoundingBox;
 import litematica.render.infohud.InfoHud;
 import litematica.scheduler.tasks.TaskProcessChunkBase;
 import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.util.SchematicCreationUtils;
+import litematica.schematic.util.SchematicCreationUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.SelectionBox;
 import litematica.util.PositionUtils;

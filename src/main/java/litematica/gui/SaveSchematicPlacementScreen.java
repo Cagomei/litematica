@@ -11,7 +11,7 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntry;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.FileNameUtils;
 import litematica.Reference;
-import litematica.schematic.old.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacement;
 
 public class SaveSchematicPlacementScreen extends BaseSavedSchematicPlacementsBrowserScreen
 {

@@ -1,4 +1,4 @@
-package litematica.schematic.old.projects;
+package litematica.schematic.projects;
 
 import javax.annotation.Nullable;
 import com.google.gson.JsonObject;

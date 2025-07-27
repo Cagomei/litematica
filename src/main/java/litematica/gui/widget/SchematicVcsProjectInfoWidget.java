@@ -13,8 +13,8 @@ import malilib.render.text.StyledTextLine;
 import malilib.util.StringUtils;
 import malilib.util.position.BlockPos;
 import litematica.data.DataManager;
-import litematica.schematic.old.projects.SchematicProject;
-import litematica.schematic.old.projects.SchematicVersion;
+import litematica.schematic.projects.SchematicProject;
+import litematica.schematic.projects.SchematicVersion;
 
 public class SchematicVcsProjectInfoWidget extends ContainerWidget
 {

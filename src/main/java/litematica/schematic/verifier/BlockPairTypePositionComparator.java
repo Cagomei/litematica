@@ -1,4 +1,4 @@
-package litematica.schematic.old.verifier;
+package litematica.schematic.verifier;
 
 import java.util.Comparator;
 

@@ -24,10 +24,10 @@ import malilib.util.StringUtils;
 import litematica.config.Configs;
 import litematica.gui.widget.SchematicVerifierBlockInfoWidget;
 import litematica.materials.MaterialCache;
-import litematica.schematic.old.verifier.BlockStatePair;
-import litematica.schematic.old.verifier.BlockStatePairCount;
-import litematica.schematic.old.verifier.SchematicVerifier;
-import litematica.schematic.old.verifier.VerifierResultType;
+import litematica.schematic.verifier.BlockStatePair;
+import litematica.schematic.verifier.BlockStatePairCount;
+import litematica.schematic.verifier.SchematicVerifier;
+import litematica.schematic.verifier.VerifierResultType;
 
 public class SchematicVerifierResultEntryWidget extends BaseDataListEntryWidget<BlockStatePairCount>
 {

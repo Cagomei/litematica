@@ -1,4 +1,4 @@
-package litematica.schematic.old.placement;
+package litematica.schematic.placement;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +29,7 @@ import litematica.materials.MaterialListBase;
 import litematica.materials.MaterialListPlacement;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.ISchematicRegion;
-import litematica.schematic.old.verifier.SchematicVerifier;
+import litematica.schematic.verifier.SchematicVerifier;
 import litematica.selection.SelectionBox;
 import litematica.util.LitematicaDirectories;
 import litematica.util.PositionUtils;

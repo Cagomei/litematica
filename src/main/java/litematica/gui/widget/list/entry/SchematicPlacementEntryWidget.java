@@ -30,8 +30,8 @@ import litematica.gui.util.LitematicaIcons;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.SchematicMetadata;
 import litematica.schematic.old.SchematicType;
-import litematica.schematic.old.placement.SchematicPlacement;
-import litematica.schematic.old.placement.SchematicPlacementManager;
+import litematica.schematic.placement.SchematicPlacement;
+import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SchematicPlacementEntryWidget extends BaseOrderableListEditEntryWidget<SchematicPlacement>
 {
