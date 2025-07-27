@@ -10,9 +10,9 @@ import net.minecraft.util.ScreenShotHelper;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
+import litematica.data.LoadedSchematic;
 import litematica.render.infohud.InfoHud;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicMetadata;
+import litematica.schematic.SchematicMetadata;
 
 /**
  * This task doesn't actually do/run anything on its own.
@@ -25,13 +25,13 @@ import litematica.schematic.old.SchematicMetadata;
  */
 public class SetSchematicPreviewTask extends TaskBase
 {
-    protected final ISchematic schematic;
+    protected final LoadedSchematic loadedSchematic;
 
-    public SetSchematicPreviewTask(ISchematic schematic)
+    public SetSchematicPreviewTask(LoadedSchematic loadedSchematic)
     {
-        this.schematic = schematic;
+        this.loadedSchematic = loadedSchematic;
         this.name = StringUtils.translate("litematica.label.task.set_schematic_preview",
-                                          schematic.getMetadata().getName());
+                                          loadedSchematic.schematic.getMetadata().getSchematicName());
         this.infoHudLines.add(this.name);
         InfoHud.getInstance().addInfoHudRenderer(this, true);
     }
@@ -66,18 +66,23 @@ public class SetSchematicPreviewTask extends TaskBase
 
             int[] pixels = scaled.getRGB(0, 0, previewDimensions, previewDimensions, null, 0, scaled.getWidth());
 
-            SchematicMetadata meta = this.schematic.getMetadata();
+            SchematicMetadata meta = this.loadedSchematic.schematic.getMetadata();
             meta.setPreviewImagePixelData(pixels);
             meta.setTimeModifiedToNowIfNotRecentlyCreated();
+            this.loadedSchematic.setModifiedSinceSaved();
 
-            this.schematic.writeToFile(this.schematic.getFile(), true);
+            if (this.loadedSchematic.file.isPresent())
+            {
+                this.loadedSchematic.writeToFile(this.loadedSchematic.file.get(), true);
+                this.loadedSchematic.clearModifiedSinceSaved();
+            }
 
-            MessageDispatcher.success("litematica.message.info.schematic_manager.set_preview.success", meta.getName());
+            MessageDispatcher.success("litematica.message.info.schematic_manager.set_preview.success", meta.getSchematicName());
         }
         catch (Exception e)
         {
             MessageDispatcher.error().console(e).translate("litematica.message.error.schematic_preview_set_failed",
-                                                           this.schematic.getMetadata().getName());
+                                                           this.loadedSchematic.schematic.getMetadata().getSchematicName());
         }
 
         this.finished = true;

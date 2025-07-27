@@ -330,7 +330,7 @@ public class ToolUtils
                                           AreaSelection selection,
                                           BlockPos pos)
     {
-        SchematicHolder.getInstance().removeSchematic(schematic);
+        SchematicHolder.INSTANCE.removeSchematic(schematic);
         selection.moveEntireAreaSelectionTo(pos, false);
         areaMovedTime = System.nanoTime();
     }
@@ -380,7 +380,7 @@ public class ToolUtils
         }
 
         SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
-        SchematicHolder.getInstance().addSchematic(schematic, true);
+        SchematicHolder.INSTANCE.addSchematic(schematic, true);
 
         SchematicPlacement placement = SchematicPlacement.create(schematic, origin, name, true, false);
         SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();

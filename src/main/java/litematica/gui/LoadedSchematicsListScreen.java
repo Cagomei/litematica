@@ -73,7 +73,7 @@ public class LoadedSchematicsListScreen extends BaseListScreen<DataListWidget<IS
     @Override
     protected DataListWidget<ISchematic> createListWidget()
     {
-        Supplier<List<ISchematic>> supplier = SchematicHolder.getInstance()::getAllSchematics;
+        Supplier<List<ISchematic>> supplier = SchematicHolder.INSTANCE::getAllSchematics;
         DataListWidget<ISchematic> listWidget = new DataListWidget<>(supplier, true);
         listWidget.addDefaultSearchBar();
         listWidget.setEntryFilter(BaseSchematicEntryWidget::schematicSearchFilter);

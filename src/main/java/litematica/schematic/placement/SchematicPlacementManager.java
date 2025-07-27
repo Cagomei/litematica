@@ -29,9 +29,9 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.EnabledCondition;
 import malilib.util.data.json.JsonUtils;
 import malilib.util.game.RayTraceUtils.RayTraceFluidHandling;
-import malilib.util.game.wrap.WorldWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
+import malilib.util.game.wrap.WorldWrap;
 import malilib.util.position.BlockMirror;
 import malilib.util.position.BlockPos;
 import malilib.util.position.BlockRotation;
@@ -43,11 +43,11 @@ import malilib.util.position.IntBoundingBox;
 import litematica.config.Configs;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.render.LitematicaRenderer;
 import litematica.render.OverlayRenderer;
 import litematica.render.infohud.StatusInfoRenderer;
-import litematica.schematic.old.ISchematic;
 import litematica.schematic.util.SchematicPlacingUtils;
 import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.util.Nags;
@@ -95,7 +95,7 @@ public class SchematicPlacementManager
         this.chunksToRebuild.clear();
         this.chunksToUnload.clear();
 
-        SchematicHolder.getInstance().clearLoadedSchematics();
+        SchematicHolder.INSTANCE.clearLoadedSchematics();
     }
 
     public boolean hasPendingRebuilds()
@@ -313,20 +313,20 @@ public class SchematicPlacementManager
         this.addSchematicPlacement(duplicate, false);
     }
 
-    public void updateDependentPlacements(ISchematic schematic, Path newSchematicFile, boolean selectedOnly)
+    public void updateDependentPlacements(LoadedSchematic loadedSchematic, Path newSchematicFile, boolean selectedOnly)
     {
         if (selectedOnly)
         {
             SchematicPlacement placement = this.getSelectedSchematicPlacement();
 
-            if (placement != null && placement.getSchematic() == schematic)
+            if (placement != null && placement.getLoadedSchematic() == loadedSchematic)
             {
                 placement.setSchematicFile(newSchematicFile);
             }
         }
         else
         {
-            for (SchematicPlacement placement : this.getAllPlacementsOfSchematic(schematic))
+            for (SchematicPlacement placement : this.getAllPlacementsOfSchematic(loadedSchematic))
             {
                 placement.setSchematicFile(newSchematicFile);
             }
@@ -448,13 +448,13 @@ public class SchematicPlacementManager
         return removed;
     }
 
-    public List<SchematicPlacement> getAllPlacementsOfSchematic(ISchematic schematic)
+    public List<SchematicPlacement> getAllPlacementsOfSchematic(LoadedSchematic loadedSchematic)
     {
         List<SchematicPlacement> list = new ArrayList<>();
 
         for (SchematicPlacement placement : this.allVisibleSchematicPlacements)
         {
-            if (placement.getSchematic() == schematic)
+            if (placement.getLoadedSchematic() == loadedSchematic)
             {
                 list.add(placement);
             }
@@ -463,7 +463,7 @@ public class SchematicPlacementManager
         return list;
     }
 
-    public void removeAllPlacementsOfSchematic(ISchematic schematic)
+    public void removeAllPlacementsOfSchematic(LoadedSchematic loadedSchematic)
     {
         boolean removed = false;
 
@@ -471,7 +471,7 @@ public class SchematicPlacementManager
         {
             SchematicPlacement placement = this.schematicPlacements.get(i);
 
-            if (placement.getSchematic() == schematic)
+            if (placement.getLoadedSchematic() == loadedSchematic)
             {
                 removed |= this.removeSchematicPlacement(placement, false);
                 --i;
@@ -512,7 +512,7 @@ public class SchematicPlacementManager
 
         if (placement != null && placement.isSchematicLoaded())
         {
-            SchematicHolder.getInstance().removeSchematic(placement.getSchematic());
+            SchematicHolder.INSTANCE.removeSchematic(placement.getLoadedSchematic());
         }
         else
         {
@@ -694,7 +694,7 @@ public class SchematicPlacementManager
         this.onPlacementModified(placement);
     }
 
-    public void changeSchematicInPlacement(SchematicPlacement placement, ISchematic newSchematic)
+    public void changeSchematicInPlacement(SchematicPlacement placement, LoadedSchematic newSchematic)
     {
         if (placement.isLocked())
         {
@@ -960,11 +960,11 @@ public class SchematicPlacementManager
         }
     }
 
-    public void markAllPlacementsOfSchematicForRebuild(ISchematic schematic)
+    public void markAllPlacementsOfSchematicForRebuild(LoadedSchematic loadedSchematic)
     {
         for (SchematicPlacement placement : this.allVisibleSchematicPlacements)
         {
-            if (placement.getSchematic() == schematic)
+            if (placement.getLoadedSchematic() == loadedSchematic)
             {
                 this.markChunksForRebuild(placement);
             }
@@ -1165,11 +1165,11 @@ public class SchematicPlacementManager
         return false;
     }
 
-    public void createPlacementForNewlyLoadedSchematic(ISchematic schematic, boolean createAsEnabled)
+    public void createPlacementForNewlyLoadedSchematic(LoadedSchematic loadedSchematic, boolean createAsEnabled)
     {
         BlockPos pos = EntityWrap.getCameraEntityBlockPos();
-        String name = schematic.getMetadata().getName();
-        SchematicPlacement placement = SchematicPlacement.create(schematic, pos, name, createAsEnabled);
+        String name = loadedSchematic.schematic.getMetadata().getSchematicName();
+        SchematicPlacement placement = SchematicPlacement.create(loadedSchematic, pos, name, createAsEnabled);
 
         this.addSchematicPlacement(placement, true);
         this.setSelectedSchematicPlacement(placement);

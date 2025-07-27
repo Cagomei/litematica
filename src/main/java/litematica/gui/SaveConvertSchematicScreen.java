@@ -7,31 +7,32 @@ import malilib.gui.widget.RadioButtonWidget;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.data.DataManager;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicType;
+import litematica.data.LoadedSchematic;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {
     protected final RadioButtonWidget<UpdatePlacementsOption> updatePlacementsWidget;
-    protected final ISchematic schematic;
+    protected final LoadedSchematic loadedSchematic;
     protected final boolean addUpdatePlacementsElement;
 
-    public SaveConvertSchematicScreen(ISchematic schematic,
+    public SaveConvertSchematicScreen(LoadedSchematic loadedSchematic,
                                       boolean addUpdatePlacementsElement)
     {
-        this(schematic, addUpdatePlacementsElement, "schematic_manager");
+        this(loadedSchematic, addUpdatePlacementsElement, "schematic_manager");
     }
 
-    public SaveConvertSchematicScreen(ISchematic schematic,
+    public SaveConvertSchematicScreen(LoadedSchematic loadedSchematic,
                                       boolean addUpdatePlacementsElement,
                                       String browserContext)
     {
         super(10, 74, 20 + 170 + 2, 80, browserContext);
 
-        this.schematic = schematic;
+        this.loadedSchematic = loadedSchematic;
         this.addUpdatePlacementsElement = addUpdatePlacementsElement;
-        this.originalName = getDefaultFileNameForSchematic(schematic);
+        this.originalName = getDefaultFileNameForSchematic(loadedSchematic);
 
         this.updatePlacementsWidget = new RadioButtonWidget<>(UpdatePlacementsOption.VALUES,
                                                               UpdatePlacementsOption::getDisplayString,
@@ -40,7 +41,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 
         this.fileNameTextField.setText(this.originalName);
 
-        this.setTitle("litematica.title.screen.save_or_convert_schematic", schematic.getMetadata().getName());
+        this.setTitle("litematica.title.screen.save_or_convert_schematic", loadedSchematic.schematic.getMetadata().getSchematicName());
     }
 
     @Override
@@ -88,16 +89,16 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
             return;
         }
 
-        SchematicType<?> outputType = this.schematicTypeDropdown.getSelectedEntry();
-        ISchematic convertedSchematic = this.schematic;
+        SchematicType outputType = this.schematicTypeDropdown.getSelectedEntry();
+        Schematic convertedSchematic = this.loadedSchematic.schematic;
 
-        if (outputType != this.schematic.getType())
+        if (outputType != convertedSchematic.getType())
         {
-            convertedSchematic = outputType.createSchematic(null);
+            convertedSchematic = outputType.createSchematic();
 
             try
             {
-                convertedSchematic.readFrom(this.schematic);
+                convertedSchematic.read(this.loadedSchematic);
             }
             catch (Exception e)
             {
@@ -120,7 +121,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 
     protected void onSchematicSaved(Path newSchematicFile)
     {
-        this.schematic.getMetadata().clearModifiedSinceSaved();
+        this.loadedSchematic.clearModifiedSinceSaved();
         this.onSchematicChange();
 
         String key = "litematica.message.success.save_schematic_convert";
@@ -137,10 +138,10 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 
     protected void updateDependentPlacements(Path newSchematicFile, boolean selectedOnly)
     {
-        if (this.schematic != null)
+        if (this.loadedSchematic != null)
         {
             SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
-            manager.updateDependentPlacements(this.schematic, newSchematicFile, selectedOnly);
+            manager.updateDependentPlacements(this.loadedSchematic, newSchematicFile, selectedOnly);
         }
     }
 

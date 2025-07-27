@@ -21,25 +21,25 @@ import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.gui.MaterialListScreen;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.ISchematicRegion;
-import litematica.schematic.old.container.ILitematicaBlockStateContainer;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicRegion;
+import litematica.schematic.container.BlockContainer;
 
 public class MaterialListUtils
 {
-    public static List<MaterialListEntry> createMaterialListFor(ISchematic schematic)
+    public static List<MaterialListEntry> createMaterialListFor(Schematic schematic)
     {
-        return createMaterialListFor(schematic, schematic.getRegionNames());
+        return createMaterialListFor(schematic, schematic.getRegions().keySet());
     }
 
-    public static List<MaterialListEntry> createMaterialListFor(ISchematic schematic, Collection<String> subRegions)
+    public static List<MaterialListEntry> createMaterialListFor(Schematic schematic, Collection<String> subRegions)
     {
         Object2LongOpenHashMap<IBlockState> countsTotal = new Object2LongOpenHashMap<>();
 
         for (String regionName : subRegions)
         {
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
-            ILitematicaBlockStateContainer container = region != null ? region.getBlockStateContainer() : null;
+            SchematicRegion region = schematic.getRegions().get(regionName);
+            BlockContainer container = region != null ? region.getBlockContainer() : null;
 
             if (container != null)
             {
@@ -156,13 +156,13 @@ public class MaterialListUtils
         }
     }
 
-    public static void openMaterialListScreenFor(ISchematic schematic)
+    public static void openMaterialListScreenFor(Schematic schematic)
     {
         if (BaseScreen.isShiftDown())
         {
-            StringListSelectionScreen screen = new StringListSelectionScreen(schematic.getRegionNames(),
+            StringListSelectionScreen screen = new StringListSelectionScreen(schematic.getRegions().keySet(),
                                                     (strings) -> createMaterialListOfRegions(schematic, strings));
-            screen.setTitle("litematica.title.screen.material_list.select_schematic_regions", schematic.getMetadata().getName());
+            screen.setTitle("litematica.title.screen.material_list.select_schematic_regions", schematic.getMetadata().getSchematicName());
             BaseScreen.openScreenWithParent(screen);
         }
         else
@@ -173,7 +173,7 @@ public class MaterialListUtils
         }
     }
 
-    public static void createMaterialListOfRegions(ISchematic schematic, Collection<String> regions)
+    public static void createMaterialListOfRegions(Schematic schematic, Collection<String> regions)
     {
         MaterialListSchematic materialList = new MaterialListSchematic(schematic, regions, true);
         DataManager.setMaterialList(materialList); // Remember the last opened material list for the hotkey to (re-) open it

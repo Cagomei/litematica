@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
@@ -24,11 +25,12 @@ import malilib.util.data.json.JsonUtils;
 import malilib.util.position.BlockPos;
 import malilib.util.position.IntBoundingBox;
 import litematica.Litematica;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.materials.MaterialListBase;
 import litematica.materials.MaterialListPlacement;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.ISchematicRegion;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicRegion;
 import litematica.schematic.verifier.SchematicVerifier;
 import litematica.selection.SelectionBox;
 import litematica.util.LitematicaDirectories;
@@ -41,8 +43,8 @@ public class SchematicPlacement extends BasePlacement
     protected final Map<String, SubRegionPlacement> subRegionPlacements = new HashMap<>();
     protected final Map<String, SubRegionPlacement> modifiedSubRegions = new HashMap<>();
 
-    @Nullable protected Path schematicFile;
-    @Nullable protected ISchematic schematic;
+    protected Optional<Path> schematicFileOpt;
+    @Nullable protected LoadedSchematic loadedSchematic;
     @Nullable protected IntBoundingBox enclosingBox;
     @Nullable protected GridSettings gridSettings;
     @Nullable protected String placementSaveFile;
@@ -60,39 +62,39 @@ public class SchematicPlacement extends BasePlacement
     protected int subRegionCount = 1;
     protected long lastSaveTime = -1;
 
-    protected SchematicPlacement(@Nullable Path schematicFile)
+    protected SchematicPlacement(Optional<Path> schematicFileOpt)
     {
-        this(schematicFile, BlockPos.ORIGIN, "?", true);
+        this(schematicFileOpt, BlockPos.ORIGIN, "?", true);
     }
 
-    protected SchematicPlacement(@Nullable Path schematicFile,
+    protected SchematicPlacement(Optional<Path> schematicFileOpt,
                                  BlockPos origin,
                                  String name,
                                  boolean enabled)
     {
         super(name, origin);
 
-        this.schematicFile = schematicFile;
+        this.schematicFileOpt = schematicFileOpt;
         this.enabled = enabled;
 
-        this.setShouldBeSaved(schematicFile != null);
+        this.setShouldBeSaved(schematicFileOpt.isPresent());
     }
 
-    protected SchematicPlacement(@Nullable ISchematic schematic,
-                                 @Nullable Path schematicFile,
+    protected SchematicPlacement(@Nullable LoadedSchematic loadedSchematic,
+                                 Optional<Path> schematicFileOpt,
                                  BlockPos origin,
                                  String name,
                                  boolean enabled)
     {
-        this(schematicFile, origin, name, enabled);
+        this(schematicFileOpt, origin, name, enabled);
 
-        this.schematic = schematic;
-        this.subRegionCount = schematic != null ? schematic.getRegions().size() : 1;
+        this.loadedSchematic = loadedSchematic;
+        this.subRegionCount = loadedSchematic != null ? loadedSchematic.schematic.getRegions().size() : 1;
     }
 
     public boolean isSchematicLoaded()
     {
-        return this.schematic != null;
+        return this.loadedSchematic != null;
     }
 
     public boolean isLocked()
@@ -141,19 +143,25 @@ public class SchematicPlacement extends BasePlacement
 
     public boolean isSchematicInMemoryOnly()
     {
-        return this.schematicFile == null;
+        return this.schematicFileOpt.isPresent() == false;
     }
 
     @Nullable
-    public ISchematic getSchematic()
+    public Schematic getSchematic()
     {
-        return this.schematic;
+        return this.loadedSchematic != null ? this.loadedSchematic.schematic : null;
+    }
+
+    @Nullable
+    public LoadedSchematic getLoadedSchematic()
+    {
+        return this.loadedSchematic;
     }
 
     @Nullable
     public Path getSchematicFile()
     {
-        return this.schematicFile;
+        return this.schematicFileOpt.orElse(null);
     }
 
     @Nullable
@@ -192,21 +200,21 @@ public class SchematicPlacement extends BasePlacement
 
     public void setSchematicFile(@Nullable Path schematicFile)
     {
-        this.schematicFile = schematicFile;
+        this.schematicFileOpt = Optional.ofNullable(schematicFile);
     }
 
-    protected boolean setSchematic(@Nullable ISchematic schematic)
+    protected boolean setSchematic(@Nullable LoadedSchematic loadedSchematic)
     {
         // Do we want to try to keep any modified subregions between different schematics?
         // That calls for problems if the schematics are actually different, as in if
         // they have a different set of subregions or some regions are in different locations etc.
         // this.storeModifiedSubRegions();
 
-        this.schematic = schematic;
+        this.loadedSchematic = loadedSchematic;
 
-        if (this.isSchematicLoaded())
+        if (loadedSchematic != null)
         {
-            this.schematicFile = schematic.getFile();
+            this.schematicFileOpt = loadedSchematic.file;
             this.configureSubRegions();
             return true;
         }
@@ -216,8 +224,10 @@ public class SchematicPlacement extends BasePlacement
 
     public boolean loadAndSetSchematicFromFile(Path file)
     {
-        this.schematicFile = file;
-        this.setSchematic(SchematicHolder.getInstance().getOrLoad(file));
+        this.schematicFileOpt = Optional.of(file);
+        Optional<LoadedSchematic> loadedSchematicOpt = SchematicHolder.INSTANCE.getOrLoad(file);
+        LoadedSchematic loadedSchematic = loadedSchematicOpt.isPresent() ? loadedSchematicOpt.get() : null;
+        this.setSchematic(loadedSchematic);
 
         return this.isSchematicLoaded();
     }
@@ -225,8 +235,8 @@ public class SchematicPlacement extends BasePlacement
     protected void loadSchematicFromFileIfEnabled()
     {
         if (this.enabled &&
-            this.schematicFile != null &&
-            this.loadAndSetSchematicFromFile(this.schematicFile) == false)
+            this.schematicFileOpt.isPresent() &&
+            this.loadAndSetSchematicFromFile(this.schematicFileOpt.get()) == false)
         {
             this.enabled = false;
         }
@@ -317,7 +327,7 @@ public class SchematicPlacement extends BasePlacement
     }
 
     protected SelectionBox getSelectionBoxForRegion(SubRegionPlacement regionPlacement,
-                                                    ISchematicRegion schematicRegion)
+                                                    SchematicRegion schematicRegion)
     {
         BlockPos boxOriginRelative = regionPlacement.getPosition();
         BlockPos boxOriginAbsolute = PositionUtils.getTransformedBlockPos(boxOriginRelative, this.mirror, this.rotation).add(this.position);
@@ -336,14 +346,14 @@ public class SchematicPlacement extends BasePlacement
         }
 
         ImmutableMap.Builder<String, SelectionBox> builder = ImmutableMap.builder();
-        Map<String, ISchematicRegion> schematicRegions = this.schematic.getRegions();
+        Map<String, SchematicRegion> schematicRegions = this.loadedSchematic.schematic.getRegions();
 
         for (SubRegionPlacement regionPlacement : this.subRegionPlacements.values())
         {
             if (regionPlacement.matchesRequirement(condition))
             {
                 String regionName = regionPlacement.getName();
-                ISchematicRegion schematicRegion = schematicRegions.get(regionName);
+                SchematicRegion schematicRegion = schematicRegions.get(regionName);
 
                 if (schematicRegion != null)
                 {
@@ -352,7 +362,7 @@ public class SchematicPlacement extends BasePlacement
                 else
                 {
                     Litematica.LOGGER.warn("SchematicPlacement.getSubRegionBoxes(): Subregion '{}' not found in the schematic '{}'",
-                                           regionName, this.schematic.getMetadata().getName());
+                                           regionName, this.loadedSchematic.schematic.getMetadata().getSchematicName());
                 }
             }
         }
@@ -367,7 +377,7 @@ public class SchematicPlacement extends BasePlacement
 
         if (this.isSchematicLoaded() && regionPlacement != null && regionPlacement.matchesRequirement(condition))
         {
-            ISchematicRegion schematicRegion = this.schematic.getRegions().get(regionName);
+            SchematicRegion schematicRegion = this.loadedSchematic.schematic.getRegions().get(regionName);
 
             if (schematicRegion != null)
             {
@@ -375,7 +385,8 @@ public class SchematicPlacement extends BasePlacement
             }
             else
             {
-                Litematica.LOGGER.warn("SchematicPlacement.getSubRegionBoxFor(): Sub-region '{}' not found in the schematic '{}'", regionName, this.schematic.getMetadata().getName());
+                Litematica.LOGGER.warn("SchematicPlacement.getSubRegionBoxFor(): Sub-region '{}' not found in the schematic '{}'",
+                                       regionName, this.loadedSchematic.schematic.getMetadata().getSchematicName());
             }
         }
 
@@ -437,7 +448,7 @@ public class SchematicPlacement extends BasePlacement
         this.resetAllSubRegionsToSchematicValues();
         this.configureModifiedSubRegions();
         this.checkSubRegionsModified();
-        this.subRegionCount = this.schematic.getRegions().size();
+        this.subRegionCount = this.loadedSchematic.schematic.getRegions().size();
     }
 
     protected void checkSubRegionsModified()
@@ -447,7 +458,7 @@ public class SchematicPlacement extends BasePlacement
             return;
         }
 
-        Map<String, ISchematicRegion> subRegions = this.schematic.getRegions();
+        Map<String, SchematicRegion> subRegions = this.loadedSchematic.schematic.getRegions();
 
         if (subRegions.size() != this.subRegionPlacements.size())
         {
@@ -455,11 +466,11 @@ public class SchematicPlacement extends BasePlacement
             return;
         }
 
-        for (Map.Entry<String, ISchematicRegion> entry : subRegions.entrySet())
+        for (Map.Entry<String, SchematicRegion> entry : subRegions.entrySet())
         {
             SubRegionPlacement placement = this.subRegionPlacements.get(entry.getKey());
 
-            if (placement == null || placement.isRegionPlacementModified(entry.getValue().getPosition()))
+            if (placement == null || placement.isRegionPlacementModified(entry.getValue().getRelativePosition()))
             {
                 this.regionPlacementsModified = true;
                 return;
@@ -546,10 +557,10 @@ public class SchematicPlacement extends BasePlacement
         this.subRegionPlacements.clear();
         this.regionPlacementsModified = false;
 
-        for (Map.Entry<String, ISchematicRegion> entry : this.schematic.getRegions().entrySet())
+        for (Map.Entry<String, SchematicRegion> entry : this.loadedSchematic.schematic.getRegions().entrySet())
         {
             String name = entry.getKey();
-            this.subRegionPlacements.put(name, new SubRegionPlacement(entry.getValue().getPosition(), name));
+            this.subRegionPlacements.put(name, new SubRegionPlacement(entry.getValue().getRelativePosition(), name));
         }
 
         this.resetEnclosingBox();
@@ -591,7 +602,7 @@ public class SchematicPlacement extends BasePlacement
 
     public SchematicPlacement copy()
     {
-        SchematicPlacement copy = new SchematicPlacement(this.schematic, this.schematicFile,
+        SchematicPlacement copy = new SchematicPlacement(this.loadedSchematic, this.schematicFileOpt,
                                                          this.position, this.name, this.enabled);
         copy.copyBaseSettingsFrom(this);
         copy.copyGridSettingsFrom(this);
@@ -600,7 +611,7 @@ public class SchematicPlacement extends BasePlacement
 
     public SchematicPlacement createRepeatedCopy()
     {
-        SchematicPlacement copy = new SchematicPlacement(this.schematic, this.schematicFile,
+        SchematicPlacement copy = new SchematicPlacement(this.loadedSchematic, this.schematicFileOpt,
                                                          this.position, this.name, this.enabled);
         copy.copyBaseSettingsFrom(this);
         copy.repeatedPlacement = true;
@@ -609,12 +620,12 @@ public class SchematicPlacement extends BasePlacement
 
     public boolean fullyLoadPlacement()
     {
-        if (this.schematicFile != null &&
+        if (this.schematicFileOpt.isPresent() &&
             this.isSchematicLoaded() == false &&
-            this.loadAndSetSchematicFromFile(this.schematicFile) == false)
+            this.loadAndSetSchematicFromFile(this.schematicFileOpt.get()) == false)
         {
             MessageDispatcher.error().translate("litematica.error.schematic_load.failed",
-                                                this.schematicFile.toAbsolutePath().toString());
+                                                this.schematicFileOpt.get().toAbsolutePath().toString());
             return false;
         }
 
@@ -668,7 +679,7 @@ public class SchematicPlacement extends BasePlacement
     @Nullable
     public JsonObject toJson()
     {
-        if (this.schematicFile == null)
+        if (this.schematicFileOpt.isPresent() == false)
         {
             // If this placement is for an in-memory-only schematic, then there is no point in saving
             // this placement, as the schematic can't be automatically loaded anyway.
@@ -677,7 +688,7 @@ public class SchematicPlacement extends BasePlacement
 
         JsonObject obj = super.toJson();
 
-        obj.addProperty("schematic", this.schematicFile.toAbsolutePath().toString());
+        obj.addProperty("schematic", this.schematicFileOpt.get().toAbsolutePath().toString());
 
         JsonUtils.addIfNotEqual(obj, "bb_color", this.boundingBoxColor.intValue, 0);
         JsonUtils.addIfNotEqual(obj, "locked", this.locked, false);
@@ -739,7 +750,7 @@ public class SchematicPlacement extends BasePlacement
         obj.remove("region_count");
         obj.remove("schematic");
 
-        if (this.isSchematicLoaded() && this.schematic.getMetadata().getName().equals(this.name))
+        if (this.isSchematicLoaded() && this.loadedSchematic.schematic.getMetadata().getSchematicName().equals(this.name))
         {
             obj.remove("name");
         }
@@ -805,7 +816,7 @@ public class SchematicPlacement extends BasePlacement
         if (origin == null)
         {
             MessageDispatcher.error().translate("litematica.error.schematic_placements.settings_load.missing_data");
-            String name = this.schematicFile != null ? this.schematicFile.toAbsolutePath().toString() : "<null>";
+            String name = this.schematicFileOpt.isPresent() ? this.schematicFileOpt.get().toAbsolutePath().toString() : "<null>";
             Litematica.LOGGER.warn("Failed to load schematic placement for '{}', invalid origin position", name);
             return false;
         }
@@ -844,14 +855,14 @@ public class SchematicPlacement extends BasePlacement
     {
         String name;
 
-        if (this.schematicFile != null)
+        if (this.schematicFileOpt.isPresent())
         {
-            name = FileNameUtils.getFileNameWithoutExtension(this.schematicFile.getFileName().toString().toLowerCase(Locale.ROOT));
+            name = FileNameUtils.getFileNameWithoutExtension(this.schematicFileOpt.get().getFileName().toString().toLowerCase(Locale.ROOT));
             name = FileNameUtils.generateSafeFileName(name);
         }
-        else if (this.schematic != null)
+        else if (this.loadedSchematic != null)
         {
-            name = FileNameUtils.generateSafeFileName(this.schematic.getMetadata().getName().toLowerCase(Locale.ROOT));
+            name = FileNameUtils.generateSafeFileName(this.loadedSchematic.schematic.getMetadata().getSchematicName().toLowerCase(Locale.ROOT));
         }
         else
         {
@@ -864,12 +875,12 @@ public class SchematicPlacement extends BasePlacement
     @Nullable
     protected Path getAvailableFileName()
     {
-        if (this.schematicFile == null)
+        if (this.schematicFileOpt.isPresent() == false)
         {
             return null;
         }
 
-        String schName = FileNameUtils.getFileNameWithoutExtension(this.schematicFile.getFileName().toString());
+        String schName = FileNameUtils.getFileNameWithoutExtension(this.schematicFileOpt.get().getFileName().toString());
         String nameBase = FileNameUtils.generateSafeFileName(schName);
 
         return FileUtils.getUnusedFileName(getSaveDirectory(), nameBase + "_%03d.json", 1);
@@ -964,7 +975,7 @@ public class SchematicPlacement extends BasePlacement
         if (JsonUtils.hasString(obj, "schematic"))
         {
             Path schematicFile = Paths.get(JsonUtils.getString(obj, "schematic"));
-            SchematicPlacement placement = new SchematicPlacement(schematicFile);
+            SchematicPlacement placement = new SchematicPlacement(Optional.of(schematicFile));
 
             if (placement.readFromJson(obj) == false)
             {
@@ -1008,15 +1019,15 @@ public class SchematicPlacement extends BasePlacement
         return null;
     }
 
-    public static SchematicPlacement create(ISchematic schematic, BlockPos origin, String name, boolean enabled)
+    public static SchematicPlacement create(LoadedSchematic loadedSchematic, BlockPos origin, String name, boolean enabled)
     {
-        return create(schematic, origin, name, enabled, true);
+        return create(loadedSchematic, origin, name, enabled, true);
     }
 
-    public static SchematicPlacement create(ISchematic schematic, BlockPos origin, String name, boolean enabled,
+    public static SchematicPlacement create(LoadedSchematic loadedSchematic, BlockPos origin, String name, boolean enabled,
                                             boolean offsetToInFrontOfPlayer)
     {
-        SchematicPlacement placement = new SchematicPlacement(schematic, schematic.getFile(), origin, name, enabled);
+        SchematicPlacement placement = new SchematicPlacement(loadedSchematic, loadedSchematic.file, origin, name, enabled);
 
         placement.setBoundingBoxColorToNext();
         placement.resetAllSubRegionsToSchematicValues();

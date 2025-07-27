@@ -4,98 +4,95 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import java.util.Optional;
 
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicType;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicType;
 
 public class SchematicHolder
 {
-    private static final SchematicHolder INSTANCE = new SchematicHolder();
-    private final List<ISchematic> schematics = new ArrayList<>();
+    public static final SchematicHolder INSTANCE = new SchematicHolder();
 
-    public static SchematicHolder getInstance()
-    {
-        return INSTANCE;
-    }
+    private final List<LoadedSchematic> schematics = new ArrayList<>();
 
     public void clearLoadedSchematics()
     {
         this.schematics.clear();
     }
 
-    public List<ISchematic> getAllOf(Path file)
+    public List<LoadedSchematic> getAllOf(Path file)
     {
-        List<ISchematic> list = new ArrayList<>();
+        List<LoadedSchematic> list = new ArrayList<>();
 
-        for (ISchematic schematic : this.schematics)
+        for (LoadedSchematic loadedSchematic : this.schematics)
         {
-            if (file.equals(schematic.getFile()))
+            if (loadedSchematic.file.isPresent() && file.equals(loadedSchematic.file.get()))
             {
-                list.add(schematic);
+                list.add(loadedSchematic);
             }
         }
 
         return list;
     }
 
-    @Nullable
-    public ISchematic getOrLoad(Path file)
+    public Optional<LoadedSchematic> getOrLoad(Path file)
     {
         if (Files.isRegularFile(file) == false || Files.isReadable(file) == false)
         {
-            return null;
+            return Optional.empty();
         }
 
-        for (ISchematic schematic : this.schematics)
+        for (LoadedSchematic loadedSchematic : this.schematics)
         {
-            if (file.equals(schematic.getFile()))
+            if (loadedSchematic.file.isPresent() && file.equals(loadedSchematic.file.get()))
             {
-                return schematic;
+                return Optional.of(loadedSchematic);
             }
         }
 
-        ISchematic schematic = SchematicType.tryCreateSchematicFrom(file);
+        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(file);
 
-        if (schematic != null)
+        if (schematicOpt.isPresent())
         {
-            this.schematics.add(schematic);
+            LoadedSchematic loadedSchematic = new LoadedSchematic(schematicOpt.get(), Optional.of(file));
+            this.schematics.add(loadedSchematic);
+            return Optional.of(loadedSchematic);
         }
 
-        return schematic;
+        return Optional.empty();
     }
 
-    public void addSchematic(ISchematic schematic, boolean allowDuplicates)
+    public void addSchematic(LoadedSchematic loadedSchematic, boolean allowDuplicates)
     {
-        if (allowDuplicates || this.schematics.contains(schematic) == false)
+        if (allowDuplicates || this.schematics.contains(loadedSchematic) == false)
         {
-            if (allowDuplicates == false && schematic.getFile() != null)
+            if (allowDuplicates == false && loadedSchematic.file.isPresent())
             {
-                for (ISchematic tmp : this.schematics)
+                for (LoadedSchematic tmp : this.schematics)
                 {
-                    if (schematic.getFile().equals(tmp.getFile()))
+                    if (tmp.file.isPresent() && loadedSchematic.file.get().equals(tmp.file.get()))
                     {
                         return;
                     }
                 }
             }
 
-            this.schematics.add(schematic);
+            this.schematics.add(loadedSchematic);
         }
     }
 
-    public boolean removeSchematic(ISchematic schematic)
+    public boolean removeSchematic(LoadedSchematic loadedSchematic)
     {
-        if (this.schematics.remove(schematic))
+        if (this.schematics.remove(loadedSchematic))
         {
-            DataManager.getSchematicPlacementManager().removeAllPlacementsOfSchematic(schematic);
+            DataManager.getSchematicPlacementManager().removeAllPlacementsOfSchematic(loadedSchematic);
             return true;
         }
 
         return false;
     }
 
-    public List<ISchematic> getAllSchematics()
+    public List<LoadedSchematic> getAllSchematics()
     {
         return this.schematics;
     }

@@ -2,10 +2,12 @@ package litematica.gui;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import malilib.gui.icon.DefaultIcons;
+import malilib.gui.icon.Icon;
 import malilib.gui.widget.BaseTextFieldWidget;
 import malilib.gui.widget.DropDownListWidget;
 import malilib.gui.widget.IconWidget;
@@ -17,15 +19,16 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.FileNameUtils;
 import malilib.util.FileUtils;
 import litematica.config.Configs;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicType;
+import litematica.data.LoadedSchematic;
+import litematica.gui.util.SchematicTypeIcons;
+import litematica.schematic.SchematicType;
 
 public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
 {
     protected final BaseTextFieldWidget fileNameTextField;
     protected final GenericButton revertNameButton;
     protected final GenericButton saveButton;
-    protected final DropDownListWidget<SchematicType<?>> schematicTypeDropdown;
+    protected final DropDownListWidget<SchematicType> schematicTypeDropdown;
     protected String originalName = "";
 
     protected BaseSaveSchematicScreen(int listX, int listY,
@@ -39,7 +42,7 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
         this.revertNameButton = GenericButton.create(DefaultIcons.RESET_12, this::revertName);
         this.saveButton = GenericButton.create(18, "litematica.button.save_schematic.save_schematic", this::saveSchematic);
 
-        this.schematicTypeDropdown = new DropDownListWidget<>(18, 6, SchematicType.KNOWN_TYPES, SchematicType::getDisplayName, (e) -> new IconWidget(e.getIcon()));
+        this.schematicTypeDropdown = new DropDownListWidget<>(18, 6, SchematicType.KNOWN_TYPES, SchematicType::getDisplayName, t -> new IconWidget(getIconForType(t)));
         this.schematicTypeDropdown.setSelectedEntry(SchematicType.LITEMATICA);
 
         this.revertNameButton.translateAndAddHoverString("litematica.hover.button.save_schematic.revert_name");
@@ -115,7 +118,7 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
     {
         Path dir = this.getListWidget().getCurrentDirectory();
         String name = this.fileNameTextField.getText();
-        SchematicType<?> outputType = this.schematicTypeDropdown.getSelectedEntry();
+        SchematicType outputType = this.schematicTypeDropdown.getSelectedEntry();
 
         if (outputType == null)
         {
@@ -126,8 +129,14 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
         return getSchematicFileIfCanSave(dir, name, outputType, overwrite);
     }
 
+    public static Icon getIconForType(SchematicType type)
+    {
+        Optional<Icon> iconOpt = SchematicTypeIcons.INSTANCE.getNormalIcon(type);
+        return iconOpt.orElse(DefaultIcons.EXCLAMATION_11);
+    }
+
     @Nullable
-    public static Path getSchematicFileIfCanSave(Path dir, String name, SchematicType<?> outputType, boolean overwrite)
+    public static Path getSchematicFileIfCanSave(Path dir, String name, SchematicType outputType, boolean overwrite)
     {
         if (StringUtils.isBlank(name))
         {
@@ -180,17 +189,15 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
         return file;
     }
 
-    public static String getDefaultFileNameForSchematic(ISchematic schematic)
+    public static String getDefaultFileNameForSchematic(LoadedSchematic loadedSchematic)
     {
-        Path file = schematic.getFile();
-
-        if (file != null)
+        if (loadedSchematic.file.isPresent())
         {
-            return FileNameUtils.getFileNameWithoutExtension(file.getFileName().toString());
+            return FileNameUtils.getFileNameWithoutExtension(loadedSchematic.file.get().getFileName().toString());
         }
         else
         {
-            return getFileNameFromDisplayName(schematic.getMetadata().getName());
+            return getFileNameFromDisplayName(loadedSchematic.schematic.getMetadata().getSchematicName());
         }
     }
 
@@ -198,7 +205,7 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
     {
         if (Configs.Generic.GENERATE_LOWERCASE_NAMES.getBooleanValue())
         {
-            name = FileNameUtils.generateSimpleSafeFileName(name);
+            return FileNameUtils.generateSimpleSafeFileName(name);
         }
 
         return name;

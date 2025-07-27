@@ -8,18 +8,18 @@ import javax.annotation.Nullable;
 import malilib.gui.BaseListScreen;
 import malilib.gui.widget.button.GenericButton;
 import malilib.gui.widget.list.DataListWidget;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.widget.SchematicInfoWidgetBySchematic;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;
-import litematica.schematic.old.ISchematic;
 
-public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<ISchematic>>
+public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<LoadedSchematic>>
 {
     protected final GenericButton selectSchematicButton;
     protected final SchematicInfoWidgetBySchematic schematicInfoWidget;
-    protected final Consumer<ISchematic> schematicConsumer;
+    protected final Consumer<LoadedSchematic> schematicConsumer;
 
-    public SelectLoadedSchematicScreen(Consumer<ISchematic> schematicConsumer)
+    public SelectLoadedSchematicScreen(Consumer<LoadedSchematic> schematicConsumer)
     {
         super(10, 30, 192, 56);
 
@@ -54,10 +54,10 @@ public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<I
     }
 
     @Override
-    protected DataListWidget<ISchematic> createListWidget()
+    protected DataListWidget<LoadedSchematic> createListWidget()
     {
-        Supplier<List<ISchematic>> supplier = SchematicHolder.getInstance()::getAllSchematics;
-        DataListWidget<ISchematic> listWidget = new DataListWidget<>(supplier, true);
+        Supplier<List<LoadedSchematic>> supplier = SchematicHolder.INSTANCE::getAllSchematics;
+        DataListWidget<LoadedSchematic> listWidget = new DataListWidget<>(supplier, true);
         listWidget.addDefaultSearchBar();
         listWidget.setEntryFilter(BaseSchematicEntryWidget::schematicSearchFilter);
         listWidget.setDataListEntryWidgetFactory(BaseSchematicEntryWidget::new);
@@ -69,16 +69,16 @@ public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<I
 
     protected void onSelectButtonClicked()
     {
-        ISchematic schematic = this.getListWidget().getLastSelectedEntry();
+        LoadedSchematic loadedSchematic = this.getListWidget().getLastSelectedEntry();
 
-        if (schematic != null)
+        if (loadedSchematic != null)
         {
             this.openParentScreen();
-            this.schematicConsumer.accept(schematic);
+            this.schematicConsumer.accept(loadedSchematic);
         }
     }
 
-    public void onSelectionChange(@Nullable ISchematic entry)
+    public void onSelectionChange(@Nullable LoadedSchematic entry)
     {
         this.schematicInfoWidget.onSelectionChange(entry);
     }

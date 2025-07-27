@@ -29,8 +29,6 @@ public class SchematicType
          .setDataValidator(LitematicaSchematic::isValidSchematic)
          .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equals)
-         .setDefaultIcon(LitematicaIcons.SCHEMATIC_LITEMATIC)
-         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_LITEMATIC)
          .setHasName(true)
          .build();
 
@@ -40,8 +38,6 @@ public class SchematicType
          .setDataValidator(SchematicaSchematic::isValidSchematic)
          .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equals)
-         .setDefaultIcon(LitematicaIcons.SCHEMATIC_SCHEMATICA)
-         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA)
          .setHasName(true)
          .build();
 
@@ -51,8 +47,6 @@ public class SchematicType
          .setDataValidator(SpongeSchematic::isValidSchematic)
          .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equals(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equals(ext))
-         .setDefaultIcon(LitematicaIcons.SCHEMATIC_SPONGE)
-         .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_SPONGE)
          .setHasName(true)
          .build();
 
@@ -62,8 +56,6 @@ public class SchematicType
         .setDataValidator(VanillaStructure::isValidSchematic)
         .setExtension(VanillaStructure.FILE_NAME_EXTENSION)
         .setExtensionValidator(VanillaStructure.FILE_NAME_EXTENSION::equals)
-        .setDefaultIcon(LitematicaIcons.SCHEMATIC_VANILLA)
-        .setInMemoryIcon(LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA)
         .setHasName(true)
         .build();
 
@@ -74,8 +66,6 @@ public class SchematicType
                                                                      getPossibleTypesFromFileName(p).isEmpty() == false;
 
     private final String extension;
-    private final Icon defaultIcon;
-    private final Icon inMemoryIcon;
     private final Supplier<Schematic> factory;
     private final Function<String, Boolean> extensionValidator;
     private final Function<CompoundData, Boolean> dataValidator;
@@ -83,16 +73,13 @@ public class SchematicType
     private final boolean hasName;
 
     private SchematicType(String displayName, Supplier<Schematic> factory, Function<CompoundData, Boolean> dataValidator,
-                          String extension, Function<String, Boolean> extensionValidator,
-                          Icon defaultIcon, Icon inMemoryIcon, boolean hasName)
+                          String extension, Function<String, Boolean> extensionValidator, boolean hasName)
     {
         this.displayName = displayName;
         this.extension = extension;
         this.factory = factory;
         this.extensionValidator = extensionValidator;
         this.dataValidator = dataValidator;
-        this.defaultIcon = defaultIcon;
-        this.inMemoryIcon = inMemoryIcon;
         this.hasName = hasName;
     }
 
@@ -104,21 +91,6 @@ public class SchematicType
     public String getDisplayName()
     {
         return this.displayName;
-    }
-
-    public Icon getIcon()
-    {
-        return this.defaultIcon;
-    }
-
-    public Icon getInMemoryIcon()
-    {
-        return this.inMemoryIcon;
-    }
-
-    public Icon getIcon(boolean inMemoryOnly)
-    {
-        return inMemoryOnly ? this.inMemoryIcon : this.defaultIcon;
     }
 
     public boolean getHasName()
@@ -245,8 +217,6 @@ public class SchematicType
     public static class Builder
     {
         private String extension = null;
-        private Icon defaultIcon = null;
-        private Icon inMemoryIcon = null;
         private Supplier<Schematic> factory = null;
         private Function<String, Boolean> extensionValidator = null;
         private Function<CompoundData, Boolean> dataValidator = null;
@@ -289,34 +259,19 @@ public class SchematicType
             return this;
         }
 
-        public SchematicType.Builder setDefaultIcon(Icon defaultIcon)
-        {
-            this.defaultIcon = defaultIcon;
-            return this;
-        }
-
-        public SchematicType.Builder setInMemoryIcon(Icon inMemoryIcon)
-        {
-            this.inMemoryIcon = inMemoryIcon;
-            return this;
-        }
-
         public SchematicType build()
         {
             if (this.factory == null ||
                 this.dataValidator == null ||
                 this.extension == null ||
                 this.extensionValidator == null ||
-                this.defaultIcon == null ||
-                this.displayName == null ||
-                this.inMemoryIcon == null)
+                this.displayName == null)
             {
                 throw new IllegalArgumentException("SchematicType.Builder#build(): Some of the values were null!");
             }
 
             return new SchematicType(this.displayName, this.factory, this.dataValidator,
-                                     this.extension, this.extensionValidator,
-                                     this.defaultIcon, this.inMemoryIcon, this.hasName);
+                                     this.extension, this.extensionValidator, this.hasName);
         }
     }
 }

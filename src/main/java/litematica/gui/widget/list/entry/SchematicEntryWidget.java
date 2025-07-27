@@ -131,7 +131,7 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
 
     protected void unloadSchematic()
     {
-        SchematicHolder.getInstance().removeSchematic(this.getData());
+        SchematicHolder.INSTANCE.removeSchematic(this.getData());
         this.listWidget.refreshEntries();
     }
 }

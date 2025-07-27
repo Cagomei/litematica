@@ -1,6 +1,8 @@
 package litematica.gui;
 
 import java.nio.file.Path;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 import malilib.gui.widget.CheckBoxWidget;
 import malilib.gui.widget.button.GenericButton;
@@ -10,10 +12,11 @@ import malilib.overlay.message.MessageDispatcher;
 import litematica.Reference;
 import litematica.config.Configs;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.materials.MaterialListUtils;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicType;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
@@ -63,16 +66,16 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
 
     protected void loadSchematic()
     {
-        ISchematic schematic = tryLoadSchematic(this.getListWidget().getEntrySelectionHandler().getLastSelectedEntry());
+        LoadedSchematic loadedSchematic = tryLoadSchematic(this.getListWidget().getEntrySelectionHandler().getLastSelectedEntry());
 
-        if (schematic == null)
+        if (loadedSchematic == null || loadedSchematic.file.isPresent() == false)
         {
             return;
         }
 
-        SchematicHolder.getInstance().addSchematic(schematic, true);
+        SchematicHolder.INSTANCE.addSchematic(loadedSchematic, true);
         MessageDispatcher.success("litematica.message.info.schematic_loaded_to_memory",
-                                  schematic.getFile().getFileName().toString());
+                                  loadedSchematic.file.get().getFileName().toString());
 
         // Clear the parent after loading as schematic, as presumably in most cases
         // the user would just want to close the screen at that point.
@@ -81,21 +84,22 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
         if (Configs.Internal.CREATE_PLACEMENT_ON_LOAD.getBooleanValue())
         {
             SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
-            manager.createPlacementForNewlyLoadedSchematic(schematic, isShiftDown() == false);
+            manager.createPlacementForNewlyLoadedSchematic(loadedSchematic, isShiftDown() == false);
         }
     }
 
     protected void createMaterialList()
     {
-        ISchematic schematic = tryLoadSchematic(this.getListWidget().getEntrySelectionHandler().getLastSelectedEntry());
+        LoadedSchematic loadedSchematic = tryLoadSchematic(this.getListWidget().getEntrySelectionHandler().getLastSelectedEntry());
 
-        if (schematic != null)
+        if (loadedSchematic != null)
         {
-            MaterialListUtils.openMaterialListScreenFor(schematic);
+            MaterialListUtils.openMaterialListScreenFor(loadedSchematic.schematic);
         }
     }
 
-    public static ISchematic tryLoadSchematic(DirectoryEntry entry)
+    @Nullable
+    public static LoadedSchematic tryLoadSchematic(DirectoryEntry entry)
     {
         Path file = entry != null && entry.getType() == DirectoryEntryType.FILE ? entry.getFullPath() : null;
 
@@ -105,13 +109,14 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
             return null;
         }
 
-        ISchematic schematic = SchematicType.tryCreateSchematicFrom(file);
+        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(file);
 
-        if (schematic == null)
+        if (schematicOpt.isPresent() == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_load.invalid_schematic_file");
+            return null;
         }
 
-        return schematic;
+        return new LoadedSchematic(schematicOpt.get(), Optional.of(file));
     }
 }

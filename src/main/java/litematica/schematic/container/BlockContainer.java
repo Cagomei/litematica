@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 
 import malilib.util.position.Vec3i;
-import litematica.schematic.old.container.ILitematicaBlockStateContainer;
 import litematica.schematic.old.container.ILitematicaBlockStatePalette;
 
 public interface BlockContainer
@@ -46,5 +45,5 @@ public interface BlockContainer
      * Creates and returns a copy of this block container
      * @return a copy of this container
      */
-    ILitematicaBlockStateContainer copy();
+    BlockContainer copy();
 }

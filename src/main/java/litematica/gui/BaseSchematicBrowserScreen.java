@@ -1,6 +1,7 @@
 package litematica.gui;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import malilib.config.value.FileBrowserColumns;
@@ -11,10 +12,11 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntry;
 import malilib.util.StringUtils;
 import litematica.config.Configs;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.gui.util.SchematicBrowserIconProvider;
 import litematica.gui.widget.SchematicInfoWidgetByPath;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicType;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicType;
 import litematica.util.LitematicaDirectories;
 
 public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWidget>
@@ -114,13 +116,20 @@ public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWi
     }
 
     @Nullable
-    protected ISchematic getLastSelectedSchematic()
+    protected LoadedSchematic getLastSelectedSchematic()
     {
         if (this.lastSelectedSchematicFile == null)
         {
             return null;
         }
 
-        return SchematicType.tryCreateSchematicFrom(this.lastSelectedSchematicFile);
+        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(this.lastSelectedSchematicFile);
+
+        if (schematicOpt.isPresent())
+        {
+            return new LoadedSchematic(schematicOpt.get(), Optional.of(this.lastSelectedSchematicFile));
+        }
+
+        return null;
     }
 }

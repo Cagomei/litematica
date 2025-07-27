@@ -1,6 +1,5 @@
 package litematica.gui;
 
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -32,11 +31,12 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.gui.util.LitematicaIcons;
+import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.list.entry.SchematicPlacementSubRegionEntryWidget;
 import litematica.materials.MaterialListPlacement;
 import litematica.render.OverlayRenderer;
-import litematica.schematic.old.ISchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -118,7 +118,8 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         this.lockYCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");
         this.lockZCoordCheckbox = new CheckBoxWidget(null, "litematica.hover.checkmark.schematic_placement_settings.lock_coordinate");
         this.bbColorWidget = new ColorIndicatorWidget(16, 16, () -> this.placement.getBoundingBoxColor().intValue, this::setBoundingBoxColor);
-        this.schematicTypeIcon = new IconWidget(placement.getSchematic().getType().getIcon(placement.isSchematicInMemoryOnly()));
+        Icon icon = SchematicTypeIcons.INSTANCE.getIcon(placement.getLoadedSchematic()).orElse(DefaultIcons.EXCLAMATION_11);
+        this.schematicTypeIcon = new IconWidget(icon);
 
         this.copyPasteSettingsButton.setRenderButtonBackgroundTexture(true);
         this.changeSchematicButton.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.change_schematic");
@@ -388,13 +389,13 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         }
     }
 
-    protected void changeSchematicInPlacement(ISchematic newSchematic)
+    protected void changeSchematicInPlacement(LoadedSchematic newLoadedSchematic)
     {
-        String oldSchematicName = this.placement.getSchematic().getMetadata().getName();
-        String newSchematicName = newSchematic.getMetadata().getName();
+        String oldSchematicName = this.placement.getSchematic().getMetadata().getSchematicName();
+        String newSchematicName = newLoadedSchematic.schematic.getMetadata().getSchematicName();
         boolean unnamed = this.placement.getName().equals(oldSchematicName);
 
-        DataManager.getSchematicPlacementManager().changeSchematicInPlacement(this.placement, newSchematic);
+        DataManager.getSchematicPlacementManager().changeSchematicInPlacement(this.placement, newLoadedSchematic);
 
         if (unnamed)
         {
@@ -445,7 +446,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
 
     protected void resetName()
     {
-        this.placement.setName(this.placement.getSchematic().getMetadata().getName());
+        this.placement.setName(this.placement.getSchematic().getMetadata().getSchematicName());
         this.nameTextField.setText(this.placement.getName());
     }
 
@@ -496,13 +497,12 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         int regionCount = this.placement.getSubRegionCount();
         this.subRegionsLabel.translateSetLines(key, regionCount);
 
-        ISchematic schematic = this.placement.getSchematic();
-        Path file = schematic.getFile();
-        String fileName = file != null ? file.getFileName().toString() :
+        LoadedSchematic loadedSchematic = this.placement.getLoadedSchematic();
+        String fileName = loadedSchematic.file.isPresent() ? loadedSchematic.file.get().getFileName().toString() :
                           StringUtils.translate("litematica.hover.schematic_list.in_memory_only");
 
         key = "litematica.label.schematic_placement_settings.schematic_name";
-        this.schematicNameLabel.translateSetLines(key, schematic.getMetadata().getName(), fileName);
+        this.schematicNameLabel.translateSetLines(key, loadedSchematic.schematic.getMetadata().getSchematicName(), fileName);
     }
 
     protected Icon getEnclosingBoxButtonIcon()

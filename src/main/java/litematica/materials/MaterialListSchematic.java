@@ -4,19 +4,19 @@ import java.util.Collection;
 import com.google.common.collect.ImmutableList;
 
 import malilib.util.StringUtils;
-import litematica.schematic.old.ISchematic;
+import litematica.schematic.Schematic;
 
 public class MaterialListSchematic extends MaterialListBase
 {
-    private final ISchematic schematic;
+    private final Schematic schematic;
     private final ImmutableList<String> regions;
 
-    public MaterialListSchematic(ISchematic schematic, boolean reCreate)
+    public MaterialListSchematic(Schematic schematic, boolean reCreate)
     {
-        this(schematic, schematic.getRegionNames(), reCreate);
+        this(schematic, schematic.getRegions().keySet(), reCreate);
     }
 
-    public MaterialListSchematic(ISchematic schematic, Collection<String> subRegions, boolean reCreate)
+    public MaterialListSchematic(Schematic schematic, Collection<String> subRegions, boolean reCreate)
     {
         super();
 
@@ -40,13 +40,13 @@ public class MaterialListSchematic extends MaterialListBase
     @Override
     public String getName()
     {
-        return this.schematic.getMetadata().getName();
+        return this.schematic.getMetadata().getSchematicName();
     }
 
     @Override
     public String getTitle()
     {
         return StringUtils.translate("litematica.title.screen.material_list.schematic",
-                                     this.getName(), this.regions.size(), this.schematic.getRegionNames().size());
+                                     this.getName(), this.regions.size(), this.schematic.getRegions().size());
     }
 }

@@ -8,25 +8,25 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import litematica.Reference;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicMetadata;
+import litematica.data.LoadedSchematic;
+import litematica.schematic.SchematicMetadata;
 
-public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<ISchematic>
+public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<LoadedSchematic>
 {
     @Override
     @Nullable
-    protected SchematicInfo createSchematicInfo(ISchematic schematic)
+    protected SchematicInfo createSchematicInfo(LoadedSchematic loadedSchematic)
     {
-        SchematicMetadata metadata = schematic.getMetadata();
+        SchematicMetadata metadata = loadedSchematic.schematic.getMetadata();
         String name;
 
-        if (schematic.getFile() != null)
+        if (loadedSchematic.file.isPresent())
         {
-            name = FileNameUtils.generateSimpleSafeFileName(schematic.getFile().toAbsolutePath().toString().toLowerCase(Locale.ROOT));
+            name = FileNameUtils.generateSimpleSafeFileName(loadedSchematic.file.get().toAbsolutePath().toString().toLowerCase(Locale.ROOT));
         }
         else
         {
-            name = FileNameUtils.generateSimpleSafeFileName(metadata.getName() + "_" + metadata.getAuthor() + "_" + metadata.getTimeCreated());
+            name = FileNameUtils.generateSimpleSafeFileName(metadata.getSchematicName() + "_" + metadata.getAuthor() + "_" + metadata.getTimeCreated());
         }
 
         Identifier iconName = new Identifier(Reference.MOD_ID, name);

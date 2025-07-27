@@ -20,7 +20,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
 import litematica.scheduler.TaskScheduler;
-import litematica.schematic.old.ISchematic;
+import litematica.schematic.Schematic;
 import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.util.SchematicCreationUtils;
@@ -338,7 +338,7 @@ public class SchematicProject
         return false;
     }
 
-    protected void writeSchematicToFileAndAddVersion(ISchematic schematic, String fileName, String name, Vec3i areaOffset)
+    protected void writeSchematicToFileAndAddVersion(Schematic schematic, String fileName, String name, Vec3i areaOffset)
     {
         SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
 

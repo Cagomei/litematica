@@ -39,6 +39,7 @@ import litematica.data.DataManager;
 import litematica.data.SchematicHolder;
 import litematica.gui.SaveSchematicFromAreaScreen;
 import litematica.scheduler.TaskScheduler;
+import litematica.schematic.Schematic;
 import litematica.schematic.old.EntityInfo;
 import litematica.schematic.old.ISchematic;
 import litematica.schematic.old.ISchematicRegion;
@@ -127,18 +128,18 @@ public class SchematicCreationUtils
         return false;
     }
 
-    private static void onInMemorySchematicCreated(ISchematic schematic, String name)
+    private static void onInMemorySchematicCreated(Schematic schematic, String name)
     {
         setSchematicMetadataOnCreation(schematic, name);
-        SchematicHolder.getInstance().addSchematic(schematic, true);
+        SchematicHolder.INSTANCE.addSchematic(schematic, true);
         MessageDispatcher.success("litematica.message.in_memory_schematic_created", name);
     }
 
-    public static void setSchematicMetadataOnCreation(ISchematic schematic, String schematicName)
+    public static void setSchematicMetadataOnCreation(Schematic schematic, String schematicName)
     {
         long time = System.currentTimeMillis();
         schematic.getMetadata().setAuthor(GameWrap.getPlayerName());
-        schematic.getMetadata().setName(schematicName);
+        schematic.getMetadata().setSchematicName(schematicName);
         schematic.getMetadata().setTimeCreated(time);
         schematic.getMetadata().setTimeModified(time);
     }

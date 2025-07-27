@@ -8,16 +8,16 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntry;
 import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntryType;
 import malilib.overlay.message.MessageDispatcher;
 import litematica.Reference;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
-import litematica.schematic.old.ISchematic;
 
 public class SchematicSelectorScreen extends BaseSchematicBrowserScreen
 {
     protected final GenericButton cancelButton;
     protected final GenericButton loadButton;
-    protected final Consumer<ISchematic> schematicConsumer;
+    protected final Consumer<LoadedSchematic> schematicConsumer;
 
-    public SchematicSelectorScreen(Consumer<ISchematic> schematicConsumer)
+    public SchematicSelectorScreen(Consumer<LoadedSchematic> schematicConsumer)
     {
         super(10, 24, 20 + 170 + 2, 70, "schematic_browser");
 
@@ -54,12 +54,7 @@ public class SchematicSelectorScreen extends BaseSchematicBrowserScreen
 
         if (file != null)
         {
-            ISchematic schematic = SchematicHolder.getInstance().getOrLoad(file);
-
-            if (schematic != null)
-            {
-                this.schematicConsumer.accept(schematic);
-            }
+            SchematicHolder.INSTANCE.getOrLoad(file).ifPresent(this.schematicConsumer);
         }
         else
         {

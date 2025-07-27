@@ -194,7 +194,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         }
         else
         {
-            SchematicHolder.getInstance().addSchematic(schematic, false);
+            SchematicHolder.INSTANCE.addSchematic(schematic, false);
             MessageDispatcher.error("litematica.message.error.save_schematic.failed_to_save_from_area", fileName);
         }
     }

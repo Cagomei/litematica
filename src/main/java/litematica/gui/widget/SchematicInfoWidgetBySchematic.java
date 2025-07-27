@@ -1,9 +1,9 @@
 package litematica.gui.widget;
 
+import litematica.data.LoadedSchematic;
 import litematica.gui.util.SchematicInfoCacheBySchematic;
-import litematica.schematic.old.ISchematic;
 
-public class SchematicInfoWidgetBySchematic extends AbstractSchematicInfoWidget<ISchematic>
+public class SchematicInfoWidgetBySchematic extends AbstractSchematicInfoWidget<LoadedSchematic>
 {
     public SchematicInfoWidgetBySchematic(int width, int height)
     {
