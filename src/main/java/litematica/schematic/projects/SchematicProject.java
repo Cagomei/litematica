@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -19,8 +20,10 @@ import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.scheduler.TaskScheduler;
 import litematica.schematic.Schematic;
+import litematica.schematic.SchematicType;
 import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.util.SchematicCreationUtils;
@@ -206,16 +209,17 @@ public class SchematicProject
             {
                 this.removeCurrentPlacement();
 
-                LitematicaSchematic schematic = LitematicaSchematic.createFromFile(this.directory, version.getFileName());
+                Optional<LoadedSchematic> opt = SchematicType.tryLoadSchematic(this.directory.resolve(version.getFileName()));
 
-                if (schematic != null)
+                if (opt.isPresent())
                 {
+                    LoadedSchematic loadedSchematic = opt.get();
                     BlockPos areaPosition = this.origin.add(version.getAreaOffset());
-                    this.currentPlacement = SchematicPlacement.create(schematic, areaPosition, version.getName(), true, false);
+                    this.currentPlacement = SchematicPlacement.create(loadedSchematic, areaPosition, version.getName(), true, false);
                     this.currentPlacement.setShouldBeSaved(false);
                     DataManager.getSchematicPlacementManager().addSchematicPlacement(this.currentPlacement, false);
 
-                    long time = schematic.getMetadata().getTimeCreated();
+                    long time = loadedSchematic.schematic.getMetadata().getTimeCreated();
 
                     if (time != version.getTimeStamp())
                     {
@@ -318,11 +322,12 @@ public class SchematicProject
     {
         if (this.checkCanSaveOrPrintError())
         {
-            String fileName = this.getNextFileName();
             AreaSelection selection = this.getSelection();
             BlockPos areaOffset = selection.getEffectiveOrigin().subtract(this.origin);
 
-            LitematicaSchematic schematic = SchematicCreationUtils.createEmptySchematic(selection);
+            // TODO add a project level option to select the schematic type? Or per-version?
+            Schematic schematic = SchematicType.LITEMATICA.createSchematic();
+            String fileName = this.getNextFileName(schematic.getType());
             CreateSchematicTask task = new CreateSchematicTask(schematic, selection.copy(), false,
                                                                () -> this.writeSchematicToFileAndAddVersion(schematic, fileName, name, areaOffset));
 
@@ -341,10 +346,10 @@ public class SchematicProject
     protected void writeSchematicToFileAndAddVersion(Schematic schematic, String fileName, String name, Vec3i areaOffset)
     {
         SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
+        int versionNumber = this.versions.size() + 1;
 
         if (schematic.writeToFile(this.directory, fileName, false))
         {
-            int versionNumber = this.versions.size() + 1;
             SchematicVersion version = new SchematicVersion(this, name, fileName, areaOffset,
                                                             versionNumber, System.currentTimeMillis());
             this.versions.add(version);
@@ -354,19 +359,20 @@ public class SchematicProject
 
             MessageDispatcher.success("litematica.message.schematic_projects.version_saved", version, name);
         }
+        else
+        {
+            MessageDispatcher.error("litematica.message.schematic_projects.version_save_failed", versionNumber, fileName);
+        }
     }
 
-    private String getNextFileName()
+    private String getNextFileName(SchematicType type)
     {
-        String nameBase = this.projectName + "_";
-        int version = 1;
-        int failsafe = 10000;
-        // FIXME wtf is this shit
+        int version = this.versions.size();
 
-        while (failsafe-- > 0)
+        while (version <= 100000)
         {
-            String name = nameBase + String.format("%05d", version);
-            Path file = this.directory.resolve(name + LitematicaSchematic.FILE_NAME_EXTENSION);
+            String name = String.format("%s_%05d.%s", this.projectName, version, type.getFileNameExtension());
+            Path file = this.directory.resolve(name);
 
             if (Files.exists(file) == false)
             {
@@ -376,7 +382,7 @@ public class SchematicProject
             ++version;
         }
 
-        return nameBase + "error";
+        return this.projectName + "_" + "error";
     }
 
     public void clear()

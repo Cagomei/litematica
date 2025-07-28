@@ -16,7 +16,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
 import litematica.gui.SchematicPlacementSubRegionSettingsScreen;
-import litematica.schematic.old.ISchematicRegion;
+import litematica.schematic.SchematicRegion;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -117,7 +117,7 @@ public class SchematicPlacementSubRegionEntryWidget extends BaseDataListEntryWid
             lines.add(StringUtils.translate("litematica.hover.placement_list.sub_region_modified"));
         }
 
-        ISchematicRegion region = this.placement.getSchematic().getSchematicRegion(this.data.getName());
+        SchematicRegion region = this.placement.getSchematic().getRegions().get(this.data.getName());
         Vec3i size = region != null ? region.getSize() : null;
 
         if (size != null)

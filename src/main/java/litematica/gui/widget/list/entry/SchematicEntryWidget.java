@@ -1,18 +1,21 @@
 package litematica.gui.widget.list.entry;
 
+import java.nio.file.Path;
+
 import malilib.gui.BaseScreen;
 import malilib.gui.icon.Icon;
 import malilib.gui.widget.button.GenericButton;
 import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.listener.EventListener;
+import malilib.overlay.message.MessageDispatcher;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.position.BlockPos;
 import litematica.config.Configs;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.SaveConvertSchematicScreen;
 import litematica.gui.util.LitematicaIcons;
-import litematica.schematic.old.ISchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 
@@ -24,7 +27,7 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
     protected final GenericButton unloadButton;
     protected int buttonsStartX;
 
-    public SchematicEntryWidget(ISchematic schematic, DataListEntryWidgetData constructData)
+    public SchematicEntryWidget(LoadedSchematic schematic, DataListEntryWidgetData constructData)
     {
         super(schematic, constructData);
 
@@ -106,9 +109,9 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
 
     protected void createPlacement()
     {
-        ISchematic schematic = this.getData();
+        LoadedSchematic schematic = this.getData();
         BlockPos pos = EntityWrap.getCameraEntityBlockPos();
-        String name = schematic.getMetadata().getName();
+        String name = schematic.schematic.getMetadata().getSchematicName();
         boolean createAsEnabled = BaseScreen.isShiftDown() == false;
 
         SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
@@ -119,9 +122,22 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
 
     protected void reloadFromFile()
     {
-        this.getData().readFromFile();
-        SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
-        manager.getAllPlacementsOfSchematic(this.getData()).forEach(manager::markChunksForRebuild);
+        LoadedSchematic loadedSchematic = this.getData();
+
+        if (loadedSchematic.file.isPresent())
+        {
+            Path file = loadedSchematic.file.get();
+
+            if (loadedSchematic.schematic.read())
+            {
+                SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
+                manager.getAllPlacementsOfSchematic(loadedSchematic).forEach(manager::markChunksForRebuild);
+            }
+            else
+            {
+                MessageDispatcher.error("litematica.message.error.schematic_read.failed_to_read_from_file", file);
+            }
+        }
     }
 
     protected void saveToFile()

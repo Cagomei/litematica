@@ -9,13 +9,13 @@ import malilib.gui.widget.list.DataListWidget;
 import malilib.util.StringUtils;
 import litematica.Reference;
 import litematica.config.Configs;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;
 import litematica.gui.widget.list.entry.SchematicEntryWidget;
-import litematica.schematic.old.ISchematic;
 
-public class LoadedSchematicsListScreen extends BaseListScreen<DataListWidget<ISchematic>>
+public class LoadedSchematicsListScreen extends BaseListScreen<DataListWidget<LoadedSchematic>>
 {
     protected final GenericButton iconsTextToggleButton;
     protected final GenericButton loadSchematicsScreenButton;
@@ -71,10 +71,10 @@ public class LoadedSchematicsListScreen extends BaseListScreen<DataListWidget<IS
     }
 
     @Override
-    protected DataListWidget<ISchematic> createListWidget()
+    protected DataListWidget<LoadedSchematic> createListWidget()
     {
-        Supplier<List<ISchematic>> supplier = SchematicHolder.INSTANCE::getAllSchematics;
-        DataListWidget<ISchematic> listWidget = new DataListWidget<>(supplier, true);
+        Supplier<List<LoadedSchematic>> supplier = SchematicHolder.INSTANCE::getAllSchematics;
+        DataListWidget<LoadedSchematic> listWidget = new DataListWidget<>(supplier, true);
         listWidget.addDefaultSearchBar();
         listWidget.setEntryFilter(BaseSchematicEntryWidget::schematicSearchFilter);
         listWidget.setDataListEntryWidgetFactory(SchematicEntryWidget::new);

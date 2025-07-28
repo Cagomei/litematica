@@ -12,7 +12,7 @@ import malilib.util.position.Vec3i;
 public class SchematicMetadata
 {
     protected String schematicName = "?";
-    protected String author = "?";
+    protected String author = "";
     protected String description = "";
     protected Vec3i enclosingSize = Vec3i.ZERO;
     protected long timeCreated;

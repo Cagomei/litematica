@@ -15,7 +15,6 @@ import litematica.data.DataManager;
 import litematica.data.LoadedSchematic;
 import litematica.gui.util.SchematicBrowserIconProvider;
 import litematica.gui.widget.SchematicInfoWidgetByPath;
-import litematica.schematic.Schematic;
 import litematica.schematic.SchematicType;
 import litematica.util.LitematicaDirectories;
 
@@ -116,20 +115,13 @@ public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWi
     }
 
     @Nullable
-    protected LoadedSchematic getLastSelectedSchematic()
+    protected Optional<LoadedSchematic> getLastSelectedSchematic()
     {
         if (this.lastSelectedSchematicFile == null)
         {
-            return null;
+            return Optional.empty();
         }
 
-        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(this.lastSelectedSchematicFile);
-
-        if (schematicOpt.isPresent())
-        {
-            return new LoadedSchematic(schematicOpt.get(), Optional.of(this.lastSelectedSchematicFile));
-        }
-
-        return null;
+        return SchematicType.tryLoadSchematic(this.lastSelectedSchematicFile);
     }
 }

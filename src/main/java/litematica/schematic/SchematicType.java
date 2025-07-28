@@ -9,13 +9,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
-import malilib.gui.icon.Icon;
 import malilib.util.FileNameUtils;
 import malilib.util.nbt.CompoundData;
 import malilib.util.nbt.NbtUtils;
-import litematica.gui.util.LitematicaIcons;
+import litematica.data.LoadedSchematic;
 import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.old.SchematicaSchematic;
 import litematica.schematic.old.SpongeSchematic;
@@ -169,32 +169,32 @@ public class SchematicType
         return Optional.empty();
     }
 
-    public static Optional<Schematic> tryCreateSchematicFrom(Path file)
+    public static Optional<LoadedSchematic> tryLoadSchematic(Path schematicFile)
     {
-        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(file);
+        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(schematicFile);
 
         if (possibleTypes.isEmpty() == false)
         {
-            CompoundData data = NbtUtils.readNbtFromFile(file);
+            @Nullable
+            CompoundData data = NbtUtils.readNbtFromFile(schematicFile);
 
             if (data != null)
             {
-                Optional<SchematicType> typeOpt = getType(file, data);
+                Optional<SchematicType> typeOpt = getType(schematicFile, data);
 
                 if (typeOpt.isPresent())
                 {
-                    return typeOpt.get().createSchematicAndReadFromTag(data);
+                    Optional<Schematic> schematicOpt = typeOpt.get().createSchematicAndReadFromTag(data);
+
+                    if (schematicOpt.isPresent())
+                    {
+                        return Optional.of(new LoadedSchematic(schematicOpt.get(), Optional.of(schematicFile)));
+                    }
                 }
             }
         }
 
         return Optional.empty();
-    }
-
-    public static Optional<Schematic> tryCreateSchematicFrom(Path file, CompoundData dataIn)
-    {
-        Optional<SchematicType> typeOpt = getType(file, dataIn);
-        return typeOpt.isPresent() ? typeOpt.get().createSchematicAndReadFromTag(dataIn) : Optional.empty();
     }
 
     public static void registerType(SchematicType type)

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import litematica.schematic.Schematic;
 import litematica.schematic.SchematicType;
 
 public class SchematicHolder
@@ -50,16 +49,14 @@ public class SchematicHolder
             }
         }
 
-        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(file);
+        Optional<LoadedSchematic> schematicOpt = SchematicType.tryLoadSchematic(file);
 
         if (schematicOpt.isPresent())
         {
-            LoadedSchematic loadedSchematic = new LoadedSchematic(schematicOpt.get(), Optional.of(file));
-            this.schematics.add(loadedSchematic);
-            return Optional.of(loadedSchematic);
+            this.schematics.add(schematicOpt.get());
         }
 
-        return Optional.empty();
+        return schematicOpt;
     }
 
     public void addSchematic(LoadedSchematic loadedSchematic, boolean allowDuplicates)

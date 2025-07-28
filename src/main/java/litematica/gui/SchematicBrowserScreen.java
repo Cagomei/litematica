@@ -15,7 +15,6 @@ import litematica.data.DataManager;
 import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.materials.MaterialListUtils;
-import litematica.schematic.Schematic;
 import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacementManager;
 
@@ -109,14 +108,14 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
             return null;
         }
 
-        Optional<Schematic> schematicOpt = SchematicType.tryCreateSchematicFrom(file);
+        Optional<LoadedSchematic> opt = SchematicType.tryLoadSchematic(file);
 
-        if (schematicOpt.isPresent() == false)
+        if (opt.isPresent() == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_load.invalid_schematic_file");
             return null;
         }
 
-        return new LoadedSchematic(schematicOpt.get(), Optional.of(file));
+        return opt.get();
     }
 }

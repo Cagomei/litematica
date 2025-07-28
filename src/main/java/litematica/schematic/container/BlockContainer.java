@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 import net.minecraft.block.state.IBlockState;
 
+import malilib.util.data.palette.Palette;
 import malilib.util.position.Vec3i;
-import litematica.schematic.old.container.ILitematicaBlockStatePalette;
 
 public interface BlockContainer
 {
@@ -27,7 +27,7 @@ public interface BlockContainer
     /**
      * @return the block state palette used in this container
      */
-    ILitematicaBlockStatePalette getPalette();
+    Palette<IBlockState> getPalette();
 
     /**
      * @return the block state at the given position in the container.

@@ -3,6 +3,7 @@ package litematica.gui;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import malilib.gui.ConfirmActionScreen;
@@ -20,6 +21,7 @@ import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.scheduler.TaskScheduler;
 import litematica.scheduler.tasks.SetSchematicPreviewTask;
+import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacement;
@@ -71,9 +73,9 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
             this.addWidget(this.renameSchematicButton);
             this.addWidget(this.setPreviewButton);
 
-            LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+            Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
     
-            if (loadedSchematic != null && loadedSchematic.schematic.getMetadata().getPreviewImagePixelData() != null)
+            if (opt.isPresent() && opt.get().schematic.getMetadata().getPreviewImagePixelData() != null)
             {
                 this.addWidget(this.removePreviewButton);
             }
@@ -114,11 +116,11 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
     protected void convertSchematic()
     {
-        LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+        Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
 
-        if (loadedSchematic != null)
+        if (opt.isPresent())
         {
-            SaveConvertSchematicScreen screen = new SaveConvertSchematicScreen(loadedSchematic, false);
+            SaveConvertSchematicScreen screen = new SaveConvertSchematicScreen(opt.get(), false);
             screen.setParent(this);
             openScreen(screen);
         }
@@ -141,10 +143,11 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
     protected void editDescription()
     {
-        LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+        Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
 
-        if (loadedSchematic != null)
+        if (opt.isPresent())
         {
+            LoadedSchematic loadedSchematic = opt.get();
             SchematicMetadata meta = loadedSchematic.schematic.getMetadata();
             String title = "litematica.title.screen.schematic_manager.edit_description";
             // TODO use a TextAreaWidget once one has been implemented in malilib
@@ -156,15 +159,15 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
     protected void removePreview()
     {
-        LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+        Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
         Path file = this.lastSelectedSchematicFile;
 
-        if (loadedSchematic != null && file != null && file.getFileName() != null)
+        if (opt.isPresent() && file != null && file.getFileName() != null)
         {
             String title = "litematica.title.screen.schematic_manager.confirm_preview_removal";
             String msg = "litematica.info.schematic_manager.confirm_preview_removal";
             String name = file.getFileName().toString();
-            ConfirmActionScreen screen = new ConfirmActionScreen(320, title, () -> this.removeSchematicPreviewImage(loadedSchematic), msg, name);
+            ConfirmActionScreen screen = new ConfirmActionScreen(320, title, () -> this.removeSchematicPreviewImage(opt.get()), msg, name);
             screen.setParent(this);
             openPopupScreen(screen);
         }
@@ -211,11 +214,14 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
     protected void setPreview()
     {
-        LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+        Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
 
-        if (loadedSchematic != null)
+        if (opt.isPresent())
         {
-            if (loadedSchematic.schematic.getType() == SchematicType.LITEMATICA)
+            LoadedSchematic loadedSchematic = opt.get();
+            Schematic schematic = loadedSchematic.schematic;
+
+            if (schematic.getType() == SchematicType.LITEMATICA)
             {
                 SetSchematicPreviewTask task = new SetSchematicPreviewTask(loadedSchematic);
                 TaskScheduler.getInstanceClient().scheduleTask(task, 1);
@@ -228,17 +234,19 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
             else
             {
                 MessageDispatcher.error("litematica.message.error.schematic_manager.schematic_type_has_no_preview",
-                                        loadedSchematic.schematic.getType().getDisplayName());
+                                        schematic.getType().getDisplayName());
             }
         }
     }
 
     protected void renameSchematic()
     {
-        LoadedSchematic loadedSchematic = this.getLastSelectedSchematic();
+        Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
 
-        if (loadedSchematic != null)
+        if (opt.isPresent())
         {
+            LoadedSchematic loadedSchematic = opt.get();
+
             if (loadedSchematic.schematic.getType().getHasName() == false)
             {
                 MessageDispatcher.error("litematica.message.error.schematic_manager.schematic_type_has_no_name");
@@ -247,7 +255,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
             String oldName = loadedSchematic.schematic.getMetadata().getSchematicName();
             String title = "litematica.title.screen.schematic_manager.rename_schematic";
-            TextInputScreen screen = new TextInputScreen(title, oldName, str -> this.renameSchematicToName(str, loadedSchematic));
+            TextInputScreen screen = new TextInputScreen(title, oldName, str -> this.renameSchematicToName(loadedSchematic, str));
             screen.setParent(this);
             openPopupScreen(screen);
         }
@@ -260,22 +268,26 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         return success;
     }
 
-    protected boolean renameSchematicToName(String newName, LoadedSchematic loadedSchematic)
+    protected boolean renameSchematicToName(LoadedSchematic loadedSchematic, String newName)
     {
         SchematicMetadata meta = loadedSchematic.schematic.getMetadata();
         String oldName = meta.getSchematicName();
-        Path file = loadedSchematic.file.orElse(null);
 
         meta.setSchematicName(newName);
         meta.setTimeModifiedToNowIfNotRecentlyCreated();
         loadedSchematic.setModifiedSinceSaved();
 
-        if (loadedSchematic.writeToFile(file, true))
+        if (loadedSchematic.file.isPresent() == false)
+        {
+            return true;
+        }
+
+        if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
         {
             loadedSchematic.clearModifiedSinceSaved();
 
             SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
-            List<LoadedSchematic> list = SchematicHolder.INSTANCE.getAllOf(file);
+            List<LoadedSchematic> list = SchematicHolder.INSTANCE.getAllOf(loadedSchematic.file.get());
 
             for (LoadedSchematic loadedSchematicTmp : list)
             {
@@ -292,7 +304,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
                 }
             }
 
-            MessageDispatcher.success("litematica.message.info.schematic_manager.schematic_renamed");
+            MessageDispatcher.success(2000).translate("litematica.message.info.schematic_manager.schematic_renamed");
             this.onSchematicChange();
 
             return true;
@@ -315,14 +327,17 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
             meta.setTimeModifiedToNowIfNotRecentlyCreated();
             loadedSchematic.setModifiedSinceSaved();
 
-            if (loadedSchematic.writeToFile(loadedSchematic.file.orElse(null), true))
+            if (loadedSchematic.file.isPresent())
             {
-                loadedSchematic.clearModifiedSinceSaved();
-                MessageDispatcher.success("litematica.message.info.schematic_manager.description_set");
-            }
-            else
-            {
-                MessageDispatcher.error("litematica.message.error.schematic_manager.failed_to_save_schematic");
+                if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
+                {
+                    loadedSchematic.clearModifiedSinceSaved();
+                    MessageDispatcher.success(2000).translate("litematica.message.info.schematic_manager.description_set");
+                }
+                else
+                {
+                    MessageDispatcher.error("litematica.message.error.schematic_manager.failed_to_save_schematic");
+                }
             }
 
             this.onSchematicChange();
@@ -341,14 +356,17 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
             meta.setTimeModifiedToNowIfNotRecentlyCreated();
             loadedSchematic.setModifiedSinceSaved();
 
-            if (loadedSchematic.writeToFile(loadedSchematic.file.orElse(null), true))
+            if (loadedSchematic.file.isPresent())
             {
-                loadedSchematic.clearModifiedSinceSaved();
-                MessageDispatcher.success("litematica.message.info.schematic_manager.preview_removed");
-            }
-            else
-            {
-                MessageDispatcher.error("litematica.message.error.schematic_manager.failed_to_save_schematic");
+                if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
+                {
+                    loadedSchematic.clearModifiedSinceSaved();
+                    MessageDispatcher.success(2000).translate("litematica.message.info.schematic_manager.preview_removed");
+                }
+                else
+                {
+                    MessageDispatcher.error("litematica.message.error.schematic_manager.failed_to_save_schematic");
+                }
             }
 
             this.onSchematicChange();

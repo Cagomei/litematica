@@ -18,12 +18,13 @@ import malilib.render.text.StyledText;
 import malilib.render.text.StyledTextLine;
 import malilib.render.text.StyledTextUtils;
 import malilib.util.StringUtils;
+import malilib.util.game.MinecraftVersion;
 import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.gui.SchematicInfoConfigScreen;
 import litematica.gui.util.AbstractSchematicInfoCache;
 import litematica.gui.util.AbstractSchematicInfoCache.SchematicInfo;
-import litematica.schematic.old.SchematicMetadata;
+import litematica.schematic.SchematicMetadata;
 
 public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 {
@@ -192,24 +193,29 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         List<StyledTextLine> lines = new ArrayList<>();
         SimpleDateFormat dateFormat = createDateFormat();
 
+        // TODO Add a line for the SchematicType
+
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_NAME.getBooleanValue())
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.name");
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.name.value", meta.getName());
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.name.value", meta.getSchematicName());
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_AUTHOR.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_AUTHOR.getBooleanValue() &&
+            meta.getAuthor().length() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.schematic_author", meta.getAuthor());
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_CREATION_TIME.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_CREATION_TIME.getBooleanValue() &&
+            meta.getTimeCreated() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.time_created",
                                      dateFormat.format(new Date(meta.getTimeCreated())));
         }
 
-        if (meta.hasBeenModified() && Configs.Internal.SCHEMATIC_INFO_SHOW_MODIFICATION_TIME.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_MODIFICATION_TIME.getBooleanValue() &&
+            meta.getTimeModified() > 0 && meta.getTimeModified() != meta.getTimeCreated())
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.time_modified",
                                      dateFormat.format(new Date(meta.getTimeModified())));
@@ -217,8 +223,8 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_MC_VERSION.getBooleanValue())
         {
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.mc_version",
-                                     meta.getMinecraftVersion(), meta.getMinecraftDataVersion());
+            MinecraftVersion ver = meta.getMinecraftVersion();
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.mc_version", ver.displayName, ver.dataVersion);
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION.getBooleanValue())

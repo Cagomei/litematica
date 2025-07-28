@@ -672,6 +672,7 @@ litematica.message.error.schematic_placement.save.failed_to_get_save_file=Failed
 litematica.message.error.schematic_placement.save.failed_to_serialize=Failed to serialize the placement data
 litematica.message.error.schematic_placement.save.no_changes=No changes since last saved
 litematica.message.error.schematic_placement.save.should_not_save=This placement can't be saved.\nFor example placements of in-memory-only schematics can't be saved.
+litematica.message.error.schematic_read.failed_to_read_from_file=Failed to read schematic from file §e'%s'
 litematica.message.error.schematic_read.invalid_or_missing_size=Invalid or missing schematic size
 litematica.message.error.schematic_read.invalid_or_missing_size_value=Invalid schematic size: %s x %s x %s
 litematica.message.error.schematic_read.mcedit2.missing_block_data=SchematicaSchematic: Missing/non-existing block '%s' in MCEdit2 palette
@@ -737,7 +738,8 @@ litematica.message.set_currently_held_item_as_tool=§aSet the currently held ite
 litematica.message.set_selection_box_point=Set/moved point %d to %s
 litematica.message.toggled=Toggled %s %s
 
-litematica.message.schematic_projects.version_saved=New version (#%s) saved as '%s'
+litematica.message.schematic_projects.version_save_failed=Failed to save version #%s to file §e'%s'
+litematica.message.schematic_projects.version_saved=New version #%s saved as §e'%s'
 
 litematica.message.warn.layer_mode_currently_at=Note: You are currently in the '%s' render layer mode
 litematica.message.warn.main_rendering_disabled=Warning: The main rendering is currently disabled\nSee Visuals -> %s, or Hotkeys -> %s ['%s']

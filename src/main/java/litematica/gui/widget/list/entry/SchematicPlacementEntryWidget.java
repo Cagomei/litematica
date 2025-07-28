@@ -23,13 +23,14 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.gui.SaveSchematicPlacementScreen;
 import litematica.gui.SchematicPlacementSettingsScreen;
 import litematica.gui.SchematicPlacementsListScreen;
 import litematica.gui.util.LitematicaIcons;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicMetadata;
-import litematica.schematic.old.SchematicType;
+import litematica.gui.util.SchematicTypeIcons;
+import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 
@@ -98,20 +99,20 @@ public class SchematicPlacementEntryWidget extends BaseOrderableListEditEntryWid
         this.saveToFileButton.setHoverInfoRequiresShift(true);
         this.toggleEnabledButton.setHoverInfoRequiresShift(true);
 
-        @Nullable ISchematic schematic = placement.getSchematic();
+        LoadedSchematic loadedSchematic = placement.getLoadedSchematic();
         Icon icon = DefaultIcons.EXCLAMATION_11;
 
-        if (schematic != null)
+        if (loadedSchematic != null)
         {
-            icon = schematic.getType().getIcon(placement.isSchematicInMemoryOnly());
+            icon = SchematicTypeIcons.INSTANCE.getIcon(loadedSchematic).orElse(icon);
         }
         else if (placement.getSchematicFile() != null)
         {
-            List<SchematicType<?>> types = SchematicType.getPossibleTypesFromFileName(placement.getSchematicFile());
+            List<SchematicType> types = SchematicType.getPossibleTypesFromFileName(placement.getSchematicFile());
 
             if (types.size() > 0)
             {
-                icon = types.get(0).getIcon();
+                icon = SchematicTypeIcons.INSTANCE.getNormalIcon(types.get(0)).orElse(icon);
             }
         }
 
@@ -198,8 +199,8 @@ public class SchematicPlacementEntryWidget extends BaseOrderableListEditEntryWid
     protected void addHoverInfo(SchematicPlacement placement)
     {
         @Nullable Path schematicFile = placement.getSchematicFile();
-        @Nullable ISchematic schematic = placement.getSchematic();
-        @Nullable SchematicMetadata metadata = schematic != null ? schematic.getMetadata() : null;
+        @Nullable LoadedSchematic loadedSchematic = placement.getLoadedSchematic();
+        @Nullable SchematicMetadata metadata = loadedSchematic != null ? loadedSchematic.schematic.getMetadata() : null;
         String fileName = schematicFile != null ? schematicFile.getFileName().toString() :
                           StringUtils.translate("litematica.hover.schematic_list.in_memory_only");
         List<StyledTextLine> lines = new ArrayList<>();
@@ -209,7 +210,7 @@ public class SchematicPlacementEntryWidget extends BaseOrderableListEditEntryWid
 
         if (metadata != null)
         {
-            StyledTextLine.translate(lines, "litematica.hover.schematic_list.schematic_name", metadata.getName());
+            StyledTextLine.translate(lines, "litematica.hover.schematic_list.schematic_name", metadata.getSchematicName());
         }
 
         BlockPos o = placement.getPosition();
