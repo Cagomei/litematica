@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import malilib.util.FileNameUtils;
-import malilib.util.nbt.CompoundData;
-import malilib.util.nbt.NbtUtils;
+import malilib.util.data.tag.DataFileUtils;
+import malilib.util.data.tag.CompoundData;
 import litematica.data.LoadedSchematic;
 import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.old.SchematicaSchematic;

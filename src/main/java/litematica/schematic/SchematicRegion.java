@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import malilib.util.nbt.CompoundData;
+import malilib.util.data.tag.CompoundData;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.schematic.container.BlockContainer;

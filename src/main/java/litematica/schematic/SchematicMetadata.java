@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import malilib.util.data.Constants;
 import malilib.util.game.MinecraftVersion;
-import malilib.util.nbt.CompoundData;
-import malilib.util.nbt.DataView;
+import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.DataView;
 import malilib.util.nbt.NbtUtils;
 import malilib.util.position.Vec3i;
 

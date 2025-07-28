@@ -2,7 +2,7 @@ package litematica.schematic;
 
 import com.google.common.collect.ImmutableMap;
 
-import malilib.util.nbt.CompoundData;
+import malilib.util.data.tag.CompoundData;
 import malilib.util.position.Vec3i;
 
 public interface Schematic

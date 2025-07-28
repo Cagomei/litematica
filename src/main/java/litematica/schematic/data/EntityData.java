@@ -1,6 +1,6 @@
 package litematica.schematic.data;
 
-import malilib.util.nbt.CompoundData;
+import malilib.util.data.tag.CompoundData;
 import malilib.util.position.Vec3d;
 
 public class EntityData
