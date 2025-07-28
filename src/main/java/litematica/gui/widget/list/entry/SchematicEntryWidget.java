@@ -18,6 +18,7 @@ import litematica.gui.SaveConvertSchematicScreen;
 import litematica.gui.util.LitematicaIcons;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.util.SchematicFileUtils;
 
 public class SchematicEntryWidget extends BaseSchematicEntryWidget
 {
@@ -128,7 +129,7 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
         {
             Path file = loadedSchematic.file.get();
 
-            if (loadedSchematic.schematic.read())
+            if (SchematicFileUtils.readFromFile(loadedSchematic.schematic, file))
             {
                 SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
                 manager.getAllPlacementsOfSchematic(loadedSchematic).forEach(manager::markChunksForRebuild);

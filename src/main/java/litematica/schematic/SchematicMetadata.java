@@ -2,11 +2,10 @@ package litematica.schematic;
 
 import javax.annotation.Nullable;
 
-import malilib.util.data.Constants;
-import malilib.util.game.MinecraftVersion;
 import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.DataTypeUtils;
 import malilib.util.data.tag.DataView;
-import malilib.util.nbt.NbtUtils;
+import malilib.util.game.MinecraftVersion;
 import malilib.util.position.Vec3i;
 
 public class SchematicMetadata
@@ -220,7 +219,7 @@ public class SchematicMetadata
         tag.putString("Name", this.schematicName);
         tag.putString("Author", this.author);
         tag.putString("Description", this.description);
-        tag.putCompound("EnclosingSize", NbtUtils.createBlockPosTag(this.enclosingSize));
+        tag.put("EnclosingSize", DataTypeUtils.createVec3iTag(this.enclosingSize));
 
         tag.putLong("TimeCreated", this.timeCreated);
         tag.putLong("TimeModified", this.timeModified);
@@ -252,17 +251,7 @@ public class SchematicMetadata
         this.schematicName = dataIn.getStringOrDefault("Name", "?");
         this.author = dataIn.getStringOrDefault("Author", "?");
         this.description = dataIn.getStringOrDefault("Description", "");
-
-        if (dataIn.contains("EnclosingSize", Constants.NBT.TAG_COMPOUND))
-        {
-            // TODO readOrDefault ZERO
-            Vec3i size = NbtUtils.readBlockPos(dataIn.getCompound("EnclosingSize"));
-
-            if (size != null)
-            {
-                this.enclosingSize = size;
-            }
-        }
+        this.enclosingSize = DataTypeUtils.readVec3iOrDefault(dataIn, "EnclosingSize", Vec3i.ZERO);
 
         this.timeCreated = dataIn.getLongOrDefault("TimeCreated", -1);
         this.timeModified = dataIn.getLongOrDefault("TimeModified", -1);

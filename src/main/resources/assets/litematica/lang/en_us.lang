@@ -690,6 +690,7 @@ litematica.message.error.schematic_read.schematica.schematic.invalid_metadata_ar
 litematica.message.error.schematic_read.sponge.palette.invalid_id=Invalid ID '%s' in the Sponge format schematic block palette
 litematica.message.error.schematic_read.sponge.palette.unknown_block=Unknown block '%s' in the Sponge format schematic block palette
 litematica.message.error.schematic_read.sponge.failed_to_read_blocks=Failed to read the blocks for a Sponge format schematic
+litematica.message.error.schematic_save.failed_with_exception=Schematic saving failed with an exception:\n\n%s
 litematica.message.error.schematic_save_interrupted=Schematic saving interrupted or stopped
 litematica.message.error.schematic_save.missing_container=One of the data containers not found for sub-region '%s'
 litematica.message.error.schematic_save.missing_entity_list=Entity list not found for sub-region '%s'

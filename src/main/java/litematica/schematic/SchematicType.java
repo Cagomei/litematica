@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import malilib.util.FileNameUtils;
@@ -175,8 +174,7 @@ public class SchematicType
 
         if (possibleTypes.isEmpty() == false)
         {
-            @Nullable
-            CompoundData data = NbtUtils.readNbtFromFile(schematicFile);
+            CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(schematicFile);
 
             if (data != null)
             {

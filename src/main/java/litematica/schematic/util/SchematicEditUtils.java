@@ -18,10 +18,10 @@ import net.minecraft.world.World;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.EnabledCondition;
 import malilib.util.game.RayTraceUtils.RayTraceFluidHandling;
-import malilib.util.game.wrap.WorldWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.game.wrap.ItemWrap;
+import malilib.util.game.wrap.WorldWrap;
 import malilib.util.position.BlockPos;
 import malilib.util.position.ChunkPos;
 import malilib.util.position.ChunkSectionPos;
@@ -33,12 +33,13 @@ import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.mixin.IMixinItemBlockSpecial;
 import litematica.render.RenderUtils;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.ISchematicRegion;
-import litematica.schematic.old.SchematicMetadata;
-import litematica.schematic.old.container.ILitematicaBlockStateContainer;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicRegion;
+import litematica.schematic.container.BlockContainer;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SchematicPlacementManager.PlacementPart;
@@ -381,16 +382,17 @@ public class SchematicEditUtils
                     if (part.getBox().contains(pos))
                     {
                         SchematicPlacement placement = part.getPlacement();
-                        ISchematic schematic = placement.getSchematic();
+                        LoadedSchematic loadedSchematic = placement.getLoadedSchematic();
+                        Schematic schematic = loadedSchematic.schematic;
                         String regionName = part.getSubRegionName();
-                        ISchematicRegion region = schematic.getSchematicRegion(regionName);
+                        SchematicRegion region = schematic.getRegions().get(regionName);
 
                         if (region == null)
                         {
                             continue;
                         }
 
-                        ILitematicaBlockStateContainer container = region.getBlockStateContainer();
+                        BlockContainer container = region.getBlockContainer();
                         BlockPos posSchematic = SchematicUtils.getSchematicContainerPositionFromWorldPosition(pos, schematic,
                                                                                                               regionName, placement, placement.getSubRegion(regionName), container);
 
@@ -419,7 +421,7 @@ public class SchematicEditUtils
 
                             metadata.setTotalBlocks(totalBlocks);
                             metadata.setTimeModifiedToNow();
-                            metadata.setModifiedSinceSaved();
+                            loadedSchematic.setModifiedSinceSaved();
 
                             DataManager.getSchematicPlacementManager().markChunkForRebuild(ChunkPos.asLong(cpos.getX(), cpos.getZ()));
 
@@ -451,15 +453,16 @@ public class SchematicEditUtils
                         String regionName = part.getSubRegionName();
                         SchematicPlacement schematicPlacement = part.getPlacement();
                         SubRegionPlacement placement = schematicPlacement.getSubRegion(regionName);
-                        ISchematic schematic = schematicPlacement.getSchematic();
-                        ISchematicRegion region = schematic.getSchematicRegion(regionName);
+                        LoadedSchematic loadedSchematic = schematicPlacement.getLoadedSchematic();
+                        Schematic schematic = loadedSchematic.schematic;
+                        SchematicRegion region = schematic.getRegions().get(regionName);
 
                         if (region == null)
                         {
                             continue;
                         }
 
-                        ILitematicaBlockStateContainer container = region.getBlockStateContainer();
+                        BlockContainer container = region.getBlockContainer();
                         BlockPos posStartSchematic = SchematicUtils.getSchematicContainerPositionFromWorldPosition(posStart, schematic,
                                 regionName, schematicPlacement, placement, container);
                         BlockPos posEndSchematic = SchematicUtils.getSchematicContainerPositionFromWorldPosition(posEnd, schematic,
@@ -507,9 +510,9 @@ public class SchematicEditUtils
                             SchematicMetadata metadata = schematic.getMetadata();
                             metadata.setTotalBlocks(totalBlocks);
                             metadata.setTimeModifiedToNow();
-                            metadata.setModifiedSinceSaved();
+                            loadedSchematic.setModifiedSinceSaved();
 
-                            DataManager.getSchematicPlacementManager().markAllPlacementsOfSchematicForRebuild(schematic);
+                            DataManager.getSchematicPlacementManager().markAllPlacementsOfSchematicForRebuild(loadedSchematic);
 
                             return true;
                         }
@@ -539,7 +542,7 @@ public class SchematicEditUtils
                     {
                         if (replaceAllIdenticalBlocks(part, stateOriginal, stateNew))
                         {
-                            manager.markAllPlacementsOfSchematicForRebuild(part.getPlacement().getSchematic());
+                            manager.markAllPlacementsOfSchematicForRebuild(part.getPlacement().getLoadedSchematic());
                             return true;
                         }
 
@@ -555,7 +558,8 @@ public class SchematicEditUtils
     private static boolean replaceAllIdenticalBlocks(PlacementPart part, IBlockState stateOriginalIn, IBlockState stateNewIn)
     {
         SchematicPlacement schematicPlacement = part.getPlacement();
-        ISchematic schematic = schematicPlacement.getSchematic();
+        LoadedSchematic loadedSchematic = schematicPlacement.getLoadedSchematic();
+        Schematic schematic = loadedSchematic.schematic;
         String selectedRegionName = schematicPlacement.getSelectedSubRegionName();
         List<String> regions = new ArrayList<>();
 
@@ -594,7 +598,7 @@ public class SchematicEditUtils
 
         for (String regionName : regions)
         {
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
+            SchematicRegion region = schematic.getRegions().get(regionName);
 
             if (region == null)
             {
@@ -602,7 +606,7 @@ public class SchematicEditUtils
             }
 
             SubRegionPlacement placement = schematicPlacement.getSubRegion(regionName);
-            ILitematicaBlockStateContainer container = region.getBlockStateContainer();
+            BlockContainer container = region.getBlockContainer();
             Vec3i regionSize = region.getSize();
 
             if (container == null || placement == null || regionSize == null)
@@ -666,7 +670,7 @@ public class SchematicEditUtils
         SchematicMetadata metadata = schematic.getMetadata();
         metadata.setTotalBlocks(totalBlocks);
         metadata.setTimeModifiedToNow();
-        metadata.setModifiedSinceSaved();
+        loadedSchematic.setModifiedSinceSaved();
 
         return true;
     }

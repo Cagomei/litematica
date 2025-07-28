@@ -27,6 +27,7 @@ import litematica.schematic.SchematicType;
 import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.util.SchematicCreationUtils;
+import litematica.schematic.util.SchematicFileUtils;
 import litematica.schematic.util.SchematicPlacingUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
@@ -347,8 +348,9 @@ public class SchematicProject
     {
         SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
         int versionNumber = this.versions.size() + 1;
+        Path outFile = this.directory.resolve(fileName);
 
-        if (schematic.writeToFile(this.directory, fileName, false))
+        if (SchematicFileUtils.writeToFile(schematic, outFile, false))
         {
             SchematicVersion version = new SchematicVersion(this, name, fileName, areaOffset,
                                                             versionNumber, System.currentTimeMillis());

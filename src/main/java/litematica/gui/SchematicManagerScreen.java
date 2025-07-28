@@ -26,6 +26,7 @@ import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.util.SchematicFileUtils;
 
 public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 {
@@ -282,7 +283,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
             return true;
         }
 
-        if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
+        if (SchematicFileUtils.writeToFile(loadedSchematic.schematic, loadedSchematic.file.get(), true))
         {
             loadedSchematic.clearModifiedSinceSaved();
 
@@ -329,7 +330,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
             if (loadedSchematic.file.isPresent())
             {
-                if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
+                if (SchematicFileUtils.writeToFile(loadedSchematic.schematic, loadedSchematic.file.get(), true))
                 {
                     loadedSchematic.clearModifiedSinceSaved();
                     MessageDispatcher.success(2000).translate("litematica.message.info.schematic_manager.description_set");
@@ -358,7 +359,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
             if (loadedSchematic.file.isPresent())
             {
-                if (loadedSchematic.writeToFile(loadedSchematic.file.get(), true))
+                if (SchematicFileUtils.writeToFile(loadedSchematic.schematic, loadedSchematic.file.get(), true))
                 {
                     loadedSchematic.clearModifiedSinceSaved();
                     MessageDispatcher.success(2000).translate("litematica.message.info.schematic_manager.preview_removed");

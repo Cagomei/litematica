@@ -11,6 +11,7 @@ import litematica.data.LoadedSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.util.SchematicFileUtils;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {
@@ -81,8 +82,8 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
     @Override
     protected void saveSchematic()
     {
-        boolean isHoldingShift = isShiftDown();
-        Path file = this.getSchematicFileIfCanSave(isHoldingShift);
+        boolean overwrite = isShiftDown();
+        Path file = this.getSchematicFileIfCanSave(overwrite);
 
         if (file == null)
         {
@@ -90,15 +91,15 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
         }
 
         SchematicType outputType = this.schematicTypeDropdown.getSelectedEntry();
-        Schematic convertedSchematic = this.loadedSchematic.schematic;
+        Schematic schematic = this.loadedSchematic.schematic;
 
-        if (outputType != convertedSchematic.getType())
+        if (outputType != this.loadedSchematic.schematic.getType())
         {
-            convertedSchematic = outputType.createSchematic();
+            schematic = outputType.createSchematic();
 
             try
             {
-                convertedSchematic.read(this.loadedSchematic);
+                schematic.read(this.loadedSchematic);
             }
             catch (Exception e)
             {
@@ -108,7 +109,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
             }
         }
 
-        if (convertedSchematic.writeToFile(file, isHoldingShift))
+        if (SchematicFileUtils.writeToFile(schematic, file, overwrite))
         {
             this.onSchematicSaved(file);
         }

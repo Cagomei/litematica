@@ -12,9 +12,9 @@ import malilib.util.position.BlockRotation;
 import malilib.util.position.Direction;
 import malilib.util.position.LayerRange;
 import malilib.util.position.Vec3i;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.ISchematicRegion;
-import litematica.schematic.old.container.ILitematicaBlockStateContainer;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicRegion;
+import litematica.schematic.container.BlockContainer;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SubRegionPlacement;
 import litematica.util.PositionUtils;
@@ -22,17 +22,18 @@ import litematica.util.PositionUtils;
 public class SchematicUtils
 {
     @Nullable
-    public static BlockPos getSchematicContainerPositionFromWorldPosition(BlockPos worldPos, ISchematic schematic, String regionName,
-                                                                          SchematicPlacement schematicPlacement, SubRegionPlacement regionPlacement, ILitematicaBlockStateContainer container)
+    public static BlockPos getSchematicContainerPositionFromWorldPosition(BlockPos worldPos, Schematic schematic, String regionName,
+                                                                          SchematicPlacement schematicPlacement, SubRegionPlacement regionPlacement,
+                                                                          BlockContainer container)
     {
-        ISchematicRegion region = schematic.getSchematicRegion(regionName);
+        SchematicRegion region = schematic.getRegions().get(regionName);
 
         if (region == null)
         {
             return null;
         }
 
-        BlockPos boxMinRel = getReverseTransformedWorldPosition(worldPos, schematic, schematicPlacement, regionPlacement, region.getSize());
+        BlockPos boxMinRel = getReverseTransformedWorldPosition(worldPos, schematicPlacement, regionPlacement, region.getSize());
 
         if (boxMinRel == null)
         {
@@ -61,8 +62,9 @@ public class SchematicUtils
     }
 
     @Nullable
-    private static BlockPos getReverseTransformedWorldPosition(BlockPos worldPos, ISchematic schematic,
-                                                               SchematicPlacement schematicPlacement, SubRegionPlacement regionPlacement, Vec3i regionSize)
+    private static BlockPos getReverseTransformedWorldPosition(BlockPos worldPos,
+                                                               SchematicPlacement schematicPlacement,
+                                                               SubRegionPlacement regionPlacement, Vec3i regionSize)
     {
         BlockPos origin = schematicPlacement.getPosition();
         BlockPos regionPos = regionPlacement.getPosition();
@@ -106,9 +108,8 @@ public class SchematicUtils
         BlockPos posMinRange = new BlockPos(minX, minY, minZ);
         BlockPos posMaxRange = new BlockPos(maxX, maxY, maxZ);
 
-        ISchematic schematic = schematicPlacement.getSchematic();
-        BlockPos pos1 = getReverseTransformedWorldPosition(posMinRange, schematic, schematicPlacement, placement, regionSize);
-        BlockPos pos2 = getReverseTransformedWorldPosition(posMaxRange, schematic, schematicPlacement, placement, regionSize);
+        BlockPos pos1 = getReverseTransformedWorldPosition(posMinRange, schematicPlacement, placement, regionSize);
+        BlockPos pos2 = getReverseTransformedWorldPosition(posMaxRange, schematicPlacement, placement, regionSize);
 
         if (pos1 == null || pos2 == null)
         {

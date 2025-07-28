@@ -1,13 +1,11 @@
 package litematica.schematic.util;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 
@@ -27,26 +25,27 @@ import malilib.input.ActionResult;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import malilib.util.data.ResultingStringConsumer;
+import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.DataTypeUtils;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
-import malilib.util.nbt.NbtUtils;
 import malilib.util.position.BlockPos;
 import malilib.util.position.IntBoundingBox;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import litematica.Litematica;
 import litematica.data.DataManager;
+import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.SaveSchematicFromAreaScreen;
 import litematica.scheduler.TaskScheduler;
 import litematica.schematic.Schematic;
-import litematica.schematic.old.EntityInfo;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.ISchematicRegion;
-import litematica.schematic.old.LitematicaSchematic;
-import litematica.schematic.old.SchematicMetadata;
-import litematica.schematic.old.SchematicType;
-import litematica.schematic.old.container.ILitematicaBlockStateContainer;
+import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicRegion;
+import litematica.schematic.SchematicType;
+import litematica.schematic.container.BlockContainer;
+import litematica.schematic.data.EntityData;
+import litematica.schematic.data.ScheduledBlockTickData;
 import litematica.schematic.projects.SchematicProject;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
@@ -57,27 +56,6 @@ import litematica.util.PositionUtils;
 
 public class SchematicCreationUtils
 {
-    @Nullable
-    public static <S extends ISchematic> S createFromFile(Path file, Function<Path, S> factory)
-    {
-        S schematic = factory.apply(file);
-
-        if (schematic.readFromFile())
-        {
-            return schematic;
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public static <S extends ISchematic> S createFromSchematic(ISchematic other, Supplier<S> factory)
-    {
-        S schematic = factory.get();
-        schematic.readFrom(other);
-        return schematic;
-    }
-
     public static ActionResult saveSchematic(boolean inMemoryOnly)
     {
         AreaSelectionManager sm = DataManager.getAreaSelectionManager();
@@ -114,7 +92,7 @@ public class SchematicCreationUtils
     public static boolean saveInMemorySchematic(String name, AreaSelection area)
     {
         boolean ignoreEntities = false; // TODO
-        LitematicaSchematic schematic = SchematicCreationUtils.createEmptySchematic(area);
+        Schematic schematic = SchematicCreationUtils.createEmptySchematic(area);
 
         if (schematic != null)
         {
@@ -131,7 +109,7 @@ public class SchematicCreationUtils
     private static void onInMemorySchematicCreated(Schematic schematic, String name)
     {
         setSchematicMetadataOnCreation(schematic, name);
-        SchematicHolder.INSTANCE.addSchematic(schematic, true);
+        SchematicHolder.INSTANCE.addSchematic(new LoadedSchematic(schematic, Optional.empty()), true);
         MessageDispatcher.success("litematica.message.in_memory_schematic_created", name);
     }
 
@@ -148,7 +126,7 @@ public class SchematicCreationUtils
      * Creates an empty schematic with all the maps and lists and containers already created.
      * This is intended to be used for the chunk-wise schematic creation.
      */
-    public static LitematicaSchematic createEmptySchematic(AreaSelection area)
+    public static Schematic createEmptySchematic(AreaSelection area)
     {
         List<SelectionBox> boxes = area.getAllSelectionBoxes();
 
@@ -158,7 +136,7 @@ public class SchematicCreationUtils
             return null;
         }
 
-        LitematicaSchematic schematic = SchematicType.LITEMATICA.createSchematic(null);
+        Schematic schematic = SchematicType.LITEMATICA.createSchematic();
         SchematicMetadata metadata = schematic.getMetadata();
 
         schematic.setAndInitializeSubRegions(boxes, area.getEffectiveOrigin());
@@ -170,11 +148,11 @@ public class SchematicCreationUtils
     }
 
     @Nullable
-    public static LitematicaSchematic createFromWorld(World world,
-                                                      AreaSelection area,
-                                                      boolean ignoreEntities,
-                                                      String author,
-                                                      ResultingStringConsumer feedback)
+    public static Schematic createFromWorld(World world,
+                                            AreaSelection area,
+                                            boolean ignoreEntities,
+                                            String author,
+                                            ResultingStringConsumer feedback)
     {
         List<SelectionBox> boxes = area.getAllSelectionBoxes();
 
@@ -184,13 +162,13 @@ public class SchematicCreationUtils
             return null;
         }
 
-        LitematicaSchematic schematic = SchematicType.LITEMATICA.createSchematic(null);
+        Schematic schematic = SchematicType.LITEMATICA.createSchematic();
         long time = System.currentTimeMillis();
 
         BlockPos origin = area.getEffectiveOrigin();
         schematic.setAndInitializeSubRegions(boxes, origin);
 
-        takeBlocksFromWorld(schematic, world, boxes);
+        long totalBlocks = takeBlocksFromWorld(schematic, world, boxes);
 
         if (ignoreEntities == false)
         {
@@ -199,24 +177,24 @@ public class SchematicCreationUtils
 
         SchematicMetadata metadata = schematic.getMetadata();
         metadata.setAuthor(author);
-        metadata.setName(area.getName());
+        metadata.setSchematicName(area.getName());
         metadata.setTimeCreated(time);
         metadata.setTimeModified(time);
         metadata.setRegionCount(boxes.size());
         metadata.setTotalVolume(PositionUtils.getTotalVolume(boxes));
         metadata.setEnclosingSize(PositionUtils.getEnclosingAreaSize(boxes));
-        metadata.setTotalBlocks(schematic.getTotalBlocksReadFromWorld());
+        metadata.setTotalBlocks(totalBlocks);
 
         return schematic;
     }
 
-    private static void takeEntitiesFromWorld(LitematicaSchematic schematic, World world, List<SelectionBox> boxes)
+    private static void takeEntitiesFromWorld(Schematic schematic, World world, List<SelectionBox> boxes)
     {
         for (SelectionBox box : boxes)
         {
             String regionName = box.getName();
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
-            List<EntityInfo> schematicEntityList = region != null ? region.getEntityList() : null;
+            SchematicRegion region = schematic.getRegions().get(regionName);
+            List<EntityData> schematicEntityList = region != null ? region.getEntityList() : null;
 
             if (schematicEntityList == null)
             {
@@ -226,7 +204,7 @@ public class SchematicCreationUtils
 
             AxisAlignedBB bb = PositionUtils.createEnclosingAABB(box.getCorner1(), box.getCorner2());
             BlockPos regionPosAbs = box.getCorner1();
-            List<EntityInfo> list = new ArrayList<>();
+            List<EntityData> list = new ArrayList<>();
             List<Entity> entities = world.getEntitiesInAABBexcluding(null, bb, null);
 
             for (Entity entity : entities)
@@ -238,8 +216,10 @@ public class SchematicCreationUtils
                     Vec3d posVec = new Vec3d(EntityWrap.getX(entity) - regionPosAbs.getX(),
                                              EntityWrap.getY(entity) - regionPosAbs.getY(),
                                              EntityWrap.getZ(entity) - regionPosAbs.getZ());
-                    NbtUtils.writeVec3dToListTag(posVec, tag);
-                    list.add(new EntityInfo(posVec, tag));
+
+                    CompoundData data = tag;
+                    DataTypeUtils.writeVec3dToListTag(data, posVec);
+                    list.add(new EntityData(posVec, data));
                 }
             }
 
@@ -247,7 +227,7 @@ public class SchematicCreationUtils
         }
     }
 
-    public static void takeEntitiesFromWorldWithinChunk(ISchematic schematic,
+    public static void takeEntitiesFromWorldWithinChunk(Schematic schematic,
                                                         World world,
                                                         ImmutableMap<String, IntBoundingBox> volumes,
                                                         ImmutableMap<String, SelectionBox> boxes,
@@ -257,8 +237,8 @@ public class SchematicCreationUtils
         {
             String regionName = entry.getKey();
             CornerDefinedBox box = boxes.get(regionName);
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
-            List<EntityInfo> schematicEntityList = region != null ? region.getEntityList() : null;
+            SchematicRegion region = schematic.getRegions().get(regionName);
+            List<EntityData> schematicEntityList = region != null ? region.getEntityList() : null;
 
             if (box == null || schematicEntityList == null)
             {
@@ -287,8 +267,10 @@ public class SchematicCreationUtils
                         Vec3d posVec = new Vec3d(EntityWrap.getX(entity) - regionPosAbs.getX(),
                                                  EntityWrap.getY(entity) - regionPosAbs.getY(),
                                                  EntityWrap.getZ(entity) - regionPosAbs.getZ());
-                        NbtUtils.writeVec3dToListTag(posVec, tag);
-                        schematicEntityList.add(new EntityInfo(posVec, tag));
+
+                        CompoundData data = tag;
+                        DataTypeUtils.writeVec3dToListTag(data, posVec);
+                        schematicEntityList.add(new EntityData(posVec, data));
                         existingEntities.add(uuid);
                     }
                 }
@@ -296,7 +278,7 @@ public class SchematicCreationUtils
         }
     }
 
-    private static void takeBlocksFromWorld(LitematicaSchematic schematic, World world, List<SelectionBox> boxes)
+    private static long takeBlocksFromWorld(Schematic schematic, World world, List<SelectionBox> boxes)
     {
         BlockPos.MutableBlockPos posMutable = new BlockPos.MutableBlockPos(0, 0, 0);
         long totalBlocks = 0;
@@ -304,10 +286,10 @@ public class SchematicCreationUtils
         for (SelectionBox box : boxes)
         {
             String regionName = box.getName();
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
-            ILitematicaBlockStateContainer container = region != null ? region.getBlockStateContainer() : null;
-            Map<BlockPos, NBTTagCompound> blockEntityMap = region != null ? region.getBlockEntityMap() : null;
-            Map<BlockPos, NextTickListEntry> tickMap = region != null ? region.getBlockTickMap() : null;
+            SchematicRegion region = schematic.getRegions().get(regionName);
+            BlockContainer container = region != null ? region.getBlockContainer() : null;
+            Map<BlockPos, CompoundData> blockEntityMap = region != null ? region.getBlockEntityMap() : null;
+            Map<BlockPos, ScheduledBlockTickData> tickMap = region != null ? region.getBlockTickMap() : null;
 
             if (container == null || blockEntityMap == null || tickMap == null)
             {
@@ -352,8 +334,10 @@ public class SchematicCreationUtils
                                 // TODO Add a TileEntity NBT cache from the Chunk packets, to get the original synced data (too)
                                 BlockPos pos = new BlockPos(x, y, z);
                                 NBTTagCompound tag = te.writeToNBT(new NBTTagCompound());
-                                NbtUtils.putVec3i(tag, pos);
-                                blockEntityMap.put(pos, tag);
+
+                                CompoundData data = tag;
+                                DataTypeUtils.putVec3i(data, pos);
+                                blockEntityMap.put(pos, data);
                             }
                         }
                     }
@@ -384,21 +368,24 @@ public class SchematicCreationUtils
                                     entry.position.getX() - minCorner.getX(),
                                     entry.position.getY() - minCorner.getY(),
                                     entry.position.getZ() - minCorner.getZ());
-                            NextTickListEntry newEntry = new NextTickListEntry(posRelative, entry.getBlock());
-                            newEntry.setPriority(entry.priority);
-                            newEntry.setScheduledTime(entry.scheduledTime - currentTime);
 
-                            tickMap.put(posRelative, newEntry);
+                            long delay = entry.scheduledTime - currentTime;
+                            ScheduledBlockTickData tickData = new ScheduledBlockTickData(posRelative,
+                                                                                         entry.getBlock(),
+                                                                                         entry.priority,
+                                                                                         delay);
+
+                            tickMap.put(posRelative, tickData);
                         }
                     }
                 }
             }
         }
 
-        schematic.setTotalBlocksReadFromWorld(totalBlocks);
+        return totalBlocks;
     }
 
-    public static void takeBlocksFromWorldWithinChunk(ISchematic schematic,
+    public static void takeBlocksFromWorldWithinChunk(Schematic schematic,
                                                       World world,
                                                       ImmutableMap<String, IntBoundingBox> volumes,
                                                       ImmutableMap<String, SelectionBox> boxes)
@@ -409,7 +396,7 @@ public class SchematicCreationUtils
         for (Map.Entry<String, IntBoundingBox> volumeEntry : volumes.entrySet())
         {
             String regionName = volumeEntry.getKey();
-            ISchematicRegion region = schematic.getSchematicRegion(regionName);
+            SchematicRegion region = schematic.getRegions().get(regionName);
             IntBoundingBox bb = volumeEntry.getValue();
             CornerDefinedBox box = boxes.get(regionName);
 
@@ -419,9 +406,9 @@ public class SchematicCreationUtils
                 continue;
             }
 
-            ILitematicaBlockStateContainer container = region.getBlockStateContainer();
-            Map<BlockPos, NBTTagCompound> blockEntityMap = region.getBlockEntityMap();
-            Map<BlockPos, NextTickListEntry> tickMap = region.getBlockTickMap();
+            BlockContainer container = region.getBlockContainer();
+            Map<BlockPos, CompoundData> blockEntityMap = region.getBlockEntityMap();
+            Map<BlockPos, ScheduledBlockTickData> tickMap = region.getBlockTickMap();
 
             if (container == null || blockEntityMap == null || tickMap == null)
             {
@@ -469,8 +456,10 @@ public class SchematicCreationUtils
                                 // TODO Add a TileEntity NBT cache from the Chunk packets, to get the original synced data (too)
                                 BlockPos pos = new BlockPos(x, y, z);
                                 NBTTagCompound tag = te.writeToNBT(new NBTTagCompound());
-                                NbtUtils.putVec3i(tag, pos);
-                                blockEntityMap.put(pos, tag);
+
+                                CompoundData data = tag;
+                                DataTypeUtils.putVec3i(data, pos);
+                                blockEntityMap.put(pos, data);
                             }
                         }
                     }
@@ -501,11 +490,14 @@ public class SchematicCreationUtils
                                     entry.position.getX() - minCorner.getX(),
                                     entry.position.getY() - minCorner.getY(),
                                     entry.position.getZ() - minCorner.getZ());
-                            NextTickListEntry newEntry = new NextTickListEntry(posRelative, entry.getBlock());
-                            newEntry.setPriority(entry.priority);
-                            newEntry.setScheduledTime(entry.scheduledTime - currentTime);
 
-                            tickMap.put(posRelative, newEntry);
+                            long delay = entry.scheduledTime - currentTime;
+                            ScheduledBlockTickData tickData = new ScheduledBlockTickData(posRelative,
+                                                                                         entry.getBlock(),
+                                                                                         entry.priority,
+                                                                                         delay);
+
+                            tickMap.put(posRelative, tickData);
                         }
                     }
                 }
