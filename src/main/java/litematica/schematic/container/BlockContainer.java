@@ -2,10 +2,9 @@ package litematica.schematic.container;
 
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
-
 import malilib.util.data.palette.Palette;
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 
 public interface BlockContainer
 {
@@ -22,24 +21,24 @@ public interface BlockContainer
     /**
      * @return the block state count per unique state
      */
-    Object2LongOpenHashMap<IBlockState> getBlockCountsMap();
+    Object2LongOpenHashMap<BlockState> getBlockCountsMap();
 
     /**
      * @return the block state palette used in this container
      */
-    Palette<IBlockState> getPalette();
+    Palette<BlockState> getPalette();
 
     /**
      * @return the block state at the given position in the container.
      * If the position is out of bounds, then AIR is returned.
      */
-    IBlockState getBlockState(int x, int y, int z);
+    BlockState getBlockState(int x, int y, int z);
 
     /**
      * Set the block state in the given position.
      * If the position is out of bounds, then nothing happens.
      */
-    void setBlockState(int x, int y, int z, IBlockState state);
+    void setBlockState(int x, int y, int z, BlockState state);
 
     /**
      * Creates and returns a copy of this block container

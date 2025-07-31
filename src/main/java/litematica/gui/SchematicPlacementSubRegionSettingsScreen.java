@@ -18,7 +18,8 @@ import malilib.util.position.BlockRotation;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
-import litematica.schematic.old.ISchematic;
+import litematica.data.LoadedSchematic;
+import litematica.schematic.Schematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -53,15 +54,16 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
         this.subRegion = subRegion;
         this.manager = DataManager.getSchematicPlacementManager();
 
-        ISchematic schematic = placement.getSchematic();
-        Path file = schematic.getFile();
+        LoadedSchematic loadedSchematic = placement.getLoadedSchematic();
+        Schematic schematic = loadedSchematic.schematic;
+        Path file = loadedSchematic.file.orElse(null);
         String fileName = file != null ? file.getFileName().toString() : "-";
 
         this.displayNameLabel   = new LabelWidget("litematica.label.schematic_placement_sub_region_settings.display_name");
         this.originLabel        = new LabelWidget("litematica.label.schematic_placement_sub_region_settings.region_position");
         this.placementNameLabel = new LabelWidget("litematica.label.schematic_placement_sub_region_settings.placement_name", placement.getName());
         this.regionNameLabel    = new LabelWidget("litematica.label.schematic_placement_sub_region_settings.region_name", subRegion.getName());
-        this.schematicNameLabel = new LabelWidget("litematica.label.schematic_placement_settings.schematic_name", schematic.getMetadata().getName(), fileName);
+        this.schematicNameLabel = new LabelWidget("litematica.label.schematic_placement_settings.schematic_name", schematic.getMetadata().getSchematicName(), fileName);
         this.schematicNameLabel.setLineHeight(12);
 
         this.nameTextField = new BaseTextFieldWidget(300, 16, subRegion.getDisplayName());

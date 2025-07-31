@@ -1,7 +1,5 @@
 package litematica.schematic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,15 +15,23 @@ public class SchematicRegion
     protected final BlockPos pos;
     protected final Vec3i size;
     protected final BlockContainer blockContainer;
-    protected Map<BlockPos, CompoundData> blockEntityData = new HashMap<>();
-    protected Map<BlockPos, ScheduledBlockTickData> blockTickData = new HashMap<>();
-    protected List<EntityData> entityData = new ArrayList<>();
+    protected final Map<BlockPos, CompoundData> blockEntityData;
+    protected final Map<BlockPos, ScheduledBlockTickData> blockTickData;
+    protected final List<EntityData> entityData;
 
-    public SchematicRegion(BlockPos pos, Vec3i size, BlockContainer blockContainer)
+    public SchematicRegion(BlockPos pos,
+                           Vec3i size,
+                           BlockContainer blockContainer,
+                           Map<BlockPos, CompoundData> blockEntityData,
+                           Map<BlockPos, ScheduledBlockTickData> blockTickData,
+                           List<EntityData> entityData)
     {
         this.pos = pos;
         this.size = size;
         this.blockContainer = blockContainer;
+        this.blockEntityData = blockEntityData;
+        this.blockTickData = blockTickData;
+        this.entityData = entityData;
     }
 
     /**

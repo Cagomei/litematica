@@ -6,6 +6,7 @@ import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataTypeUtils;
 import malilib.util.data.tag.DataView;
 import malilib.util.game.MinecraftVersion;
+import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 
 public class SchematicMetadata
@@ -14,15 +15,17 @@ public class SchematicMetadata
     protected String author = "";
     protected String description = "";
     protected Vec3i enclosingSize = Vec3i.ZERO;
+    protected BlockPos originalOrigin = BlockPos.ORIGIN;
     protected long timeCreated;
     protected long timeModified;
     protected MinecraftVersion minecraftVersion = MinecraftVersion.MC_UNKNOWN;
     protected int schematicVersion;
     protected int regionCount;
     protected int entityCount;
-    protected int blockEntityCount;
     protected long totalVolume = -1;
     protected long totalBlocks = -1;
+    protected long blockEntityCount;
+    protected long blockTickCount;
     @Nullable
     protected int[] thumbnailPixelData;
 
@@ -52,6 +55,11 @@ public class SchematicMetadata
         return this.regionCount;
     }
 
+    public int getEntityCount()
+    {
+        return this.entityCount;
+    }
+
     public long getTotalVolume()
     {
         return this.totalVolume;
@@ -62,14 +70,14 @@ public class SchematicMetadata
         return this.totalBlocks;
     }
 
-    public int getEntityCount()
-    {
-        return this.entityCount;
-    }
-
-    public int getBlockEntityCount()
+    public long getBlockEntityCount()
     {
         return this.blockEntityCount;
+    }
+
+    public long getBlockTickCount()
+    {
+        return this.blockTickCount;
     }
 
     public Vec3i getEnclosingSize()
@@ -95,6 +103,11 @@ public class SchematicMetadata
     public MinecraftVersion getMinecraftVersion()
     {
         return this.minecraftVersion;
+    }
+
+    public BlockPos getOriginalOrigin()
+    {
+        return this.originalOrigin;
     }
 
     public boolean wasModified()
@@ -132,9 +145,14 @@ public class SchematicMetadata
         this.entityCount = entityCount;
     }
 
-    public void setBlockEntityCount(int blockEntityCount)
+    public void setBlockEntityCount(long blockEntityCount)
     {
         this.blockEntityCount = blockEntityCount;
+    }
+
+    public void setBlockTickCount(long blockTickCount)
+    {
+        this.blockTickCount = blockTickCount;
     }
 
     public void setTotalVolume(long totalVolume)
@@ -189,17 +207,30 @@ public class SchematicMetadata
         this.minecraftVersion = minecraftVersion;
     }
 
+    public void setOriginalOrigin(BlockPos originalOrigin)
+    {
+        this.originalOrigin = originalOrigin;
+    }
+
     public void copyFrom(SchematicMetadata other)
     {
         this.schematicName = other.schematicName;
         this.author = other.author;
         this.description = other.description;
         this.enclosingSize = other.enclosingSize;
+
         this.timeCreated = other.timeCreated;
         this.timeModified = other.timeModified;
+        this.schematicVersion = other.schematicVersion;
+        this.minecraftVersion = other.minecraftVersion;
+
         this.regionCount = other.regionCount;
+        this.entityCount = other.entityCount;
         this.totalVolume = other.totalVolume;
         this.totalBlocks = other.totalBlocks;
+        this.blockEntityCount = other.blockEntityCount;
+        this.blockTickCount = other.blockTickCount;
+        this.originalOrigin = other.originalOrigin;
 
         if (other.thumbnailPixelData != null)
         {
@@ -234,9 +265,11 @@ public class SchematicMetadata
 
         tag.putInt("RegionCount", this.regionCount);
         tag.putInt("EntityCount", this.entityCount);
-        tag.putInt("BlockEntityCount", this.blockEntityCount);
         tag.putLong("TotalVolume", this.totalVolume);
         tag.putLong("TotalBlocks", this.totalBlocks);
+        tag.putLong("BlockEntityCount", this.blockEntityCount);
+        tag.putLong("BlockTickCount", this.blockTickCount);
+        tag.put("Origin", DataTypeUtils.createVec3iTag(this.originalOrigin));
 
         if (this.thumbnailPixelData != null)
         {
@@ -262,10 +295,13 @@ public class SchematicMetadata
 
         this.regionCount = dataIn.getIntOrDefault("RegionCount", -1);
         this.entityCount = dataIn.getIntOrDefault("EntityCount", -1);
-        this.blockEntityCount = dataIn.getIntOrDefault("BlockEntityCount", -1);
         this.totalVolume = dataIn.getLongOrDefault("TotalVolume", -1);
         this.totalBlocks = dataIn.getLongOrDefault("TotalBlocks", -1);
+        this.blockEntityCount = dataIn.getLongOrDefault("BlockEntityCount", -1);    // FIXME was this already saved in public builds? If so then it should be read from an int tag as a backup
+        this.blockTickCount = dataIn.getLongOrDefault("BlockTickCount", -1);
 
         this.thumbnailPixelData = dataIn.getIntArrayOrDefault("PreviewImageData", null);
+        BlockPos origin = DataTypeUtils.readBlockPos(dataIn.getCompound("Origin"));
+        this.originalOrigin = origin != null ? origin : BlockPos.ORIGIN;
     }
 }

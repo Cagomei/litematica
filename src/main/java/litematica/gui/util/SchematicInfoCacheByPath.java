@@ -2,6 +2,7 @@ package litematica.gui.util;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -11,9 +12,10 @@ import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import malilib.util.nbt.NbtUtils;
 import litematica.Reference;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.SchematicMetadata;
-import litematica.schematic.old.SchematicType;
+import litematica.data.LoadedSchematic;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicType;
 
 public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
 {
@@ -24,13 +26,15 @@ public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
         // TODO Use a partial NBT read method to only read the metadata tag
         // TODO (that's only beneficial if it's stored before the bulk schematic data in the stream)
         NBTTagCompound tag = NbtUtils.readNbtFromFile(file);
+        // FIXME
 
         if (tag != null)
         {
-            ISchematic schematic = SchematicType.tryCreateSchematicFrom(file, tag);
+            Optional<LoadedSchematic> loadedSchematicOpt = SchematicType.tryLoadSchematic(file);
 
-            if (schematic != null)
+            if (loadedSchematicOpt.isPresent())
             {
+                Schematic schematic = loadedSchematicOpt.get().schematic;
                 SchematicMetadata metadata = schematic.getMetadata();
                 String filePath = FileNameUtils.generateSimpleSafeFileName(file.toAbsolutePath().toString().toLowerCase(Locale.ROOT));
                 Identifier iconName = new Identifier(Reference.MOD_ID, filePath);

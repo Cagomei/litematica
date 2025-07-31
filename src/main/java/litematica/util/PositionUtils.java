@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -473,6 +474,52 @@ public class PositionUtils
         }
 
         return set;
+    }
+
+    public static Set<ChunkPos> getTouchedChunksForBoxesAsChunkPos(Collection<? extends CornerDefinedBox> boxes)
+    {
+        Set<ChunkPos> set = new HashSet<>();
+
+        for (CornerDefinedBox box : boxes)
+        {
+            final int boxXMin = Math.min(box.getCorner1().getX(), box.getCorner2().getX()) >> 4;
+            final int boxZMin = Math.min(box.getCorner1().getZ(), box.getCorner2().getZ()) >> 4;
+            final int boxXMax = Math.max(box.getCorner1().getX(), box.getCorner2().getX()) >> 4;
+            final int boxZMax = Math.max(box.getCorner1().getZ(), box.getCorner2().getZ()) >> 4;
+
+            for (int cz = boxZMin; cz <= boxZMax; ++cz)
+            {
+                for (int cx = boxXMin; cx <= boxXMax; ++cx)
+                {
+                    set.add(new ChunkPos(cx, cz));
+                }
+            }
+        }
+
+        return set;
+    }
+
+    public static ArrayListMultimap<ChunkPos, SelectionBox> getPerChunkBoxes(Collection<SelectionBox> boxes)
+    {
+        ArrayListMultimap<ChunkPos, SelectionBox> map = ArrayListMultimap.create();
+
+        for (SelectionBox box : boxes)
+        {
+            final int boxXMin = Math.min(box.getCorner1().getX(), box.getCorner2().getX()) >> 4;
+            final int boxZMin = Math.min(box.getCorner1().getZ(), box.getCorner2().getZ()) >> 4;
+            final int boxXMax = Math.max(box.getCorner1().getX(), box.getCorner2().getX()) >> 4;
+            final int boxZMax = Math.max(box.getCorner1().getZ(), box.getCorner2().getZ()) >> 4;
+
+            for (int cz = boxZMin; cz <= boxZMax; ++cz)
+            {
+                for (int cx = boxXMin; cx <= boxXMax; ++cx)
+                {
+                    map.put(new ChunkPos(cx, cz), box);
+                }
+            }
+        }
+
+        return map;
     }
 
     @Nullable

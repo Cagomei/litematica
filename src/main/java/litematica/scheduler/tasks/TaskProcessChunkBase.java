@@ -108,6 +108,7 @@ public abstract class TaskProcessChunkBase extends TaskBase
         this.requiredChunks.clear();
         PositionUtils.getPerChunkBoxes(allBoxes, this.boxesInChunks::put);
         this.requiredChunks.addAll(this.boxesInChunks.keySet());
+        this.updateInfoHudLinesMissingChunks();
     }
 
     protected void addPerChunkBoxes(Collection<? extends CornerDefinedBox> allBoxes, LayerRange range)
@@ -122,10 +123,16 @@ public abstract class TaskProcessChunkBase extends TaskBase
         this.requiredChunks.clear();
         PositionUtils.getLayerRangeClampedPerChunkBoxes(allBoxes, range, this.boxesInChunks::put);
         this.requiredChunks.addAll(this.boxesInChunks.keySet());
+        this.updateInfoHudLinesMissingChunks();
     }
 
     protected List<IntBoundingBox> getBoxesInChunk(ChunkPos pos)
     {
         return this.boxesInChunks.get(pos);
+    }
+
+    protected void updateInfoHudLinesMissingChunks()
+    {
+        this.updateInfoHudLinesMissingChunks(this.requiredChunks);
     }
 }
