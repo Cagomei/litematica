@@ -20,20 +20,19 @@ import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
 import litematica.scheduler.TaskScheduler;
+import litematica.scheduler.task.LocalCreateSchematicTask;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
+import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.SchematicType;
-import litematica.schematic.old.LitematicaSchematic;
 import litematica.schematic.placement.SchematicPlacement;
-import litematica.schematic.util.SchematicCreationUtils;
 import litematica.schematic.util.SchematicFileUtils;
 import litematica.schematic.util.SchematicPlacingUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.AreaSelectionSimple;
 import litematica.selection.AreaSelectionType;
-import litematica.task.CreateSchematicTask;
 import litematica.util.ToolUtils;
 
 public class SchematicProject
@@ -210,7 +209,7 @@ public class SchematicProject
             {
                 this.removeCurrentPlacement();
 
-                Optional<LoadedSchematic> opt = SchematicType.tryLoadSchematic(this.directory.resolve(version.getFileName()));
+                Optional<LoadedSchematic> opt = LoadedSchematic.tryLoadSchematic(this.directory.resolve(version.getFileName()));
 
                 if (opt.isPresent())
                 {
@@ -323,14 +322,13 @@ public class SchematicProject
     {
         if (this.checkCanSaveOrPrintError())
         {
-            AreaSelection selection = this.getSelection();
+            AreaSelection selection = this.getSelection().copy();
             BlockPos areaOffset = selection.getEffectiveOrigin().subtract(this.origin);
 
             // TODO add a project level option to select the schematic type? Or per-version?
-            Schematic schematic = SchematicType.LITEMATICA.createSchematic();
-            String fileName = this.getNextFileName(schematic.getType());
-            CreateSchematicTask task = new CreateSchematicTask(schematic, selection.copy(), false,
-                                                               () -> this.writeSchematicToFileAndAddVersion(schematic, fileName, name, areaOffset));
+            String fileName = this.getNextFileName(SchematicType.LITEMATICA);
+            LocalCreateSchematicTask task = new LocalCreateSchematicTask(selection, new SchematicSaveSettings(),
+                                                sch -> this.writeSchematicToFileAndAddVersion(sch, fileName, name, areaOffset));
 
             TaskScheduler.getServerInstanceIfExistsOrClient().scheduleTask(task, 2);
 
@@ -346,7 +344,6 @@ public class SchematicProject
 
     protected void writeSchematicToFileAndAddVersion(Schematic schematic, String fileName, String name, Vec3i areaOffset)
     {
-        SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
         int versionNumber = this.versions.size() + 1;
         Path outFile = this.directory.resolve(fileName);
 

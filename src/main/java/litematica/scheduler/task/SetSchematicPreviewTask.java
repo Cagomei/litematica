@@ -1,4 +1,4 @@
-package litematica.scheduler.tasks;
+package litematica.scheduler.task;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -10,9 +10,12 @@ import net.minecraft.util.ScreenShotHelper;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.render.infohud.InfoHud;
+import litematica.scheduler.tasks.TaskBase;
+import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
+import litematica.schematic.util.SchematicFileUtils;
 
 /**
  * This task doesn't actually do/run anything on its own.
@@ -26,13 +29,16 @@ import litematica.schematic.SchematicMetadata;
 public class SetSchematicPreviewTask extends TaskBase
 {
     protected final LoadedSchematic loadedSchematic;
+    protected final Schematic schematic;
 
     public SetSchematicPreviewTask(LoadedSchematic loadedSchematic)
     {
         this.loadedSchematic = loadedSchematic;
+        this.schematic = loadedSchematic.schematic;
         this.name = StringUtils.translate("litematica.label.task.set_schematic_preview",
-                                          loadedSchematic.schematic.getMetadata().getSchematicName());
+                                          this.schematic.getMetadata().getSchematicName());
         this.infoHudLines.add(this.name);
+
         InfoHud.getInstance().addInfoHudRenderer(this, true);
     }
 
@@ -66,14 +72,14 @@ public class SetSchematicPreviewTask extends TaskBase
 
             int[] pixels = scaled.getRGB(0, 0, previewDimensions, previewDimensions, null, 0, scaled.getWidth());
 
-            SchematicMetadata meta = this.loadedSchematic.schematic.getMetadata();
+            SchematicMetadata meta = this.schematic.getMetadata();
             meta.setPreviewImagePixelData(pixels);
             meta.setTimeModifiedToNowIfNotRecentlyCreated();
             this.loadedSchematic.setModifiedSinceSaved();
 
             if (this.loadedSchematic.file.isPresent())
             {
-                this.loadedSchematic.writeToFile(this.loadedSchematic.file.get(), true);
+                SchematicFileUtils.writeToFile(this.schematic, this.loadedSchematic.file.get(), true);
                 this.loadedSchematic.clearModifiedSinceSaved();
             }
 
@@ -82,7 +88,7 @@ public class SetSchematicPreviewTask extends TaskBase
         catch (Exception e)
         {
             MessageDispatcher.error().console(e).translate("litematica.message.error.schematic_preview_set_failed",
-                                                           this.loadedSchematic.schematic.getMetadata().getSchematicName());
+                                                           this.schematic.getMetadata().getSchematicName());
         }
 
         this.finished = true;

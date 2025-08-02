@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,7 +27,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 
 import malilib.overlay.message.MessageDispatcher;
-import malilib.util.data.SimpleBooleanStorage;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataTypeUtils;
 import malilib.util.game.wrap.EntityWrap;
@@ -40,12 +39,13 @@ import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
 import litematica.Litematica;
+import litematica.mixin.access.NextTickListEntryMixin;
 import litematica.render.infohud.InfoHud;
 import litematica.scheduler.tasks.TaskProcessChunkBase;
+import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicRegion;
-import litematica.schematic.SchematicType;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
 import litematica.schematic.data.ScheduledBlockTickData;
@@ -56,7 +56,7 @@ import litematica.util.PositionUtils;
 public class LocalCreateSchematicTask extends TaskProcessChunkBase
 {
     protected final AreaSelection area;
-    protected final SaveSettings settings;
+    protected final SchematicSaveSettings settings;
     protected final BlockPos origin;
     protected final ImmutableMap<String, SelectionBox> subRegions;
     protected final ArrayListMultimap<ChunkPos, SelectionBox> selectionBoxesPerChunk;
@@ -68,11 +68,11 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
     protected final Consumer<Schematic> schematicListener;
     protected long totalBlocks;
     protected int totalEntities;
-    protected int totalBlockEntities;
+    protected long totalBlockEntities;
     protected long totalBlockTicks;
 
     public LocalCreateSchematicTask(AreaSelection area,
-                                    SaveSettings settings,
+                                    SchematicSaveSettings settings,
                                     Consumer<Schematic> schematicListener)
     {
         super("litematica.hud.task_name.local_create_schematic");
@@ -118,31 +118,51 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
         String regionName = selectionBox.getName();
         BlockPos minCorner = malilib.util.position.PositionUtils.getMinCorner(selectionBox.getCorner1(), selectionBox.getCorner2());
-        this.readBlockData(cPos, regionName, box, minCorner, this.world);
+        BlockContainer container = this.blockContainers.computeIfAbsent(regionName, key -> this.createBlockContainer(selectionBox));
+        Map<BlockPos, CompoundData> blockEntityMap = this.blockEntityMaps.computeIfAbsent(regionName, key -> new HashMap<>());
+
+        this.readBlockData(cPos, container, blockEntityMap, box, minCorner, this.settings, this.world);
 
         if (this.settings.saveScheduledBlockTicks.getBooleanValue())
         {
-            this.readBlockTickData(regionName, box, minCorner, this.world);
+            Map<BlockPos, ScheduledBlockTickData> blockTickMap = this.blockTickMaps.computeIfAbsent(regionName, key -> new HashMap<>());
+            this.totalBlockTicks += this.readBlockTickData(blockTickMap, box, minCorner, this.world, this.world.getTotalWorldTime());
         }
 
         if (this.settings.saveEntities.getBooleanValue())
         {
-            this.readEntityData(regionName, box, selectionBox.getCorner1(), this.world);
+            List<EntityData> entityList = this.entityLists.computeIfAbsent(regionName, key -> new ArrayList<>());
+            this.totalEntities += this.readEntityData(entityList, this.existingEntities, box, selectionBox.getCorner1(), this.world);
         }
     }
 
-    protected void readBlockData(ChunkPos cPos, String regionName, IntBoundingBox box, BlockPos minCorner, World world)
+    protected BlockContainer createBlockContainer(SelectionBox selectionBox)
     {
-        boolean saveBlocks = this.settings.saveBlocks.getBooleanValue();
-        boolean saveBlockEntities = this.settings.saveBlockEntities.getBooleanValue();
+        Vec3i containerSize = PositionUtils.getAbsoluteAreaSize(selectionBox);
+        return this.createBlockContainer(containerSize);
+    }
+
+    protected BlockContainer createBlockContainer(Vec3i containerSize)
+    {
+        return this.settings.schematicType.createContainer(containerSize);
+    }
+
+    protected void readBlockData(ChunkPos cPos,
+                                 BlockContainer container,
+                                 Map<BlockPos, CompoundData> blockEntityMapOut,
+                                 IntBoundingBox box,
+                                 BlockPos minCorner,
+                                 SchematicSaveSettings settings,
+                                 World world)
+    {
+        boolean saveBlocks = settings.saveBlocks.getBooleanValue();
+        boolean saveBlockEntities = settings.saveBlockEntities.getBooleanValue();
 
         if (saveBlocks == false && saveBlockEntities == false)
         {
             return;
         }
 
-        BlockContainer container = this.blockContainers.computeIfAbsent(regionName, key -> null); // TODO
-        Map<BlockPos, CompoundData> blockEntityMap = this.blockEntityMaps.computeIfAbsent(regionName, key -> new HashMap<>());
         Chunk chunk = world.getChunk(cPos.x, cPos.z);
         MutBlockPos mutPos = new MutBlockPos();
 
@@ -174,29 +194,33 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
                         this.totalBlocks++;
                     }
 
-                    if (saveBlockEntities && state.getBlock().hasTileEntity())
+                    if (saveBlockEntities == false || state.getBlock().hasTileEntity() == false)
                     {
-                        TileEntity te = chunk.getTileEntity(mutPos, EnumCreateEntityType.CHECK);
+                        continue;
+                    }
 
-                        if (te != null)
-                        {
-                            try
-                            {
-                                NBTTagCompound nbt = new NBTTagCompound();
-                                te.writeToNBT(nbt);
+                    TileEntity te = chunk.getTileEntity(mutPos, EnumCreateEntityType.CHECK);
 
-                                BlockPos relPos = new BlockPos(relX, relY, relZ);
-                                CompoundData data = DataTypeUtils.fromVanillaCompound(nbt);
-                                DataTypeUtils.putVec3i(data, relPos);
+                    if (te == null)
+                    {
+                        continue;
+                    }
 
-                                blockEntityMap.put(relPos, data);
-                                this.totalBlockEntities++;
-                            }
-                            catch (Exception e)
-                            {
-                                Litematica.LOGGER.warn("Failed to save BlockEntity {} at {}", te, mutPos);
-                            }
-                        }
+                    try
+                    {
+                        NBTTagCompound nbt = new NBTTagCompound();
+                        te.writeToNBT(nbt);
+
+                        BlockPos relPos = new BlockPos(relX, relY, relZ);
+                        CompoundData data = DataTypeUtils.fromVanillaCompound(nbt);
+                        DataTypeUtils.putVec3i(data, relPos);
+
+                        blockEntityMapOut.put(relPos, data);
+                        this.totalBlockEntities++;
+                    }
+                    catch (Exception e)
+                    {
+                        Litematica.LOGGER.warn("Failed to save BlockEntity {} at {}", te, mutPos);
                     }
                 }
             }
@@ -224,67 +248,78 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         return true;
     }
 
-    protected void readBlockTickData(String regionName, IntBoundingBox box, BlockPos minCorner, World world)
+    protected long readBlockTickData(Map<BlockPos, ScheduledBlockTickData> blockTickMap,
+                                     IntBoundingBox box,
+                                     BlockPos regionMinCorner,
+                                     World world,
+                                     long currentWorldTick)
     {
-        Map<BlockPos, ScheduledBlockTickData> blockTickMap = this.blockTickMaps.computeIfAbsent(regionName, key -> new HashMap<>());
+        long blockTickCount = 0;
 
-        if (world instanceof WorldServer)
+        if ((world instanceof WorldServer) == false)
         {
-            // The vanilla method checks for "x < maxX" etc.
-            IntBoundingBox expandedBox = IntBoundingBox.createProper(
-                    box.minX,     box.minY,     box.minZ,
-                    box.maxX + 1, box.maxY + 1, box.maxZ + 1);
-            List<NextTickListEntry> pendingTicks = world.getPendingBlockUpdates(expandedBox.toVanillaBox(), false);
-
-            if (pendingTicks != null)
-            {
-                final int listSize = pendingTicks.size();
-                final long currentTime = world.getTotalWorldTime();
-
-                // The getPendingBlockUpdates() method doesn't check the y-coordinate... :-<
-                for (int i = 0; i < listSize; ++i)
-                {
-                    NextTickListEntry entry = pendingTicks.get(i);
-
-                    if (entry.position.getY() >= box.minY && entry.position.getY() <= box.maxY)
-                    {
-                        BlockPos relPos = new BlockPos(entry.position.getX() - minCorner.getX(),
-                                                       entry.position.getY() - minCorner.getY(),
-                                                       entry.position.getZ() - minCorner.getZ());
-
-                        // Store the delay, i.e. relative time
-                        long delay = entry.scheduledTime - currentTime;
-                        long sortOrder = 0; // TODO
-
-                        ScheduledBlockTickData tickData = new ScheduledBlockTickData(relPos,
-                                                                                     entry.getBlock(),
-                                                                                     entry.priority,
-                                                                                     delay,
-                                                                                     sortOrder);
-
-                        blockTickMap.put(relPos, tickData);
-                        this.totalBlockTicks++;
-                    }
-                }
-            }
+            return 0;
         }
+
+        // The vanilla method checks for "x < maxX" etc.
+        IntBoundingBox expandedBox = IntBoundingBox.createProper(
+                box.minX,     box.minY,     box.minZ,
+                box.maxX + 1, box.maxY + 1, box.maxZ + 1);
+        List<NextTickListEntry> pendingTicks = world.getPendingBlockUpdates(expandedBox.toVanillaBox(), false);
+
+        if (pendingTicks == null)
+        {
+            return 0;
+        }
+
+        // The getPendingBlockUpdates() method doesn't check the y-coordinate... :-<
+        for (NextTickListEntry entry : pendingTicks)
+        {
+            if (entry.position.getY() < box.minY || entry.position.getY() > box.maxY)
+            {
+                continue;
+            }
+
+            BlockPos relPos = new BlockPos(entry.position.getX() - regionMinCorner.getX(),
+                                           entry.position.getY() - regionMinCorner.getY(),
+                                           entry.position.getZ() - regionMinCorner.getZ());
+
+            // Store the delay, i.e. relative time
+            long delay = entry.scheduledTime - currentWorldTick;
+            long tickId = ((NextTickListEntryMixin) entry).litematica$getTickId();
+
+            ScheduledBlockTickData tickData = new ScheduledBlockTickData(relPos,
+                                                                         entry.getBlock(),
+                                                                         entry.priority,
+                                                                         delay,
+                                                                         tickId);
+
+            blockTickMap.put(relPos, tickData);
+            blockTickCount++;
+        }
+
+        return blockTickCount;
     }
 
-    protected void readEntityData(String regionName, IntBoundingBox box, BlockPos regionPosAbs, World world)
+    protected int readEntityData(List<EntityData> entityListOut,
+                                 Set<UUID> existingEntities,
+                                 IntBoundingBox box,
+                                 BlockPos regionPosAbs,
+                                 World world)
     {
-        List<EntityData> entityList = this.entityLists.computeIfAbsent(regionName, key -> new ArrayList<>());
         AxisAlignedBB bb = PositionUtils.createAABBFrom(box);
         List<Entity> entities = world.getEntitiesInAABBexcluding(null, bb, e -> (e instanceof EntityPlayer) == false);
         int regionOriginX = regionPosAbs.getX();
         int regionOriginY = regionPosAbs.getY();
         int regionOriginZ = regionPosAbs.getZ();
+        int entityCount = 0;
 
         for (Entity entity : entities)
         {
             UUID uuid = entity.getUniqueID();
 
             // This entity was already saved to some region
-            if (this.existingEntities.contains(uuid))
+            if (existingEntities.contains(uuid))
             {
                 continue;
             }
@@ -312,9 +347,9 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
                     CompoundData data = DataTypeUtils.fromVanillaCompound(tag);
                     DataTypeUtils.writeVec3dToListTag(data, relPos);
 
-                    entityList.add(new EntityData(relPos, data));
-                    this.existingEntities.add(uuid);
-                    this.totalEntities++;
+                    entityListOut.add(new EntityData(relPos, data));
+                    existingEntities.add(uuid);
+                    entityCount++;
                 }
             }
             catch (Exception e)
@@ -322,17 +357,31 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
                 Litematica.LOGGER.warn("Failed to save entity {} at {}", entity, entity.getPositionVector());
             }
         }
-        
+
+        return entityCount;
     }
 
     protected void onDataCollected()
+    {
+        ImmutableMap<String, SchematicRegion> regions = this.buildSchematicRegions();
+        Optional<Schematic> schematicOpt = this.settings.schematicType.createSchematicFromRegions(regions);
+
+        if (schematicOpt.isPresent())
+        {
+            Schematic schematic = schematicOpt.get();
+            this.setMetadataValues(schematic.getMetadata());
+            this.schematicListener.accept(schematic);
+        }
+    }
+
+    protected ImmutableMap<String, SchematicRegion> buildSchematicRegions()
     {
         ImmutableMap.Builder<String, SchematicRegion> regionBuilder = ImmutableMap.builder();
 
         for (SelectionBox box : this.subRegions.values())
         {
             String regionName = box.getName();
-            BlockContainer container = this.blockContainers.getOrDefault(regionName, null); // TODO
+            BlockContainer container = this.blockContainers.getOrDefault(regionName, this.createBlockContainer(Vec3i.ZERO));
             Map<BlockPos, CompoundData> blockEntityMap = this.blockEntityMaps.getOrDefault(regionName, new HashMap<>());
             Map<BlockPos, ScheduledBlockTickData> blockTickMap = this.blockTickMaps.getOrDefault(regionName, new HashMap<>());
             List<EntityData> entityList = this.entityLists.getOrDefault(regionName, new ArrayList<>());
@@ -344,12 +393,14 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             regionBuilder.put(regionName, region);
         }
 
-        ImmutableMap<String, SchematicRegion> regionMap = regionBuilder.build();
-        Schematic schematic = this.settings.schematicType.createSchematic();
-        SchematicMetadata meta = schematic.getMetadata();
+        return regionBuilder.build();
+    }
 
-        meta.setTotalVolume(PositionUtils.getTotalVolume(this.subRegions.values()));
-        meta.setEnclosingSize(PositionUtils.getEnclosingAreaSize(this.subRegions.values()));
+    protected void setMetadataValues(SchematicMetadata meta)
+    {
+        Collection<SelectionBox> boxes = this.subRegions.values();
+        meta.setEnclosingSize(PositionUtils.getEnclosingAreaSize(boxes));
+        meta.setTotalVolume(PositionUtils.getTotalVolume(boxes));
         meta.setTotalBlocks(this.totalBlocks);
         meta.setEntityCount(this.totalEntities);
         meta.setBlockEntityCount(this.totalBlockEntities);
@@ -362,8 +413,6 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         long time = System.currentTimeMillis();
         meta.setTimeCreated(time);
         meta.setTimeModified(time);
-
-        this.schematicListener.accept(schematic);
     }
 
     @Override
@@ -371,26 +420,11 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
     {
         if (this.finished == false)
         {
-            MessageDispatcher.warning().translate("litematica.message.error.schematic_save_interrupted");
+            MessageDispatcher.warning().translate("litematica.message.error.schematic_save.interrupted");
         }
 
         InfoHud.getInstance().removeInfoHudRenderer(this, false);
 
         this.notifyListener();
-    }
-
-    public static class SaveSettings
-    {
-        public final SimpleBooleanStorage saveBlocks              = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage saveBlockEntities       = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage saveEntities            = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage saveScheduledBlockTicks = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage saveFromClientWorld     = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage saveFromSchematicWorld  = new SimpleBooleanStorage(false);
-        public final SimpleBooleanStorage clientWorldFirst        = new SimpleBooleanStorage(true);
-        public final SimpleBooleanStorage exposedBlocksOnly       = new SimpleBooleanStorage(false);
-        public final Set<Block>           ignoreBlocks            = new HashSet<>();
-        public final Set<IBlockState>     ignoreBlockStates       = new HashSet<>();
-        public SchematicType schematicType = SchematicType.LITEMATICA;
     }
 }

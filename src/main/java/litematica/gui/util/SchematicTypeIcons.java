@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import malilib.gui.icon.Icon;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.SchematicType;
 
 public class SchematicTypeIcons

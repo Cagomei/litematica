@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import malilib.gui.BaseListScreen;
 import malilib.gui.widget.button.GenericButton;
 import malilib.gui.widget.list.DataListWidget;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.widget.SchematicInfoWidgetBySchematic;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;

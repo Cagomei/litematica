@@ -9,7 +9,7 @@ import malilib.gui.widget.list.DataListWidget;
 import malilib.util.StringUtils;
 import litematica.Reference;
 import litematica.config.Configs;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.widget.list.entry.BaseSchematicEntryWidget;

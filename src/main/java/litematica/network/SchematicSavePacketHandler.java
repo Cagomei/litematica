@@ -3,25 +3,12 @@ package litematica.network;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 import com.google.common.collect.ImmutableList;
-import io.netty.buffer.Unpooled;
 
-import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-import malilib.network.PacketSplitter;
 import malilib.network.message.BasePacketHandler;
-import malilib.overlay.message.MessageDispatcher;
-import malilib.util.game.wrap.GameWrap;
-import malilib.util.game.wrap.NbtWrap;
-import malilib.util.nbt.NbtUtils;
-import litematica.scheduler.TaskScheduler;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.util.SchematicSaveSettings;
-import litematica.selection.AreaSelection;
 import litematica.task.MultiplayerCreateSchematicTask;
 
 public class SchematicSavePacketHandler extends BasePacketHandler
@@ -46,6 +33,7 @@ public class SchematicSavePacketHandler extends BasePacketHandler
     @Override
     public void onPacketReceived(PacketBuffer buf)
     {
+        /*
         try
         {
             NBTTagCompound tag = buf.readCompoundTag();
@@ -67,8 +55,10 @@ public class SchematicSavePacketHandler extends BasePacketHandler
             MessageDispatcher.error("litematica.message.error.schematic_save.server_side.failed_reading_data");
             MessageDispatcher.error(e.getMessage());
         }
+        */
     }
 
+    /*
     public void removeSaveTask(UUID taskId)
     {
         this.pendingSaveTasks.remove(taskId);
@@ -129,4 +119,5 @@ public class SchematicSavePacketHandler extends BasePacketHandler
 
         return true;
     }
+    */
 }

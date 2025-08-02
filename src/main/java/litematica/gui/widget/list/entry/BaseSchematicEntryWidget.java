@@ -16,11 +16,10 @@ import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.render.text.StyledTextLine;
 import malilib.util.FileNameUtils;
 import malilib.util.StringUtils;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.AbstractSchematicInfoWidget;
 import litematica.schematic.Schematic;
-import litematica.schematic.old.ISchematic;
 
 public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<LoadedSchematic>
 {

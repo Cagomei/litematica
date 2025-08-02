@@ -18,7 +18,7 @@ import malilib.util.position.BlockRotation;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;

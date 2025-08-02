@@ -1,6 +1,6 @@
 package litematica.gui.widget;
 
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.SchematicInfoCacheBySchematic;
 
 public class SchematicInfoWidgetBySchematic extends AbstractSchematicInfoWidget<LoadedSchematic>

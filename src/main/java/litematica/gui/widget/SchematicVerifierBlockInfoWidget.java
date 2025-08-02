@@ -21,6 +21,7 @@ import malilib.gui.widget.LabelWidget;
 import malilib.render.text.StyledTextLine;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.RegistryUtils;
+import malilib.util.world.BlockState;
 import litematica.config.Configs;
 import litematica.materials.MaterialCache;
 import litematica.schematic.verifier.VerifierResultType;
@@ -47,8 +48,8 @@ public class SchematicVerifierBlockInfoWidget extends ContainerWidget
     {
         super(200, 100);
 
-        ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(expectedState);
-        ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(foundState);
+        ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(expectedState));
+        ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(foundState));
 
         this.expectedState = expectedState;
         this.foundState = foundState;

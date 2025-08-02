@@ -2,17 +2,16 @@ package litematica.scheduler.tasks;
 
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
-
 import malilib.util.position.BlockPos;
 import malilib.util.position.ChunkPos;
 import malilib.util.position.Direction;
 import malilib.util.position.IntBoundingBox;
 import malilib.util.position.LayerRange;
+import malilib.util.world.BlockState;
 
 public abstract class TaskCountBlocksBase extends TaskProcessChunkBase
 {
-    protected final Object2LongOpenHashMap<IBlockState> countsTotal = new Object2LongOpenHashMap<>();
+    protected final Object2LongOpenHashMap<BlockState> countsTotal = new Object2LongOpenHashMap<>();
 
     protected TaskCountBlocksBase(String nameOnHud)
     {

@@ -12,21 +12,21 @@ import litematica.schematic.data.ScheduledBlockTickData;
 
 public class SchematicRegion
 {
-    protected final BlockPos pos;
+    protected final BlockPos relativePosition;
     protected final Vec3i size;
     protected final BlockContainer blockContainer;
     protected final Map<BlockPos, CompoundData> blockEntityData;
     protected final Map<BlockPos, ScheduledBlockTickData> blockTickData;
     protected final List<EntityData> entityData;
 
-    public SchematicRegion(BlockPos pos,
+    public SchematicRegion(BlockPos relativePosition,
                            Vec3i size,
                            BlockContainer blockContainer,
                            Map<BlockPos, CompoundData> blockEntityData,
                            Map<BlockPos, ScheduledBlockTickData> blockTickData,
                            List<EntityData> entityData)
     {
-        this.pos = pos;
+        this.relativePosition = relativePosition;
         this.size = size;
         this.blockContainer = blockContainer;
         this.blockEntityData = blockEntityData;
@@ -39,7 +39,7 @@ public class SchematicRegion
      */
     public BlockPos getRelativePosition()
     {
-        return this.pos;
+        return this.relativePosition;
     }
 
     /**

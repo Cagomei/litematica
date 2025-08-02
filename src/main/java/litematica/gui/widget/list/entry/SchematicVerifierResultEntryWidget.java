@@ -21,6 +21,7 @@ import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.gui.widget.list.header.DataColumn;
 import malilib.render.text.StyledTextLine;
 import malilib.util.StringUtils;
+import malilib.util.world.BlockState;
 import litematica.config.Configs;
 import litematica.gui.widget.SchematicVerifierBlockInfoWidget;
 import litematica.materials.MaterialCache;
@@ -81,8 +82,8 @@ public class SchematicVerifierResultEntryWidget extends BaseDataListEntryWidget<
         }
         else
         {
-            ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(pair.expectedState);
-            ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(pair.foundState);
+            ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(pair.expectedState));
+            ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(pair.foundState));
             this.expectedModelWidget = new ItemStackWidget(expectedStack);
             this.foundModelWidget = new ItemStackWidget(foundStack);
             this.expectedNameText = StyledTextLine.parseFirstLine(expectedStack.getDisplayName());
@@ -186,8 +187,8 @@ public class SchematicVerifierResultEntryWidget extends BaseDataListEntryWidget<
             {
                 for (BlockStatePairCount entry : dataListWidget.getNonFilteredDataList())
                 {
-                    ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(entry.getPair().expectedState);
-                    ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(entry.getPair().foundState);
+                    ItemStack expectedStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(entry.getPair().expectedState));
+                    ItemStack foundStack = MaterialCache.getInstance().getItemForDisplayNameForState(BlockState.of(entry.getPair().foundState));
                     expectedNameColumnWidth = Math.max(expectedNameColumnWidth, StringUtils.getStringWidth(expectedStack.getDisplayName()));
                     foundNameColumnWidth = Math.max(foundNameColumnWidth, StringUtils.getStringWidth(foundStack.getDisplayName()));
                 }

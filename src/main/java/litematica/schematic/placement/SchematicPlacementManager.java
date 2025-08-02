@@ -43,7 +43,7 @@ import malilib.util.position.IntBoundingBox;
 import litematica.config.Configs;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.render.LitematicaRenderer;
 import litematica.render.OverlayRenderer;

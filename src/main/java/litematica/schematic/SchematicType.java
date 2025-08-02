@@ -8,53 +8,59 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import malilib.util.FileNameUtils;
-import malilib.util.data.tag.DataFileUtils;
-import malilib.util.data.tag.CompoundData;
-import litematica.data.LoadedSchematic;
-import litematica.schematic.old.LitematicaSchematic;
-import litematica.schematic.old.SchematicaSchematic;
-import litematica.schematic.old.SpongeSchematic;
-import litematica.schematic.old.VanillaStructure;
+import malilib.util.StringUtils;
+import malilib.util.data.tag.DataView;
+import malilib.util.position.Vec3i;
+import litematica.schematic.container.BlockContainer;
+import litematica.schematic.container.BlockContainerFactory;
 
 public class SchematicType
 {
     public static final SchematicType LITEMATICA = SchematicType.builder()
-         .setDisplayName("Litematica")
-         .setFactory(LitematicaSchematic::new)
-         .setDataValidator(LitematicaSchematic::isValidSchematic)
+         .setTranslationKey("litematica.schematic.type.litematica")
+         .setBlockContainerFactory(LitematicaSchematic::createDefaultBlockContainer)
+         .setSchematicFromDataFactory(LitematicaSchematic::fromData)
+         .setSchematicFromRegionsFactory(LitematicaSchematic::fromRegions)
+         .setDataValidator(LitematicaSchematic::isValidData)
          .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equals)
          .setHasName(true)
          .build();
 
     public static final SchematicType SCHEMATICA = SchematicType.builder()
-         .setDisplayName("Schematica/MCEdit")
-         .setFactory(SchematicaSchematic::new)
-         .setDataValidator(SchematicaSchematic::isValidSchematic)
+         .setTranslationKey("litematica.schematic.type.schematica")
+         .setBlockContainerFactory(SchematicaSchematic::createDefaultBlockContainer)
+         .setSchematicFromDataFactory(SchematicaSchematic::fromData)
+         .setSchematicFromRegionsFactory(SchematicaSchematic::fromRegions)
+         .setDataValidator(SchematicaSchematic::isValidData)
          .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equals)
          .setHasName(true)
          .build();
 
     public static final SchematicType SPONGE = SchematicType.builder()
-         .setDisplayName("Sponge")
-         .setFactory(SpongeSchematic::new)
-         .setDataValidator(SpongeSchematic::isValidSchematic)
+         .setTranslationKey("litematica.schematic.type.sponge")
+         .setBlockContainerFactory(SpongeSchematic::createDefaultBlockContainer)
+         .setSchematicFromDataFactory(SpongeSchematic::fromData)
+         .setSchematicFromRegionsFactory(SpongeSchematic::fromRegions)
+         .setDataValidator(SpongeSchematic::isValidData)
          .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
          .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equals(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equals(ext))
          .setHasName(true)
          .build();
 
     public static final SchematicType VANILLA = SchematicType.builder()
-        .setDisplayName("Vanilla Structure")
-        .setFactory(VanillaStructure::new)
-        .setDataValidator(VanillaStructure::isValidSchematic)
-        .setExtension(VanillaStructure.FILE_NAME_EXTENSION)
-        .setExtensionValidator(VanillaStructure.FILE_NAME_EXTENSION::equals)
+        .setTranslationKey("litematica.schematic.type.vanilla")
+        .setBlockContainerFactory(VanillaSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(VanillaSchematic::fromData)
+        .setSchematicFromRegionsFactory(VanillaSchematic::fromRegions)
+        .setDataValidator(VanillaSchematic::isValidData)
+        .setExtension(VanillaSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator(VanillaSchematic.FILE_NAME_EXTENSION::equals)
         .setHasName(true)
         .build();
 
@@ -65,18 +71,28 @@ public class SchematicType
                                                                      getPossibleTypesFromFileName(p).isEmpty() == false;
 
     private final String extension;
-    private final Supplier<Schematic> factory;
+    private final BlockContainerFactory containerFactory;
+    private final Function<DataView, Optional<Schematic>> schematicFromDataFactory;
+    private final Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory;
     private final Function<String, Boolean> extensionValidator;
-    private final Function<CompoundData, Boolean> dataValidator;
-    private final String displayName;
+    private final Function<DataView, Boolean> dataValidator;
+    private final String translationKey;
     private final boolean hasName;
 
-    private SchematicType(String displayName, Supplier<Schematic> factory, Function<CompoundData, Boolean> dataValidator,
-                          String extension, Function<String, Boolean> extensionValidator, boolean hasName)
+    private SchematicType(String translationKey,
+                          BlockContainerFactory containerFactory,
+                          Function<DataView, Optional<Schematic>> schematicFromDataFactory,
+                          Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory,
+                          Function<DataView, Boolean> dataValidator,
+                          String extension,
+                          Function<String, Boolean> extensionValidator,
+                          boolean hasName)
     {
-        this.displayName = displayName;
+        this.translationKey = translationKey;
         this.extension = extension;
-        this.factory = factory;
+        this.containerFactory = containerFactory;
+        this.schematicFromDataFactory = schematicFromDataFactory;
+        this.schematicFromRegionsFactory = schematicFromRegionsFactory;
         this.extensionValidator = extensionValidator;
         this.dataValidator = dataValidator;
         this.hasName = hasName;
@@ -89,7 +105,7 @@ public class SchematicType
 
     public String getDisplayName()
     {
-        return this.displayName;
+        return StringUtils.translate(this.translationKey);
     }
 
     public boolean getHasName()
@@ -102,31 +118,24 @@ public class SchematicType
         return this.extensionValidator.apply(extension).booleanValue();
     }
 
-    public boolean isValidData(CompoundData dataIn)
+    public boolean isValidData(DataView dataIn)
     {
         return this.dataValidator.apply(dataIn).booleanValue();
     }
 
-    /**
-     * Creates a new schematic instance of the given type.
-     * @return the created new schematic instance
-     */
-    public Schematic createSchematic()
+    public BlockContainer createContainer(Vec3i containerSize)
     {
-        return this.factory.get();
+        return this.containerFactory.create(containerSize);
     }
 
-    // TODO remove this?
-    public Optional<Schematic> createSchematicAndReadFromTag(CompoundData dataIn)
+    public Optional<Schematic> createSchematicFromRegions(ImmutableMap<String, SchematicRegion> regions)
     {
-        Schematic schematic = this.factory.get();
+        return this.schematicFromRegionsFactory.apply(regions);
+    }
 
-        if (schematic.read(dataIn))
-        {
-            return Optional.of(schematic);
-        }
-
-        return Optional.empty();
+    public Optional<Schematic> createSchematicFromData(DataView dataIn)
+    {
+        return this.schematicFromDataFactory.apply(dataIn);
     }
 
     public static List<SchematicType> getPossibleTypesFromFileName(Path file)
@@ -150,45 +159,36 @@ public class SchematicType
         return list;
     }
 
-    public static Optional<SchematicType> getType(Path file, CompoundData dataIn)
+    public static List<SchematicType> getAllTypesSortedByProbability(Path file)
     {
-        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(file);
+        List<SchematicType> possibleTypes = SchematicType.getPossibleTypesFromFileName(file);
 
-        if (possibleTypes.isEmpty() == false)
+        for (SchematicType type : SchematicType.KNOWN_TYPES)
         {
-            for (SchematicType type : possibleTypes)
+            if (possibleTypes.contains(type))
             {
-                if (type.isValidData(dataIn))
-                {
-                    return Optional.of(type);
-                }
+                continue;
             }
+
+            possibleTypes.add(type);
         }
 
-        return Optional.empty();
+        return possibleTypes;
     }
 
-    public static Optional<LoadedSchematic> tryLoadSchematic(Path schematicFile)
+    public static Optional<SchematicType> getTypeFromData(Path file, DataView dataIn)
     {
-        List<SchematicType> possibleTypes = getPossibleTypesFromFileName(schematicFile);
+        List<SchematicType> possibleTypes = SchematicType.getAllTypesSortedByProbability(file);
+        return getTypeFromData(possibleTypes, dataIn);
+    }
 
-        if (possibleTypes.isEmpty() == false)
+    public static Optional<SchematicType> getTypeFromData(List<SchematicType> possibleTypes, DataView dataIn)
+    {
+        for (SchematicType type : possibleTypes)
         {
-            CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(schematicFile);
-
-            if (data != null)
+            if (type.isValidData(dataIn))
             {
-                Optional<SchematicType> typeOpt = getType(schematicFile, data);
-
-                if (typeOpt.isPresent())
-                {
-                    Optional<Schematic> schematicOpt = typeOpt.get().createSchematicAndReadFromTag(data);
-
-                    if (schematicOpt.isPresent())
-                    {
-                        return Optional.of(new LoadedSchematic(schematicOpt.get(), Optional.of(schematicFile)));
-                    }
-                }
+                return Optional.of(type);
             }
         }
 
@@ -214,20 +214,22 @@ public class SchematicType
 
     public static class Builder
     {
-        private String extension = null;
-        private Supplier<Schematic> factory = null;
-        private Function<String, Boolean> extensionValidator = null;
-        private Function<CompoundData, Boolean> dataValidator = null;
+        private String extension;
+        private BlockContainerFactory containerFactory;
+        private Function<DataView, Optional<Schematic>> schematicFromDataFactory;
+        private Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory;
+        private Function<String, Boolean> extensionValidator;
+        private Function<DataView, Boolean> dataValidator;
         private String displayName = "?";
         private boolean hasName = false;
 
-        public SchematicType.Builder setDataValidator(Function<CompoundData, Boolean> dataValidator)
+        public SchematicType.Builder setDataValidator(Function<DataView, Boolean> dataValidator)
         {
             this.dataValidator = dataValidator;
             return this;
         }
 
-        public SchematicType.Builder setDisplayName(String displayName)
+        public SchematicType.Builder setTranslationKey(String displayName)
         {
             this.displayName = displayName;
             return this;
@@ -245,9 +247,21 @@ public class SchematicType
             return this;
         }
 
-        public SchematicType.Builder setFactory(Supplier<Schematic> factory)
+        public SchematicType.Builder setBlockContainerFactory(BlockContainerFactory containerFactory)
         {
-            this.factory = factory;
+            this.containerFactory = containerFactory;
+            return this;
+        }
+
+        public SchematicType.Builder setSchematicFromDataFactory(Function<DataView, Optional<Schematic>> schematicFromDataFactory)
+        {
+            this.schematicFromDataFactory = schematicFromDataFactory;
+            return this;
+        }
+
+        public SchematicType.Builder setSchematicFromRegionsFactory(Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory)
+        {
+            this.schematicFromRegionsFactory = schematicFromRegionsFactory;
             return this;
         }
 
@@ -259,7 +273,9 @@ public class SchematicType
 
         public SchematicType build()
         {
-            if (this.factory == null ||
+            if (this.containerFactory == null ||
+                this.schematicFromDataFactory == null ||
+                this.schematicFromRegionsFactory == null ||
                 this.dataValidator == null ||
                 this.extension == null ||
                 this.extensionValidator == null ||
@@ -268,8 +284,14 @@ public class SchematicType
                 throw new IllegalArgumentException("SchematicType.Builder#build(): Some of the values were null!");
             }
 
-            return new SchematicType(this.displayName, this.factory, this.dataValidator,
-                                     this.extension, this.extensionValidator, this.hasName);
+            return new SchematicType(this.displayName,
+                                     this.containerFactory,
+                                     this.schematicFromDataFactory,
+                                     this.schematicFromRegionsFactory,
+                                     this.dataValidator,
+                                     this.extension,
+                                     this.extensionValidator,
+                                     this.hasName);
         }
     }
 }

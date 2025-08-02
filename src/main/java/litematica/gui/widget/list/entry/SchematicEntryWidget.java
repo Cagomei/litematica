@@ -12,7 +12,7 @@ import malilib.util.game.wrap.EntityWrap;
 import malilib.util.position.BlockPos;
 import litematica.config.Configs;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.gui.SaveConvertSchematicScreen;
 import litematica.gui.util.LitematicaIcons;
@@ -138,6 +138,10 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
             {
                 MessageDispatcher.error("litematica.message.error.schematic_read.failed_to_read_from_file", file);
             }
+        }
+        else
+        {
+            MessageDispatcher.error("litematica.error.schematic_read_from_file_failed.no_file");
         }
     }
 

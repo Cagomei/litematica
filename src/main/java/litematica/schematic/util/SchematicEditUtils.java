@@ -31,9 +31,10 @@ import malilib.util.position.LayerRange;
 import malilib.util.position.PositionUtils;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.mixin.IMixinItemBlockSpecial;
 import litematica.render.RenderUtils;
 import litematica.schematic.Schematic;
@@ -400,13 +401,13 @@ public class SchematicEditUtils
                         {
                             state = SchematicUtils.getUntransformedBlockState(state, placement, regionName);
 
-                            IBlockState stateOriginal = container.getBlockState(posSchematic.getX(), posSchematic.getY(), posSchematic.getZ());
+                            BlockState stateOriginal = container.getBlockState(posSchematic.getX(), posSchematic.getY(), posSchematic.getZ());
 
                             SchematicMetadata metadata = schematic.getMetadata();
                             long totalBlocks = metadata.getTotalBlocks();
                             long increment;
 
-                            if (stateOriginal.getBlock() != Blocks.AIR)
+                            if (stateOriginal.vanillaState().getBlock() != Blocks.AIR)
                             {
                                 increment = state.getBlock() != Blocks.AIR ? 0 : -1;
                             }
@@ -417,7 +418,7 @@ public class SchematicEditUtils
 
                             totalBlocks += increment;
 
-                            container.setBlockState(posSchematic.getX(), posSchematic.getY(), posSchematic.getZ(), state);
+                            container.setBlockState(posSchematic.getX(), posSchematic.getY(), posSchematic.getZ(), BlockState.of(state));
 
                             metadata.setTotalBlocks(totalBlocks);
                             metadata.setTimeModifiedToNow();
@@ -482,6 +483,7 @@ public class SchematicEditUtils
                             long increment = 0;
 
                             state = SchematicUtils.getUntransformedBlockState(state, schematicPlacement, regionName);
+                            BlockState newState = BlockState.of(state);
 
                             for (int y = minY; y <= maxY; ++y)
                             {
@@ -489,9 +491,9 @@ public class SchematicEditUtils
                                 {
                                     for (int x = minX; x <= maxX; ++x)
                                     {
-                                        IBlockState stateOriginal = container.getBlockState(x, y, z);
+                                        BlockState stateOriginal = container.getBlockState(x, y, z);
 
-                                        if (stateOriginal.getBlock() != Blocks.AIR)
+                                        if (stateOriginal.vanillaState().getBlock() != Blocks.AIR)
                                         {
                                             increment = state.getBlock() != Blocks.AIR ? 0 : -1;
                                         }
@@ -502,7 +504,7 @@ public class SchematicEditUtils
 
                                         totalBlocks += increment;
 
-                                        container.setBlockState(x, y, z, state);
+                                        container.setBlockState(x, y, z, newState);
                                     }
                                 }
                             }
@@ -648,8 +650,8 @@ public class SchematicEditUtils
             //System.out.printf("DEBUG == region: %s, sx: %d, sy: %s, sz: %d, ex: %d, ey: %d, ez: %d - size x: %d y: %d z: %d =============\n",
             //        regionName, startX, startY, startZ, endX, endY, endZ, size.getX(), size.getY(), size.getZ());
 
-            IBlockState stateOriginal = SchematicUtils.getUntransformedBlockState(stateOriginalIn, schematicPlacement, regionName);
-            IBlockState stateNew = SchematicUtils.getUntransformedBlockState(stateNewIn, schematicPlacement, regionName);
+            BlockState stateOriginal = BlockState.of(SchematicUtils.getUntransformedBlockState(stateOriginalIn, schematicPlacement, regionName));
+            BlockState stateNew = BlockState.of(SchematicUtils.getUntransformedBlockState(stateNewIn, schematicPlacement, regionName));
 
             for (int y = startY; y <= endY; ++y)
             {

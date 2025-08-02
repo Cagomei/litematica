@@ -243,10 +243,8 @@ public class SchematicMetadata
         }
     }
 
-    public CompoundData write()
+    public CompoundData write(CompoundData tag)
     {
-        CompoundData tag = new CompoundData();
-
         tag.putString("Name", this.schematicName);
         tag.putString("Author", this.author);
         tag.putString("Description", this.description);

@@ -12,7 +12,7 @@ import litematica.render.OverlayRenderer;
 import litematica.render.infohud.InfoHud;
 import litematica.render.infohud.ToolHud;
 import litematica.scheduler.TaskScheduler;
-import litematica.scheduler.tasks.SetSchematicPreviewTask;
+import litematica.scheduler.task.SetSchematicPreviewTask;
 import litematica.tool.ToolMode;
 
 public class RenderHandler implements PostGameOverlayRenderer, PostWorldRenderer

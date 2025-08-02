@@ -36,7 +36,7 @@ import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.data.DataManager;
-import litematica.schematic.old.ISchematicRegion;
+import litematica.schematic.SchematicRegion;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -161,6 +161,17 @@ public class PositionUtils
         return false;
     }
 
+    public static Vec3i getAbsoluteAreaSize(SelectionBox box)
+    {
+        BlockPos corner1 = box.getCorner1();
+        BlockPos corner2 = box.getCorner2();
+        int sizeX = Math.abs(corner2.getX() - corner1.getX()) + 1;
+        int sizeY = Math.abs(corner2.getY() - corner1.getY()) + 1;
+        int sizeZ = Math.abs(corner2.getZ() - corner1.getZ()) + 1;
+
+        return new Vec3i(sizeX, sizeY, sizeZ);
+    }
+
     public static Vec3i getAreaSize(Vec3i corner1, Vec3i corner2)
     {
         int x = corner2.getX() - corner1.getX();
@@ -279,7 +290,7 @@ public class PositionUtils
     }
 
     @Nullable
-    public static IntBoundingBox getEnclosingBoxAroundRegions(Collection<ISchematicRegion> regions)
+    public static IntBoundingBox getEnclosingBoxAroundRegions(Collection<SchematicRegion> regions)
     {
         if (regions.isEmpty())
         {
@@ -293,7 +304,7 @@ public class PositionUtils
         int maxY = Integer.MIN_VALUE;
         int maxZ = Integer.MIN_VALUE;
 
-        for (ISchematicRegion region : regions)
+        for (SchematicRegion region : regions)
         {
             Vec3i size = region.getSize();
             int offX = size.getX();
@@ -304,7 +315,7 @@ public class PositionUtils
             offY = offY >= 0 ? offY - 1 : offY + 1;
             offZ = offZ >= 0 ? offZ - 1 : offZ + 1;
 
-            BlockPos pos = region.getPosition();
+            BlockPos pos = region.getRelativePosition();
             int x1 = pos.getX();
             int y1 = pos.getY();
             int z1 = pos.getZ();
@@ -325,7 +336,7 @@ public class PositionUtils
     }
 
     @Nullable
-    public static BlockPos getMinCornerOfEnclosingBoxAroundRegions(Collection<ISchematicRegion> regions)
+    public static BlockPos getMinCornerOfEnclosingBoxAroundRegions(Collection<SchematicRegion> regions)
     {
         if (regions.isEmpty())
         {
@@ -336,7 +347,7 @@ public class PositionUtils
         int minY = Integer.MAX_VALUE;
         int minZ = Integer.MAX_VALUE;
 
-        for (ISchematicRegion region : regions)
+        for (SchematicRegion region : regions)
         {
             Vec3i size = region.getSize();
             int offX = size.getX();
@@ -347,7 +358,7 @@ public class PositionUtils
             offY = offY >= 0 ? offY - 1 : offY + 1;
             offZ = offZ >= 0 ? offZ - 1 : offZ + 1;
 
-            BlockPos pos = region.getPosition();
+            BlockPos pos = region.getRelativePosition();
             int x = pos.getX();
             int y = pos.getY();
             int z = pos.getZ();

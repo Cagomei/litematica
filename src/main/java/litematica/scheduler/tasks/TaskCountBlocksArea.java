@@ -3,6 +3,7 @@ package litematica.scheduler.tasks;
 import net.minecraft.block.state.IBlockState;
 
 import malilib.util.position.BlockPos;
+import malilib.util.world.BlockState;
 import litematica.materials.IMaterialList;
 import litematica.selection.AreaSelection;
 
@@ -23,6 +24,6 @@ public class TaskCountBlocksArea extends TaskCountBlocksMaterialList
     protected void countAtPosition(BlockPos pos)
     {
         IBlockState stateClient = this.worldClient.getBlockState(pos).getActualState(this.worldClient, pos);
-        this.countsTotal.addTo(stateClient, 1);
+        this.countsTotal.addTo(BlockState.of(stateClient), 1);
     }
 }

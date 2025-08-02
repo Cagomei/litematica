@@ -45,6 +45,7 @@ import malilib.util.position.HitResult;
 import malilib.util.position.IntBoundingBox;
 import malilib.util.position.LayerRange;
 import malilib.util.position.Vec3d;
+import malilib.util.world.BlockState;
 import litematica.Litematica;
 import litematica.config.Configs;
 import litematica.config.Hotkeys;
@@ -407,7 +408,7 @@ public class EasyPlaceUtils
         World schematicWorld = SchematicWorldHandler.getSchematicWorld();
         IBlockState stateSchematic = schematicWorld.getBlockState(targetBlockPos);
         IBlockState stateClient = world.getBlockState(targetBlockPos).getActualState(world, targetBlockPos);
-        ItemStack requiredStack = MaterialCache.getInstance().getRequiredBuildItemForState(stateSchematic);
+        ItemStack requiredStack = MaterialCache.getInstance().getRequiredBuildItemForState(BlockState.of(stateSchematic));
 
         // The block is correct already, or it was recently placed, or some of the checks failed
         if (stateSchematic == stateClient || ItemWrap.isEmpty(requiredStack) ||
@@ -635,7 +636,7 @@ public class EasyPlaceUtils
                 return true;
             }
 
-            IBlockState stateSchematic = worldSchematic.getBlockState(pos);
+            BlockState stateSchematic = BlockState.of(worldSchematic.getBlockState(pos));
             ItemStack stack = MaterialCache.getInstance().getRequiredBuildItemForState(stateSchematic);
 
             // The player is holding the wrong item for the targeted position

@@ -3,11 +3,10 @@ package litematica.scheduler.tasks;
 import java.util.List;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
-
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.ChunkPos;
 import malilib.util.position.LayerRange;
+import malilib.util.world.BlockState;
 import litematica.data.DataManager;
 import litematica.materials.IMaterialList;
 import litematica.materials.MaterialListEntry;
@@ -18,8 +17,8 @@ import litematica.world.SchematicWorldRenderingNotifier;
 
 public abstract class TaskCountBlocksMaterialList extends TaskCountBlocksBase
 {
-    protected final Object2LongOpenHashMap<IBlockState> countsMissing = new Object2LongOpenHashMap<>();
-    protected final Object2LongOpenHashMap<IBlockState> countsMismatch = new Object2LongOpenHashMap<>();
+    protected final Object2LongOpenHashMap<BlockState> countsMissing = new Object2LongOpenHashMap<>();
+    protected final Object2LongOpenHashMap<BlockState> countsMismatch = new Object2LongOpenHashMap<>();
     protected final IMaterialList materialList;
     protected final LayerRange layerRange;
 

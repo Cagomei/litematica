@@ -10,14 +10,14 @@ public class ScheduledBlockTickData
     public final Block block;
     public final int priority;
     public final long delay;
-    public final long sortOrder;
+    public final long tickId;
 
-    public ScheduledBlockTickData(BlockPos pos, Block block, int priority, long delay, long sortOrder)
+    public ScheduledBlockTickData(BlockPos pos, Block block, int priority, long delay, long tickId)
     {
         this.pos = pos;
         this.block = block;
         this.priority = priority;
         this.delay = delay;
-        this.sortOrder = sortOrder;
+        this.tickId = tickId;
     }
 }

@@ -19,7 +19,7 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.FileNameUtils;
 import malilib.util.FileUtils;
 import litematica.config.Configs;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.schematic.SchematicType;
 
@@ -58,7 +58,6 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
 
         this.addWidget(this.fileNameTextField);
         this.addWidget(this.revertNameButton);
-        this.addWidget(this.saveButton);
     }
 
     @Override

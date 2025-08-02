@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import litematica.schematic.SchematicType;
+import litematica.schematic.LoadedSchematic;
 
 public class SchematicHolder
 {
@@ -49,7 +49,7 @@ public class SchematicHolder
             }
         }
 
-        Optional<LoadedSchematic> schematicOpt = SchematicType.tryLoadSchematic(file);
+        Optional<LoadedSchematic> schematicOpt = LoadedSchematic.tryLoadSchematic(file);
 
         if (schematicOpt.isPresent())
         {

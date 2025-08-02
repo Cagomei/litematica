@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -26,6 +25,7 @@ import malilib.util.game.wrap.GameWrap;
 import malilib.util.game.wrap.ItemWrap;
 import malilib.util.inventory.InventoryUtils;
 import malilib.util.position.BlockPos;
+import malilib.util.world.BlockState;
 import litematica.config.Configs;
 import litematica.materials.MaterialCache;
 import litematica.render.RenderUtils;
@@ -156,7 +156,7 @@ public class PickBlockUtils
     private static EnumHand doPickBlockForPosition(BlockPos pos)
     {
         World world = SchematicWorldHandler.getSchematicWorld();
-        IBlockState state = world.getBlockState(pos);
+        BlockState state = BlockState.of(world.getBlockState(pos));
         ItemStack stack = MaterialCache.getInstance().getRequiredBuildItemForState(state, world, pos);
         boolean ignoreNbt = Configs.Generic.PICK_BLOCK_IGNORE_NBT.getBooleanValue();
 

@@ -8,7 +8,7 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntry;
 import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntryType;
 import malilib.overlay.message.MessageDispatcher;
 import litematica.Reference;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 
 public class SchematicSelectorScreen extends BaseSchematicBrowserScreen

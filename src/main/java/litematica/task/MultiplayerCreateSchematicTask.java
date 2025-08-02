@@ -1,44 +1,8 @@
 package litematica.task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.world.NextTickListEntry;
-
-import malilib.mixin.access.NBTTagLongArrayMixin;
-import malilib.overlay.message.MessageDispatcher;
-import malilib.util.StringUtils;
-import malilib.util.game.wrap.NbtWrap;
-import malilib.util.game.wrap.RegistryUtils;
-import malilib.util.nbt.NbtUtils;
-import malilib.util.position.BlockPos;
-import malilib.util.position.Vec3d;
-import malilib.util.position.Vec3i;
-import litematica.network.SchematicSavePacketHandler;
-import litematica.render.infohud.InfoHud;
-import litematica.scheduler.tasks.TaskBase;
-import litematica.schematic.old.EntityInfo;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.LitematicaSchematic;
-import litematica.schematic.old.SchematicBase;
-import litematica.schematic.old.SchematicMetadata;
-import litematica.schematic.old.SchematicType;
-import litematica.schematic.old.container.LitematicaBlockStateContainerFull;
-import litematica.schematic.util.SchematicCreationUtils;
-import litematica.selection.AreaSelection;
-import litematica.selection.SelectionBox;
-import litematica.util.PositionUtils;
-
-public class MultiplayerCreateSchematicTask extends TaskBase
+public class MultiplayerCreateSchematicTask// extends TaskBase
 {
+    /*
     protected final UUID taskId;
     protected final Consumer<ISchematic> schematicConsumer;
     protected final LitematicaSchematic schematic;
@@ -293,4 +257,5 @@ public class MultiplayerCreateSchematicTask extends TaskBase
             consumer.accept(map);
         }
     }
+    */
 }

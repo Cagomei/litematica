@@ -3,8 +3,7 @@ package litematica.scheduler;
 public interface ITask
 {
     /**
-     * Get the display name for this task, used in the Task Manager GUI
-     * @return
+     * @return the display name for this task, used in the Task Manager screen
      */
     String getDisplayName();
 
@@ -26,8 +25,7 @@ public interface ITask
     boolean execute();
 
     /**
-     * Returns true if this task should be removed
-     * @return
+     * @return true if this task should be removed
      */
     boolean shouldRemove();
 
@@ -37,14 +35,13 @@ public interface ITask
     void stop();
 
     /**
-     * Returns the task's timer
-     * @return
+     * @return the timer of the task
      */
     TaskTimer getTimer();
 
     /**
      * Creates a new timer for the task, with the given execution interval in game ticks
-     * @param interval
+     * @param interval the execution interval in game ticks
      */
     void createTimer(int interval);
 }

@@ -12,7 +12,7 @@ import malilib.gui.widget.list.BaseFileBrowserWidget.DirectoryEntry;
 import malilib.util.StringUtils;
 import litematica.config.Configs;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.SchematicBrowserIconProvider;
 import litematica.gui.widget.SchematicInfoWidgetByPath;
 import litematica.schematic.SchematicType;
@@ -24,6 +24,7 @@ public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWi
     protected final GenericButton mainMenuScreenButton;
     protected final SchematicInfoWidgetByPath schematicInfoWidget;
     protected final String browserContext;
+    protected Optional<LoadedSchematic> lastSelectedSchematic = Optional.empty();
     @Nullable protected Path lastSelectedSchematicFile;
 
     public BaseSchematicBrowserScreen(int listX, int listY,
@@ -114,14 +115,14 @@ public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWi
         this.schematicInfoWidget.onSelectionChange(fullPath);
     }
 
-    @Nullable
     protected Optional<LoadedSchematic> getLastSelectedSchematic()
     {
-        if (this.lastSelectedSchematicFile == null)
+        if (this.lastSelectedSchematic.isPresent() == false &&
+            this.lastSelectedSchematicFile != null)
         {
-            return Optional.empty();
+            this.lastSelectedSchematic = LoadedSchematic.tryLoadSchematic(this.lastSelectedSchematicFile);
         }
 
-        return SchematicType.tryLoadSchematic(this.lastSelectedSchematicFile);
+        return this.lastSelectedSchematic;
     }
 }

@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import javax.annotation.Nullable;
 
+import malilib.gui.icon.DefaultIcons;
 import malilib.gui.icon.FileBrowserIconProvider;
 import malilib.gui.icon.Icon;
-import litematica.schematic.old.SchematicType;
+import litematica.schematic.SchematicType;
 
 public class SchematicBrowserIconProvider implements FileBrowserIconProvider
 {
@@ -21,11 +22,11 @@ public class SchematicBrowserIconProvider implements FileBrowserIconProvider
 
         if (icon == null && this.cachedIcons.containsKey(file) == false)
         {
-            List<SchematicType<?>> possibleTypes = SchematicType.getPossibleTypesFromFileName(file);
+            List<SchematicType> possibleTypes = SchematicType.getPossibleTypesFromFileName(file);
 
             if (possibleTypes.isEmpty() == false)
             {
-                icon = possibleTypes.get(0).getIcon();
+                icon = SchematicTypeIcons.INSTANCE.getNormalIcon(possibleTypes.get(0)).orElse(DefaultIcons.EXCLAMATION_11);
             }
 
             this.cachedIcons.put(file, icon);

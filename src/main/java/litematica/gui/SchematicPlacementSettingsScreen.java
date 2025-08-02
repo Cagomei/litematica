@@ -31,7 +31,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.list.entry.SchematicPlacementSubRegionEntryWidget;

@@ -23,7 +23,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.config.Configs;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.gui.SaveSchematicPlacementScreen;
 import litematica.gui.SchematicPlacementSettingsScreen;
 import litematica.gui.SchematicPlacementsListScreen;

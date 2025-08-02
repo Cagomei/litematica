@@ -14,7 +14,7 @@ import malilib.util.position.BlockRotation;
 import litematica.data.DataManager;
 import litematica.input.MouseScrollHandlerImpl;
 import litematica.scheduler.TaskScheduler;
-import litematica.scheduler.tasks.SetSchematicPreviewTask;
+import litematica.scheduler.task.SetSchematicPreviewTask;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.util.SchematicCreationUtils;

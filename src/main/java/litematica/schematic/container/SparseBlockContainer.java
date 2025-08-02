@@ -1,37 +1,36 @@
-package litematica.schematic.old.container;
+package litematica.schematic.container;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
-
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 
-public class LitematicaBlockStateContainerSparse extends LitematicaBlockStateContainerBase
+public class SparseBlockContainer extends BaseBlockContainer
 {
-    private final Long2ObjectOpenHashMap<IBlockState> blocks = new Long2ObjectOpenHashMap<>();
+    protected final Long2ObjectOpenHashMap<BlockState> blocks = new Long2ObjectOpenHashMap<>();
 
-    public LitematicaBlockStateContainerSparse(Vec3i size)
+    public SparseBlockContainer(Vec3i size)
     {
         super(size);
 
-        this.palette = new VanillaStructurePalette();
-        this.blockCounts = new long[256];
+        this.palette = new NonResizingHashMapPalette<>(1024);
+        this.blockCounts = new long[1024];
     }
 
     @Override
-    public IBlockState getBlockState(int x, int y, int z)
+    public BlockState getBlockState(int x, int y, int z)
     {
         long pos = (long) y << 32 | (long) (z & 0xFFFF) << 16 | (long) (x & 0xFFFF);
-        IBlockState state = this.blocks.get(pos);
+        BlockState state = this.blocks.get(pos);
         return state != null ? state : AIR_BLOCK_STATE;
     }
 
     @Override
-    public void setBlockState(int x, int y, int z, IBlockState state)
+    public void setBlockState(int x, int y, int z, BlockState state)
     {
         long pos = (long) y << 32 | (long) (z & 0xFFFF) << 16 | (long) (x & 0xFFFF);
 
-        IBlockState oldState = this.blocks.put(pos, state);
+        BlockState oldState = this.blocks.put(pos, state);
         int id = this.palette.idFor(state);
 
         if (id >= this.blockCounts.length)
@@ -54,9 +53,9 @@ public class LitematicaBlockStateContainerSparse extends LitematicaBlockStateCon
     }
 
     @Override
-    public LitematicaBlockStateContainerSparse copy()
+    public BlockContainer copy()
     {
-        LitematicaBlockStateContainerSparse copy = new LitematicaBlockStateContainerSparse(this.size);
+        SparseBlockContainer copy = new SparseBlockContainer(this.size);
         copy.blocks.putAll(this.blocks);
         copy.blockCounts = this.blockCounts.clone();
         copy.palette = this.palette.copy(null);
@@ -68,7 +67,7 @@ public class LitematicaBlockStateContainerSparse extends LitematicaBlockStateCon
     {
     }
 
-    public Long2ObjectOpenHashMap<IBlockState> getBlockMap()
+    public Long2ObjectOpenHashMap<BlockState> getBlockMap()
     {
         return this.blocks;
     }

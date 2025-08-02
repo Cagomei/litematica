@@ -3,6 +3,7 @@ package litematica.schematic;
 import com.google.common.collect.ImmutableMap;
 
 import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.DataView;
 import malilib.util.position.Vec3i;
 
 public interface Schematic
@@ -39,5 +40,5 @@ public interface Schematic
      * @param dataIn the data to read the schematic contents from
      * @return true if the read succeeded without errors, false if there was an error
      */
-    boolean read(CompoundData dataIn);
+    boolean read(DataView dataIn);
 }

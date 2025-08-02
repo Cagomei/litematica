@@ -40,6 +40,7 @@ import malilib.util.game.wrap.ItemWrap;
 import malilib.util.game.wrap.NbtWrap;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 import litematica.Litematica;
 import litematica.Reference;
 import litematica.util.WorldUtils;
@@ -49,8 +50,8 @@ public class MaterialCache
 {
     private static final MaterialCache INSTANCE = new MaterialCache();
 
-    protected final IdentityHashMap<IBlockState, ItemStack> buildItemsForStates = new IdentityHashMap<>();
-    protected final IdentityHashMap<IBlockState, ItemStack> displayItemsForStates = new IdentityHashMap<>();
+    protected final IdentityHashMap<BlockState, ItemStack> buildItemsForStates = new IdentityHashMap<>();
+    protected final IdentityHashMap<BlockState, ItemStack> displayItemsForStates = new IdentityHashMap<>();
     protected final WorldSchematic tempWorld;
     protected final BlockPos checkPos;
     protected boolean hasReadFromFile;
@@ -83,12 +84,12 @@ public class MaterialCache
         this.buildItemsForStates.clear();
     }
 
-    public ItemStack getRequiredBuildItemForState(IBlockState state)
+    public ItemStack getRequiredBuildItemForState(BlockState state)
     {
         return this.getRequiredBuildItemForState(state, this.tempWorld, this.checkPos);
     }
 
-    public ItemStack getRequiredBuildItemForState(IBlockState state, World world, BlockPos pos)
+    public ItemStack getRequiredBuildItemForState(BlockState state, World world, BlockPos pos)
     {
         ItemStack stack = this.buildItemsForStates.get(state);
 
@@ -100,7 +101,7 @@ public class MaterialCache
         return stack;
     }
 
-    public ItemStack getItemForDisplayNameForState(IBlockState state)
+    public ItemStack getItemForDisplayNameForState(BlockState state)
     {
         ItemStack stack = this.displayItemsForStates.get(state);
 
@@ -112,14 +113,14 @@ public class MaterialCache
         return stack;
     }
 
-    protected ItemStack getItemForStateFromWorld(IBlockState state, World world, BlockPos pos, boolean isBuildItem)
+    protected ItemStack getItemForStateFromWorld(BlockState state, World world, BlockPos pos, boolean isBuildItem)
     {
         ItemStack stack = isBuildItem ? this.getStateToItemOverride(state) : null;
 
         if (stack == null)
         {
-            world.setBlockState(pos, state, 0x14);
-            stack = state.getBlock().getItem(world, pos, state);
+            world.setBlockState(pos, state.vanillaState(), 0x14);
+            stack = state.getBlock().getItem(world, pos, state.vanillaState());
         }
 
         if (stack == null || ItemWrap.isEmpty(stack))
@@ -145,7 +146,7 @@ public class MaterialCache
         return stack;
     }
 
-    public boolean requiresMultipleItems(IBlockState state)
+    public boolean requiresMultipleItems(BlockState state)
     {
         Block block = state.getBlock();
 
@@ -157,12 +158,12 @@ public class MaterialCache
         return false;
     }
 
-    public ImmutableList<ItemStack> getItems(IBlockState state)
+    public ImmutableList<ItemStack> getItems(BlockState state)
     {
         return this.getItems(state, this.tempWorld, this.checkPos);
     }
 
-    public ImmutableList<ItemStack> getItems(IBlockState state, World world, BlockPos pos)
+    public ImmutableList<ItemStack> getItems(BlockState state, World world, BlockPos pos)
     {
         Block block = state.getBlock();
 
@@ -208,7 +209,7 @@ public class MaterialCache
     }
 
     @Nullable
-    protected ItemStack getStateToItemOverride(IBlockState state)
+    protected ItemStack getStateToItemOverride(BlockState state)
     {
         Block block = state.getBlock();
 
@@ -274,13 +275,15 @@ public class MaterialCache
         return null;
     }
 
-    protected void overrideStackSize(IBlockState state, ItemStack stack)
+    protected void overrideStackSize(BlockState state, ItemStack stack)
     {
-        if (state.getBlock() instanceof BlockSlab && ((BlockSlab) state.getBlock()).isDouble())
+        Block block = state.getBlock();
+
+        if (block instanceof BlockSlab && ((BlockSlab) block).isDouble())
         {
             stack.setCount(2);
         }
-        else if (state.getBlock() == Blocks.SNOW_LAYER)
+        else if (block == Blocks.SNOW_LAYER)
         {
             stack.setCount(state.getValue(BlockSnow.LAYERS));
         }
@@ -296,15 +299,15 @@ public class MaterialCache
         return nbt;
     }
 
-    protected NBTTagList writeMapToNBT(IdentityHashMap<IBlockState, ItemStack> map)
+    protected NBTTagList writeMapToNBT(IdentityHashMap<BlockState, ItemStack> map)
     {
         NBTTagList list = new NBTTagList();
 
-        for (Map.Entry<IBlockState, ItemStack> entry : map.entrySet())
+        for (Map.Entry<BlockState, ItemStack> entry : map.entrySet())
         {
             NBTTagCompound tag = new NBTTagCompound();
             NBTTagCompound stateTag = new NBTTagCompound();
-            NBTUtil.writeBlockState(stateTag, entry.getKey());
+            NBTUtil.writeBlockState(stateTag, entry.getKey().vanillaState());
 
             NbtWrap.putTag(tag, "Block", stateTag);
             NbtWrap.putTag(tag, "Item", entry.getValue().writeToNBT(new NBTTagCompound()));
@@ -324,7 +327,7 @@ public class MaterialCache
         this.readMapFromNBT(nbt, "DisplayMaterialCache", this.displayItemsForStates);
     }
 
-    protected void readMapFromNBT(NBTTagCompound nbt, String tagName, IdentityHashMap<IBlockState, ItemStack> map)
+    protected void readMapFromNBT(NBTTagCompound nbt, String tagName, IdentityHashMap<BlockState, ItemStack> map)
     {
         if (NbtWrap.containsList(nbt, tagName))
         {
@@ -343,7 +346,7 @@ public class MaterialCache
                     if (state != null)
                     {
                         ItemStack stack = ItemWrap.fromTag(NbtWrap.getCompound(tag, "Item"));
-                        map.put(state, stack);
+                        map.put(BlockState.of(state), stack);
                     }
                 }
             }

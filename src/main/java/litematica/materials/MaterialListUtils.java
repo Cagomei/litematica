@@ -7,7 +7,6 @@ import java.util.Map;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
@@ -18,6 +17,7 @@ import malilib.util.game.wrap.GameWrap;
 import malilib.util.game.wrap.ItemWrap;
 import malilib.util.inventory.InventoryUtils;
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.gui.MaterialListScreen;
@@ -34,7 +34,7 @@ public class MaterialListUtils
 
     public static List<MaterialListEntry> createMaterialListFor(Schematic schematic, Collection<String> subRegions)
     {
-        Object2LongOpenHashMap<IBlockState> countsTotal = new Object2LongOpenHashMap<>();
+        Object2LongOpenHashMap<BlockState> countsTotal = new Object2LongOpenHashMap<>();
 
         for (String regionName : subRegions)
         {
@@ -45,7 +45,7 @@ public class MaterialListUtils
             {
                 if (Configs.Generic.MATERIALS_FROM_CONTAINER.getBooleanValue())
                 {
-                    for (Map.Entry<IBlockState, Long> entry : container.getBlockCountsMap().entrySet())
+                    for (Map.Entry<BlockState, Long> entry : container.getBlockCountsMap().entrySet())
                     {
                         long total = entry.getValue().longValue();
 
@@ -69,7 +69,7 @@ public class MaterialListUtils
                         {
                             for (int x = 0; x < sizeX; ++x)
                             {
-                                IBlockState state = container.getBlockState(x, y, z);
+                                BlockState state = container.getBlockState(x, y, z);
                                 countsTotal.addTo(state, 1);
                             }
                         }
@@ -82,9 +82,9 @@ public class MaterialListUtils
     }
 
     public static List<MaterialListEntry> getMaterialList(
-            Object2LongOpenHashMap<IBlockState> countsTotal,
-            Object2LongOpenHashMap<IBlockState> countsMissing,
-            Object2LongOpenHashMap<IBlockState> countsMismatch)
+            Object2LongOpenHashMap<BlockState> countsTotal,
+            Object2LongOpenHashMap<BlockState> countsMissing,
+            Object2LongOpenHashMap<BlockState> countsMismatch)
     {
         List<MaterialListEntry> list = new ArrayList<>();
 
@@ -116,12 +116,12 @@ public class MaterialListUtils
     }
 
     private static void convertStatesToStacks(
-            Object2LongOpenHashMap<IBlockState> blockStatesIn,
+            Object2LongOpenHashMap<BlockState> blockStatesIn,
             Object2LongOpenHashMap<ItemType> itemTypesOut,
             MaterialCache cache)
     {
         // Convert from counts per IBlockState to counts per different stacks
-        for (IBlockState state : blockStatesIn.keySet())
+        for (BlockState state : blockStatesIn.keySet())
         {
             if (cache.requiresMultipleItems(state))
             {

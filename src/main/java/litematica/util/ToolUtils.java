@@ -19,6 +19,7 @@ import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.data.SchematicHolder;
 import litematica.scheduler.TaskScheduler;
+import litematica.scheduler.task.LocalCreateSchematicTask;
 import litematica.scheduler.tasks.TaskBase;
 import litematica.scheduler.tasks.TaskDeleteArea;
 import litematica.scheduler.tasks.TaskFillArea;
@@ -26,15 +27,13 @@ import litematica.scheduler.tasks.TaskPasteSchematicDirect;
 import litematica.scheduler.tasks.TaskPasteSchematicPerChunkBase;
 import litematica.scheduler.tasks.TaskPasteSchematicPerChunkCommand;
 import litematica.scheduler.tasks.TaskUpdateBlocks;
-import litematica.schematic.old.ISchematic;
-import litematica.schematic.old.LitematicaSchematic;
+import litematica.schematic.LoadedSchematic;
+import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
-import litematica.schematic.util.SchematicCreationUtils;
 import litematica.selection.AreaSelection;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.SelectionBox;
-import litematica.task.CreateSchematicTask;
 import litematica.tool.ToolMode;
 import litematica.tool.ToolModeData;
 import litematica.util.RayTraceUtils.RayTraceWrapper;
@@ -258,7 +257,7 @@ public class ToolUtils
         // might wipe the area before the new blocks have arrived on the
         // client and thus the new move schematic would just be air.
         if ((currentTime - areaMovedTime) < 1000000000L ||
-            scheduler.hasTask(CreateSchematicTask.class) ||
+            scheduler.hasTask(LocalCreateSchematicTask.class) ||
             scheduler.hasTask(TaskDeleteArea.class) ||
             scheduler.hasTask(TaskPasteSchematicPerChunkBase.class) ||
             scheduler.hasTask(TaskPasteSchematicDirect.class))
@@ -272,12 +271,11 @@ public class ToolUtils
 
         if (selection != null && selection.getBoxCount() > 0)
         {
-            LitematicaSchematic schematic = SchematicCreationUtils.createEmptySchematic(selection);
-            CreateSchematicTask taskSave = new CreateSchematicTask(schematic, selection, false,
-                                                () -> onAreaSavedForMove(schematic, selection, scheduler, pos));
+            LocalCreateSchematicTask task = new LocalCreateSchematicTask(selection, new SchematicSaveSettings(),
+                                                sch -> onAreaSavedForMove(new LoadedSchematic(sch), selection, scheduler, pos));
             areaMovedTime = System.nanoTime();
-            taskSave.disableCompletionMessage();
-            scheduler.scheduleTask(taskSave, 1);
+            task.disableCompletionMessage();
+            scheduler.scheduleTask(task, 1);
         }
         else
         {
@@ -285,23 +283,23 @@ public class ToolUtils
         }
     }
 
-    private static void onAreaSavedForMove(ISchematic schematic,
+    private static void onAreaSavedForMove(LoadedSchematic loadedSchematic,
                                            AreaSelection selection,
                                            TaskScheduler scheduler,
                                            BlockPos pos)
     {
-        SchematicPlacement placement = SchematicPlacement.create(schematic, pos, "-", true);
+        SchematicPlacement placement = SchematicPlacement.create(loadedSchematic, pos, "-", true);
         DataManager.getSchematicPlacementManager().addSchematicPlacement(placement, false);
 
         areaMovedTime = System.nanoTime();
 
         TaskDeleteArea taskDelete = new TaskDeleteArea(selection.getAllSelectionBoxes(), true);
         taskDelete.disableCompletionMessage();
-        taskDelete.setCompletionListener(() -> onAreaDeletedBeforeMove(schematic, placement, selection, scheduler, pos));
+        taskDelete.setCompletionListener(() -> onAreaDeletedBeforeMove(loadedSchematic, placement, selection, scheduler, pos));
         scheduler.scheduleTask(taskDelete, 1);
     }
 
-    private static void onAreaDeletedBeforeMove(ISchematic schematic,
+    private static void onAreaDeletedBeforeMove(LoadedSchematic loadedSchematic,
                                                 SchematicPlacement placement,
                                                 AreaSelection selection,
                                                 TaskScheduler scheduler,
@@ -322,15 +320,15 @@ public class ToolUtils
         areaMovedTime = System.nanoTime();
 
         taskPaste.disableCompletionMessage();
-        taskPaste.setCompletionListener(() -> onMovedAreaPasted(schematic, selection, pos));
+        taskPaste.setCompletionListener(() -> onMovedAreaPasted(loadedSchematic, selection, pos));
         scheduler.scheduleTask(taskPaste, 1);
     }
 
-    private static void onMovedAreaPasted(ISchematic schematic,
+    private static void onMovedAreaPasted(LoadedSchematic loadedSchematic,
                                           AreaSelection selection,
                                           BlockPos pos)
     {
-        SchematicHolder.INSTANCE.removeSchematic(schematic);
+        SchematicHolder.INSTANCE.removeSchematic(loadedSchematic);
         selection.moveEntireAreaSelectionTo(pos, false);
         areaMovedTime = System.nanoTime();
     }
@@ -342,12 +340,11 @@ public class ToolUtils
 
         if (selection != null && selection.getBoxCount() > 0)
         {
-            LitematicaSchematic schematic = SchematicCreationUtils.createEmptySchematic(selection);
-            CreateSchematicTask taskSave = new CreateSchematicTask(schematic, selection, false,
-                                                                         () -> placeClonedSchematic(schematic, selection));
-            taskSave.disableCompletionMessage();
+            LocalCreateSchematicTask task = new LocalCreateSchematicTask(selection, new SchematicSaveSettings(),
+                                                sch -> placeClonedSchematic(new LoadedSchematic(sch), selection));
+            task.disableCompletionMessage();
 
-            TaskScheduler.getServerInstanceIfExistsOrClient().scheduleTask(taskSave, 10);
+            TaskScheduler.getServerInstanceIfExistsOrClient().scheduleTask(task, 10);
 
             return true;
         }
@@ -359,7 +356,7 @@ public class ToolUtils
         return false;
     }
 
-    private static void placeClonedSchematic(ISchematic schematic, AreaSelection selection)
+    private static void placeClonedSchematic(LoadedSchematic loadedSchematic, AreaSelection selection)
     {
         String name = selection.getName();
         BlockPos origin;
@@ -379,10 +376,9 @@ public class ToolUtils
             }
         }
 
-        SchematicCreationUtils.setSchematicMetadataOnCreation(schematic, name);
-        SchematicHolder.INSTANCE.addSchematic(schematic, true);
+        SchematicHolder.INSTANCE.addSchematic(loadedSchematic, true);
 
-        SchematicPlacement placement = SchematicPlacement.create(schematic, origin, name, true, false);
+        SchematicPlacement placement = SchematicPlacement.create(loadedSchematic, origin, name, true, false);
         SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
 
         manager.addSchematicPlacement(placement, false);

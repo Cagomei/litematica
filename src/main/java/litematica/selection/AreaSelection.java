@@ -374,6 +374,7 @@ public class AreaSelection
 
     public AreaSelection copy()
     {
+        // FIXME don't use to/from JSON here... >_>
         return fromJson(this.toJson());
     }
 

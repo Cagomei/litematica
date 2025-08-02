@@ -1,11 +1,11 @@
-package litematica.schematic.old.container;
+package litematica.schematic.container;
 
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 
 import malilib.util.MathUtils;
 
-public class LitematicaBitArray
+public class TightLongBackedBitArray
 {
     /** The long array that is used to store the data for this BitArray. */
     private final long[] longArray;
@@ -16,55 +16,52 @@ public class LitematicaBitArray
      * For instance, if bitsPerEntry were 5, this value would be 31 (ie, {@code 0b00011111}).
      */
     private final long maxEntryValue;
-    /** Number of entries in this array (<b>not</b> the length of the long array that internally backs this array) */
+    /** Number of entries in this bit array (<b>not</b> the length of the long array that backs the bit array) */
     private final long arraySize;
 
-    public LitematicaBitArray(int bitsPerEntryIn, long arraySizeIn)
+    public TightLongBackedBitArray(int bitsPerEntryIn, long arraySizeIn)
     {
         this(bitsPerEntryIn, arraySizeIn, null);
     }
 
-    public LitematicaBitArray(int bitsPerEntryIn, long arraySizeIn, @Nullable long[] longArrayIn)
+    public TightLongBackedBitArray(int bitsPerEntry, long arraySize, @Nullable long[] array)
     {
-        Validate.inclusiveBetween(1L, 32L, (long) bitsPerEntryIn);
-        this.arraySize = arraySizeIn;
-        this.bitsPerEntry = bitsPerEntryIn;
-        this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;
+        Validate.inclusiveBetween(1L, 32L, bitsPerEntry);
+        this.arraySize = arraySize;
+        this.bitsPerEntry = bitsPerEntry;
+        this.maxEntryValue = (1L << bitsPerEntry) - 1L;
 
-        if (longArrayIn != null)
+        if (array != null)
         {
-            this.longArray = longArrayIn;
+            this.longArray = array;
         }
         else
         {
-            this.longArray = new long[(int) (MathUtils.roundUp((long) arraySizeIn * (long) bitsPerEntryIn, 64L) / 64L)];
+            this.longArray = new long[(int) (MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L)];
         }
     }
 
     public void setAt(long index, int value)
     {
-        Validate.inclusiveBetween(0L, this.arraySize - 1L, (long) index);
-        Validate.inclusiveBetween(0L, this.maxEntryValue, (long) value);
         long startOffset = index * (long) this.bitsPerEntry;
         int startArrIndex = (int) (startOffset >> 6); // startOffset / 64
         int endArrIndex = (int) (((index + 1L) * (long) this.bitsPerEntry - 1L) >> 6);
         int startBitOffset = (int) (startOffset & 0x3F); // startOffset % 64
-        this.longArray[startArrIndex] = this.longArray[startArrIndex] & ~(this.maxEntryValue << startBitOffset) | ((long) value & this.maxEntryValue) << startBitOffset;
+        this.longArray[startArrIndex] = this.longArray[startArrIndex] & ~(this.maxEntryValue << startBitOffset) | (value & this.maxEntryValue) << startBitOffset;
 
         if (startArrIndex != endArrIndex)
         {
             int endOffset = 64 - startBitOffset;
             int j1 = this.bitsPerEntry - endOffset;
-            this.longArray[endArrIndex] = this.longArray[endArrIndex] >>> j1 << j1 | ((long) value & this.maxEntryValue) >> endOffset;
+            this.longArray[endArrIndex] = this.longArray[endArrIndex] >>> j1 << j1 | (value & this.maxEntryValue) >> endOffset;
         }
     }
 
     public int getAt(long index)
     {
-        Validate.inclusiveBetween(0L, this.arraySize - 1L, (long) index);
-        long startOffset = index * (long) this.bitsPerEntry;
+        long startOffset = index * this.bitsPerEntry;
         int startArrIndex = (int) (startOffset >> 6); // startOffset / 64
-        int endArrIndex = (int) (((index + 1L) * (long) this.bitsPerEntry - 1L) >> 6);
+        int endArrIndex = (int) (((index + 1L) * this.bitsPerEntry - 1L) >> 6);
         int startBitOffset = (int) (startOffset & 0x3F); // startOffset % 64
 
         if (startArrIndex == endArrIndex)

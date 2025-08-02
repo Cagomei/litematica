@@ -7,11 +7,8 @@ import malilib.gui.widget.RadioButtonWidget;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
-import litematica.schematic.Schematic;
-import litematica.schematic.SchematicType;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.placement.SchematicPlacementManager;
-import litematica.schematic.util.SchematicFileUtils;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {
@@ -82,6 +79,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
     @Override
     protected void saveSchematic()
     {
+        /*
         boolean overwrite = isShiftDown();
         Path file = this.getSchematicFileIfCanSave(overwrite);
 
@@ -118,6 +116,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
             String key = "litematica.message.error.save_schematic.failed_to_save_converted";
             MessageDispatcher.error(key, file.getFileName().toString());
         }
+        */
     }
 
     protected void onSchematicSaved(Path newSchematicFile)

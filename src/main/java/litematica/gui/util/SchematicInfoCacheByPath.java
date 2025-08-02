@@ -12,10 +12,9 @@ import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import malilib.util.nbt.NbtUtils;
 import litematica.Reference;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
-import litematica.schematic.SchematicType;
 
 public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
 {
@@ -30,7 +29,7 @@ public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
 
         if (tag != null)
         {
-            Optional<LoadedSchematic> loadedSchematicOpt = SchematicType.tryLoadSchematic(file);
+            Optional<LoadedSchematic> loadedSchematicOpt = LoadedSchematic.tryLoadSchematic(file);
 
             if (loadedSchematicOpt.isPresent())
             {

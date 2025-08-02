@@ -6,43 +6,68 @@ import java.nio.file.Path;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.tag.DataFileUtils;
 import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.DataView;
 import litematica.schematic.Schematic;
 
 public class SchematicFileUtils
 {
-    public static boolean readFromFile(Schematic schematic, Path fileIn)
+    public static boolean readFromFile(Schematic schematic, Path file)
     {
-        if (Files.isRegularFile(fileIn) == false || Files.isReadable(fileIn) == false)
+        if (Files.isRegularFile(file) == false || Files.isReadable(file) == false)
         {
             return false;
         }
 
-        CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(fileIn);
+        CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(file);
 
         if (data == null)
         {
+            MessageDispatcher.error("litematica.error.schematic_read_from_file_failed.cant_read",
+                                    file.toAbsolutePath().toString());
             return false;
         }
 
         return schematic.read(data);
     }
 
-    public static boolean writeToFile(Schematic schematic, Path fileOut, boolean overwrite)
+    public static boolean writeToFile(Schematic schematic, Path file, boolean overwrite)
     {
-        if ((overwrite == false && Files.exists(fileOut)) || Files.isWritable(fileOut))
+        String fileName = file.getFileName().toString();
+        String extension = schematic.getType().getFileNameExtension();
+
+        if (fileName.endsWith(extension) == false)
         {
+            fileName = fileName + extension;
+            file = file.getParent().resolve(fileName);
+        }
+
+        if (overwrite == false && Files.exists(file))
+        {
+            MessageDispatcher.error("litematica.error.schematic_write_to_file_failed.exists",
+                                    file.toAbsolutePath().toString());
             return false;
         }
 
+        if (Files.isWritable(file))
+        {
+            MessageDispatcher.error("litematica.error.schematic_write_to_file_failed.not_writable",
+                                    file.toAbsolutePath().toString());
+            return false;
+        }
+
+        DataView data;
+
         try
         {
-            return DataFileUtils.writeCompressedCompoundData(fileOut, schematic.write());
+            data = schematic.write();
         }
         catch (Exception e)
         {
-            MessageDispatcher.error("litematica.message.error.schematic_save.failed_with_exception", e.getMessage());
+            String key = "litematica.message.error.schematic_save.serializing_schematic_data_failed";
+            MessageDispatcher.error().console(e).translate(key, e.getMessage());
+            return false;
         }
 
-        return false;
+        return DataFileUtils.writeCompressedData(file, data);
     }
 }

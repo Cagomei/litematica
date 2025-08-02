@@ -25,7 +25,7 @@ import malilib.util.data.json.JsonUtils;
 import malilib.util.position.BlockPos;
 import malilib.util.position.IntBoundingBox;
 import litematica.Litematica;
-import litematica.data.LoadedSchematic;
+import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.materials.MaterialListBase;
 import litematica.materials.MaterialListPlacement;

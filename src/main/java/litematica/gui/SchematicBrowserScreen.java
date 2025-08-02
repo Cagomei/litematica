@@ -12,10 +12,9 @@ import malilib.overlay.message.MessageDispatcher;
 import litematica.Reference;
 import litematica.config.Configs;
 import litematica.data.DataManager;
-import litematica.data.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.materials.MaterialListUtils;
-import litematica.schematic.SchematicType;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
@@ -108,7 +107,7 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
             return null;
         }
 
-        Optional<LoadedSchematic> opt = SchematicType.tryLoadSchematic(file);
+        Optional<LoadedSchematic> opt = LoadedSchematic.tryLoadSchematic(file);
 
         if (opt.isPresent() == false)
         {

@@ -2,11 +2,11 @@ package litematica.scheduler.tasks;
 
 import java.util.Collection;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 
 import malilib.util.data.EnabledCondition;
 import malilib.util.position.BlockPos;
+import malilib.util.world.BlockState;
 import litematica.config.Configs;
 import litematica.data.DataManager;
 import litematica.materials.IMaterialList;
@@ -54,11 +54,11 @@ public class TaskCountBlocksPlacement extends TaskCountBlocksMaterialList
     @Override
     protected void countAtPosition(BlockPos pos)
     {
-        IBlockState stateSchematic = this.worldSchematic.getBlockState(pos).getActualState(this.worldSchematic, pos);
+        BlockState stateSchematic = BlockState.of(this.worldSchematic.getBlockState(pos).getActualState(this.worldSchematic, pos));
 
         if (stateSchematic.getBlock() != Blocks.AIR)
         {
-            IBlockState stateClient = this.worldClient.getBlockState(pos).getActualState(this.worldClient, pos);
+            BlockState stateClient = BlockState.of(this.worldClient.getBlockState(pos).getActualState(this.worldClient, pos));
 
             this.countsTotal.addTo(stateSchematic, 1);
 
@@ -66,7 +66,8 @@ public class TaskCountBlocksPlacement extends TaskCountBlocksMaterialList
             {
                 this.countsMissing.addTo(stateSchematic, 1);
             }
-            else if (this.ignoreState ? stateClient.getBlock() != stateSchematic.getBlock() : stateClient != stateSchematic)
+            else if ((this.ignoreState          && stateClient.getBlock() != stateSchematic.getBlock()) ||
+                     (this.ignoreState == false && stateClient != stateSchematic))
             {
                 this.countsMissing.addTo(stateSchematic, 1);
                 this.countsMismatch.addTo(stateSchematic, 1);

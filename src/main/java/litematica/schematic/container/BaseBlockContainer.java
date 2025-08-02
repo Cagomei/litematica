@@ -1,35 +1,39 @@
-package litematica.schematic.old.container;
+package litematica.schematic.container;
 
-import java.util.Map;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 
+import malilib.util.data.palette.HashMapPalette;
+import malilib.util.data.palette.LinearPalette;
+import malilib.util.data.palette.Palette;
+import malilib.util.data.palette.PaletteResizeHandler;
 import malilib.util.position.Vec3i;
+import malilib.util.world.BlockState;
 
-public abstract class LitematicaBlockStateContainerBase implements ILitematicaBlockStateContainer
+public abstract class BaseBlockContainer implements BlockContainer
 {
-    public static final IBlockState AIR_BLOCK_STATE = Blocks.AIR.getDefaultState();
+    public static final BlockState AIR_BLOCK_STATE = BlockState.of(Blocks.AIR.getDefaultState());
     protected static final int MAX_BITS_LINEAR = 4;
 
-    protected ILitematicaBlockStatePalette palette;
+    protected Palette<BlockState> palette;
     protected final Vec3i size;
     protected final int sizeX;
     protected final int sizeY;
     protected final int sizeZ;
     protected final long sizeLayer;
     protected final long totalVolume;
-    protected long[] blockCounts = new long[0];
-    protected int bits;
+    protected int entryWidthBits;
     protected boolean hasSetBlockCounts;
+    protected long[] blockCounts = new long[0];
 
-    public LitematicaBlockStateContainerBase(Vec3i size)
+    public BaseBlockContainer(Vec3i size)
     {
         this(size, 2);
     }
 
-    protected LitematicaBlockStateContainerBase(Vec3i size, int bits)
+    protected BaseBlockContainer(Vec3i size, int entryWidthBits)
     {
         this.size = size;
         this.sizeX = size.getX();
@@ -38,7 +42,7 @@ public abstract class LitematicaBlockStateContainerBase implements ILitematicaBl
         this.totalVolume = (long) this.sizeX * (long) this.sizeY * (long) this.sizeZ;
         this.sizeLayer = (long) this.sizeX * (long) this.sizeZ;
 
-        this.setBits(bits);
+        this.setEntryWidthBits(entryWidthBits);
     }
 
     @Override
@@ -48,7 +52,7 @@ public abstract class LitematicaBlockStateContainerBase implements ILitematicaBl
     }
 
     @Override
-    public ILitematicaBlockStatePalette getPalette()
+    public Palette<BlockState> getPalette()
     {
         return this.palette;
     }
@@ -58,16 +62,17 @@ public abstract class LitematicaBlockStateContainerBase implements ILitematicaBl
     {
         this.calculateBlockCountsIfNeeded();
 
-        ILitematicaBlockStatePalette palette = this.getPalette();
-        IBlockState air = Blocks.AIR.getDefaultState();
         final int length = this.blockCounts.length;
+        Palette<BlockState> palette = this.getPalette();
         long count = 0;
 
         for (int id = 0; id < length; ++id)
         {
-            IBlockState state = palette.getBlockState(id);
+            BlockState state = palette.getValue(id);
 
-            if (state != null && state != air)
+            if (state != null &&
+                state != AIR_BLOCK_STATE &&
+                state.vanillaState().getMaterial() != Material.AIR)
             {
                 count += this.blockCounts[id];
             }
@@ -77,17 +82,17 @@ public abstract class LitematicaBlockStateContainerBase implements ILitematicaBl
     }
 
     @Override
-    public Map<IBlockState, Long> getBlockCountsMap()
+    public Object2LongOpenHashMap<BlockState> getBlockCountsMap()
     {
         this.calculateBlockCountsIfNeeded();
 
-        Object2LongOpenHashMap<IBlockState> map = new Object2LongOpenHashMap<>(this.blockCounts.length);
-        ILitematicaBlockStatePalette palette = this.getPalette();
-        final int length = Math.min(palette.getPaletteSize(), this.blockCounts.length);
+        Object2LongOpenHashMap<BlockState> map = new Object2LongOpenHashMap<>(this.blockCounts.length);
+        Palette<BlockState> palette = this.getPalette();
+        final int length = Math.min(palette.getSize(), this.blockCounts.length);
 
         for (int id = 0; id < length; ++id)
         {
-            IBlockState state = palette.getBlockState(id);
+            BlockState state = palette.getValue(id);
 
             if (state != null)
             {
@@ -111,22 +116,22 @@ public abstract class LitematicaBlockStateContainerBase implements ILitematicaBl
         this.hasSetBlockCounts = true;
     }
 
-    protected void setBits(int bitsIn)
+    protected void setEntryWidthBits(int bitsIn)
     {
-        this.bits = bitsIn;
+        this.entryWidthBits = bitsIn;
     }
 
     protected abstract void calculateBlockCountsIfNeeded();
 
-    public static ILitematicaBlockStatePalette createPalette(int bits, IPaletteResizeHandler resizeHandler)
+    public static Palette<BlockState> createPalette(int bits, PaletteResizeHandler<BlockState> resizeHandler)
     {
         if (bits <= MAX_BITS_LINEAR)
         {
-            return new LitematicaBlockStatePaletteLinear(bits, resizeHandler);
+            return new LinearPalette<>(bits, resizeHandler);
         }
         else
         {
-            return new LitematicaBlockStatePaletteHashMap(bits, resizeHandler);
+            return new HashMapPalette<>(bits, resizeHandler);
         }
     }
 }
