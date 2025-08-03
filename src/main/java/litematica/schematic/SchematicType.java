@@ -27,7 +27,7 @@ public class SchematicType
          .setSchematicFromRegionsFactory(LitematicaSchematic::fromRegions)
          .setDataValidator(LitematicaSchematic::isValidData)
          .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equals)
+         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
          .setHasName(true)
          .build();
 
@@ -38,7 +38,7 @@ public class SchematicType
          .setSchematicFromRegionsFactory(SchematicaSchematic::fromRegions)
          .setDataValidator(SchematicaSchematic::isValidData)
          .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equals)
+         .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
          .setHasName(true)
          .build();
 
@@ -49,7 +49,7 @@ public class SchematicType
          .setSchematicFromRegionsFactory(SpongeSchematic::fromRegions)
          .setDataValidator(SpongeSchematic::isValidData)
          .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equals(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equals(ext))
+         .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext))
          .setHasName(true)
          .build();
 
@@ -60,7 +60,7 @@ public class SchematicType
         .setSchematicFromRegionsFactory(VanillaSchematic::fromRegions)
         .setDataValidator(VanillaSchematic::isValidData)
         .setExtension(VanillaSchematic.FILE_NAME_EXTENSION)
-        .setExtensionValidator(VanillaSchematic.FILE_NAME_EXTENSION::equals)
+        .setExtensionValidator(VanillaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
         .setHasName(true)
         .build();
 
