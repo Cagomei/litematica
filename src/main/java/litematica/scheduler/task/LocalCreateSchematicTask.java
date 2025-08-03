@@ -17,7 +17,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.NextTickListEntry;
@@ -28,7 +27,8 @@ import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.DataTypeUtils;
+import malilib.util.data.tag.util.DataTypeUtils;
+import malilib.util.game.wrap.BlockWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
@@ -42,10 +42,10 @@ import litematica.Litematica;
 import litematica.mixin.access.NextTickListEntryMixin;
 import litematica.render.infohud.InfoHud;
 import litematica.scheduler.tasks.TaskProcessChunkBase;
-import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicRegion;
+import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
 import litematica.schematic.data.ScheduledBlockTickData;
@@ -206,19 +206,17 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
                         continue;
                     }
 
-                    try
-                    {
-                        NBTTagCompound nbt = new NBTTagCompound();
-                        te.writeToNBT(nbt);
+                    CompoundData data = BlockWrap.writeBlockEntityToTag(te);
 
+                    if (data != null)
+                    {
                         BlockPos relPos = new BlockPos(relX, relY, relZ);
-                        CompoundData data = DataTypeUtils.fromVanillaCompound(nbt);
                         DataTypeUtils.putVec3i(data, relPos);
 
                         blockEntityMapOut.put(relPos, data);
                         this.totalBlockEntities++;
                     }
-                    catch (Exception e)
+                    else
                     {
                         Litematica.LOGGER.warn("Failed to save BlockEntity {} at {}", te, mutPos);
                     }
@@ -316,7 +314,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
         for (Entity entity : entities)
         {
-            UUID uuid = entity.getUniqueID();
+            UUID uuid = EntityWrap.getUuid(entity);
 
             // This entity was already saved to some region
             if (existingEntities.contains(uuid))
@@ -338,13 +336,11 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
             try
             {
-                NBTTagCompound tag = new NBTTagCompound();
+                CompoundData data = EntityWrap.writeEntityToTag(entity);
 
-                if (entity.writeToNBTOptional(tag))
+                if (data != null)
                 {
                     Vec3d relPos = new Vec3d(x - regionOriginX, y - regionOriginY, z - regionOriginZ);
-
-                    CompoundData data = DataTypeUtils.fromVanillaCompound(tag);
                     DataTypeUtils.writeVec3dToListTag(data, relPos);
 
                     entityListOut.add(new EntityData(relPos, data));

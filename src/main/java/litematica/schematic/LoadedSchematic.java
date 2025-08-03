@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.DataFileUtils;
+import malilib.util.data.tag.util.DataFileUtils;
 
 public class LoadedSchematic
 {
@@ -69,7 +69,7 @@ public class LoadedSchematic
 
     public static Optional<LoadedSchematic> tryLoadSchematic(Path schematicFile)
     {
-        CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(schematicFile);
+        CompoundData data = DataFileUtils.readCompoundDataFromNbtFile(schematicFile);
 
         if (data == null)
         {

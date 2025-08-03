@@ -3,7 +3,7 @@ package litematica.schematic;
 import javax.annotation.Nullable;
 
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.DataTypeUtils;
+import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.DataView;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;

@@ -14,19 +14,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.EnabledCondition;
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.DataTypeUtils;
+import malilib.util.data.tag.util.DataTypeUtils;
+import malilib.util.game.wrap.BlockWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
-import malilib.util.game.wrap.NbtWrap;
-import malilib.util.nbt.NbtUtils;
 import malilib.util.position.BlockMirror;
 import malilib.util.position.BlockPos;
 import malilib.util.position.BlockRotation;
@@ -47,13 +44,10 @@ import litematica.schematic.SchematicRegion;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
 import litematica.schematic.data.ScheduledBlockTickData;
-import litematica.schematic.old.EntityInfo;
-import litematica.schematic.old.ISchematicRegion;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
 import litematica.selection.CornerDefinedBox;
-import litematica.util.EntityUtils;
 import litematica.util.PositionUtils;
 import litematica.util.WorldUtils;
 import litematica.util.value.ReplaceBehavior;
@@ -204,7 +198,7 @@ public class SchematicPlacingUtils
 
     public static boolean placeBlocksToWorld(World world, BlockPos origin, BlockPos regionPos, Vec3i regionSize,
                                              SchematicPlacement schematicPlacement, SubRegionPlacement placement,
-                                             BlockContainer container, Map<BlockPos, CompoundData> tileMap,
+                                             BlockContainer container, Map<BlockPos, CompoundData> blockEntityMap,
                                              @Nullable Map<BlockPos, ScheduledBlockTickData> scheduledTicks,
                                              LayerRange range, boolean notifyNeighbors)
     {
@@ -267,7 +261,7 @@ public class SchematicPlacingUtils
                     }
 
                     posMutable.set(x, y, z);
-                    CompoundData teNBT = tileMap.get(posMutable);
+                    CompoundData beData = blockEntityMap.get(posMutable);
 
                     posMutable.set(posMinRel.getX() + x - regionPos.getX(),
                                    posMinRel.getY() + y - regionPos.getY(),
@@ -293,34 +287,34 @@ public class SchematicPlacingUtils
                         continue;
                     }
 
-                    TileEntity teOld = world.getTileEntity(pos);
+                    TileEntity beOld = world.getTileEntity(pos);
 
-                    if (teOld != null)
+                    if (beOld != null)
                     {
-                        if (teOld instanceof IInventory)
+                        if (beOld instanceof IInventory)
                         {
-                            ((IInventory) teOld).clear();
+                            ((IInventory) beOld).clear();
                         }
 
                         world.setBlockState(pos, barrier, 0x14);
                     }
 
-                    if (world.setBlockState(pos, state.vanillaState(), 0x12) && teNBT != null)
+                    if (world.setBlockState(pos, state.vanillaState(), 0x12) && beData != null)
                     {
-                        TileEntity te = world.getTileEntity(pos);
+                        TileEntity be = world.getTileEntity(pos);
 
-                        if (te != null)
+                        if (be != null)
                         {
-                            teNBT = teNBT.copy();
-                            DataTypeUtils.putVec3i(teNBT, pos);
+                            beData = beData.copy();
+                            DataTypeUtils.putVec3i(beData, pos);
 
                             try
                             {
-                                te.readFromNBT(teNBT);
+                                BlockWrap.readBlockEntityFrom(be, beData);
 
-                                if (mirrorMain != BlockMirror.NONE) { te.mirror(mirrorMain.getVanillaMirror()); }
-                                if (mirrorSub != BlockMirror.NONE)  { te.mirror(mirrorSub.getVanillaMirror()); }
-                                if (rotationCombined != BlockRotation.NONE) { te.rotate(rotationCombined.getVanillaRotation()); }
+                                if (mirrorMain != BlockMirror.NONE) { be.mirror(mirrorMain.getVanillaMirror()); }
+                                if (mirrorSub != BlockMirror.NONE)  { be.mirror(mirrorSub.getVanillaMirror()); }
+                                if (rotationCombined != BlockRotation.NONE) { be.rotate(rotationCombined.getVanillaRotation()); }
                             }
                             catch (Exception e)
                             {
@@ -391,7 +385,7 @@ public class SchematicPlacingUtils
 
             if (range.isPositionWithinRange((int) Math.floor(pos.x), (int) Math.floor(pos.y), (int) Math.floor(pos.z)))
             {
-                Entity entity = EntityUtils.createEntityAndPassengersFromNbt(entityData.data, world);
+                Entity entity = EntityWrap.createEntityAndPassengersFromNbt(entityData.data, world);
 
                 if (entity != null)
                 {
@@ -400,7 +394,7 @@ public class SchematicPlacingUtils
                     double z = pos.z + offZ;
 
                     rotateEntity(entity, x, y, z, rotationCombined, mirrorMain, mirrorSub);
-                    EntityUtils.spawnEntityAndPassengersInWorld(entity, world);
+                    EntityWrap.spawnEntityAndPassengersInWorld(entity, world);
                 }
             }
         }
@@ -540,7 +534,7 @@ public class SchematicPlacingUtils
                     }
 
                     posMutable.set(x, y, z);
-                    CompoundData teNBT = blockEntityMap.get(posMutable);
+                    CompoundData beData = blockEntityMap.get(posMutable);
 
                     posMutable.set(posMinRel.getX() + x - regionPos.getX(),
                                    posMinRel.getY() + y - regionPos.getY(),
@@ -561,34 +555,34 @@ public class SchematicPlacingUtils
                     if (mirrorSub != BlockMirror.NONE)  { state = state.withMirror(mirrorSub); }
                     if (rotationCombined != BlockRotation.NONE) { state = state.withRotation(rotationCombined); }
 
-                    TileEntity te = world.getTileEntity(pos);
+                    TileEntity beOld = world.getTileEntity(pos);
 
-                    if (te != null)
+                    if (beOld != null)
                     {
-                        if (te instanceof IInventory)
+                        if (beOld instanceof IInventory)
                         {
-                            ((IInventory) te).clear();
+                            ((IInventory) beOld).clear();
                         }
 
                         world.setBlockState(pos, barrier, 0x14);
                     }
 
-                    if (world.setBlockState(pos, state.vanillaState(), 0x12) && teNBT != null)
+                    if (world.setBlockState(pos, state.vanillaState(), 0x12) && beData != null)
                     {
-                        te = world.getTileEntity(pos);
+                        TileEntity be = world.getTileEntity(pos);
 
-                        if (te != null)
+                        if (be != null)
                         {
-                            teNBT = teNBT.copy();
-                            DataTypeUtils.putVec3i(teNBT, pos);
+                            beData = beData.copy();
+                            DataTypeUtils.putVec3i(beData, pos);
 
                             try
                             {
-                                te.readFromNBT(teNBT);
+                                BlockWrap.readBlockEntityFrom(be, beData);
 
-                                if (mirrorMain != BlockMirror.NONE) { te.mirror(mirrorMain.getVanillaMirror()); }
-                                if (mirrorSub != BlockMirror.NONE)  { te.mirror(mirrorSub.getVanillaMirror()); }
-                                if (rotationCombined != BlockRotation.NONE) { te.rotate(rotationCombined.getVanillaRotation()); }
+                                if (mirrorMain != BlockMirror.NONE) { be.mirror(mirrorMain.getVanillaMirror()); }
+                                if (mirrorSub != BlockMirror.NONE)  { be.mirror(mirrorSub.getVanillaMirror()); }
+                                if (rotationCombined != BlockRotation.NONE) { be.rotate(rotationCombined.getVanillaRotation()); }
                             }
                             catch (Exception e)
                             {
@@ -654,7 +648,7 @@ public class SchematicPlacingUtils
 
         for (EntityData info : entityList)
         {
-            Entity entity = EntityUtils.createEntityAndPassengersFromNbt(info.data, world);
+            Entity entity = EntityWrap.createEntityAndPassengersFromNbt(info.data, world);
 
             if (entity != null)
             {
@@ -669,7 +663,7 @@ public class SchematicPlacingUtils
                 {
                     rotateEntity(entity, x, y, z, rotationCombined, mirrorMain, mirrorSub);
                     //System.out.printf("post: %.1f - rot: %s, mm: %s, ms: %s\n", rotationYaw, rotationCombined, mirrorMain, mirrorSub);
-                    EntityUtils.spawnEntityAndPassengersInWorld(entity, world);
+                    EntityWrap.spawnEntityAndPassengersInWorld(entity, world);
                 }
             }
         }

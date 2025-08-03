@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import malilib.util.data.Constants;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.DataTypeUtils;
+import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.ListData;
 import malilib.util.game.BlockUtils;
 import malilib.util.position.BlockPos;

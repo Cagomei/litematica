@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import malilib.overlay.message.MessageDispatcher;
-import malilib.util.data.tag.DataFileUtils;
+import malilib.util.data.tag.util.DataFileUtils;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import litematica.schematic.Schematic;
@@ -18,7 +18,7 @@ public class SchematicFileUtils
             return false;
         }
 
-        CompoundData data = DataFileUtils.readCompoundDataNbtFromFile(file);
+        CompoundData data = DataFileUtils.readCompoundDataFromNbtFile(file);
 
         if (data == null)
         {
@@ -68,6 +68,6 @@ public class SchematicFileUtils
             return false;
         }
 
-        return DataFileUtils.writeCompressedData(file, data);
+        return DataFileUtils.writeCompoundDataToCompressedNbtFile(file, data);
     }
 }
