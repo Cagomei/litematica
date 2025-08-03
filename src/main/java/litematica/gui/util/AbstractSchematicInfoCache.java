@@ -25,17 +25,7 @@ public abstract class AbstractSchematicInfoCache<T>
     @Nullable
     public SchematicInfo getOrCacheSchematicInfo(T key)
     {
-        SchematicInfo info = this.cachedData.get(key);
-
-        if (info != null)
-        {
-            return info;
-        }
-
-        SchematicInfo data = this.createSchematicInfo(key);
-        this.cachedData.put(key, data);
-
-        return data;
+        return this.cachedData.computeIfAbsent(key, this::createSchematicInfo);
     }
 
     public void clearCache()
