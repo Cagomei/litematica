@@ -63,12 +63,13 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
     {
         super.reAddSubWidgets();
 
+        this.addWidget(this.configButton);
+
         if (this.currentInfo == null)
         {
             return;
         }
 
-        this.addWidget(this.configButton);
         this.addWidget(this.infoTextLabel);
         this.addWidgetIf(this.descriptionLabel, this.hasDescription);
 
@@ -81,6 +82,10 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
     @Override
     public void updateSubWidgetPositions()
     {
+        super.updateSubWidgetPositions();;
+
+        this.configButton.setPosition(this.getRight() - 14, this.getY() + 3);
+
         if (this.currentInfo == null)
         {
             return;
@@ -98,7 +103,6 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 
         int offX = (this.getWidth() - this.iconWidget.getWidth()) / 2;
         this.iconWidget.setPosition(this.getX() + offX, this.getBottom() - this.iconWidget.getHeight() - 4);
-        this.configButton.setPosition(this.getRight() - 14, this.getY() + 3);
     }
 
     protected void openConfigScreen()
@@ -190,12 +194,12 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
 
         SchematicMetadata meta = this.currentInfo.schematicMetadata;
-        List<StyledTextLine> lines = new ArrayList<>();
         SimpleDateFormat dateFormat = createDateFormat();
+        List<StyledTextLine> lines = new ArrayList<>();
 
         // TODO Add a line for the SchematicType
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_NAME.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_NAME.getBooleanValue() && meta.getSchematicName().length() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.name");
             StyledTextLine.translate(lines, "litematica.label.schematic_info.name.value", meta.getSchematicName());
@@ -221,28 +225,17 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
                                      dateFormat.format(new Date(meta.getTimeModified())));
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_MC_VERSION.getBooleanValue())
-        {
-            MinecraftVersion ver = meta.getMinecraftVersion();
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.mc_version", ver.displayName, ver.dataVersion);
-        }
-
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION.getBooleanValue())
-        {
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.schematic_version", meta.getSchematicVersion());
-        }
-
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue() && meta.getRegionCount() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.region_count", meta.getRegionCount());
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENTITY_COUNT.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENTITY_COUNT.getBooleanValue() && meta.getEntityCount() >= 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.entity_count", meta.getEntityCount());
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT.getBooleanValue() && meta.getBlockEntityCount() >= 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.block_entity_count", meta.getBlockEntityCount());
         }
@@ -251,14 +244,17 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         String areaSizeStr = StringUtils.translate("litematica.label.schematic_info.dimensions_value",
                                                    areaSize.getX(), areaSize.getY(), areaSize.getZ());
 
+        boolean showVolume = Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_VOLUME.getBooleanValue() && meta.getTotalVolume() >= 0;
+        boolean showTotalBlocks = Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS.getBooleanValue() && meta.getTotalBlocks() >= 0;
+
         if (this.getHeight() >= 240)
         {
-            if (Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS.getBooleanValue())
+            if (showTotalBlocks)
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks", meta.getTotalBlocks());
             }
 
-            if (Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_VOLUME.getBooleanValue())
+            if (showVolume)
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_volume", meta.getTotalVolume());
             }
@@ -271,12 +267,30 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
         else
         {
-            if (Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_VOLUME.getBooleanValue() ||
-                Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS.getBooleanValue())
+            if (showVolume || showTotalBlocks)
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks_and_volume",
                                          meta.getTotalBlocks(), meta.getTotalVolume());
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.enclosing_size_and_value", areaSizeStr);
+            }
+        }
+
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION.getBooleanValue() && meta.getSchematicVersion() >= 0)
+        {
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.schematic_version", meta.getSchematicVersion());
+        }
+
+        MinecraftVersion ver = meta.getMinecraftVersion();
+
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_MC_VERSION.getBooleanValue())
+        {
+            if (ver.dataVersion > 0)
+            {
+                StyledTextLine.translate(lines, "litematica.label.schematic_info.mc_version", ver.displayName, ver.dataVersion);
+            }
+            else
+            {
+                StyledTextLine.translate(lines, "litematica.label.schematic_info.mc_version", ver.displayName, "???");
             }
         }
 
