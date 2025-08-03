@@ -299,11 +299,12 @@ litematica.label.schematic_info.enclosing_size.value=  §a%s
 litematica.label.schematic_info.enclosing_size_and_value=<c=aaa>Enclosing size: %s
 litematica.label.schematic_info.entity_count=<c=aaa>Entities: §6%s
 litematica.label.schematic_info.generic_value=<c=ccc>%s
-litematica.label.schematic_info.mc_version=<c=aaa>MC ver: <c=eee>%s<c=aaa> [DV: §6%s<c=aaa>]
+litematica.label.schematic_info.mc_version=<c=aaa>MC: <c=eee>%s<c=aaa> - DV: §6%s<c=aaa>
 litematica.label.schematic_info.name=<c=aaa>Name:
 litematica.label.schematic_info.name.value= <c=7f7>%s
 litematica.label.schematic_info.region_count=<c=aaa>Regions: §6%s
 litematica.label.schematic_info.schematic_author=<c=aaa>Schematic by: <c=eee>%s
+litematica.label.schematic_info.schematic_type=<c=aaa>Type: §f%s
 litematica.label.schematic_info.schematic_version=<c=aaa>Schematic ver: §6%s
 litematica.label.schematic_info.time_created=<c=aaa>Created: <c=7af>%s
 litematica.label.schematic_info.time_modified=<c=aaa>Modified: <c=7af>%s

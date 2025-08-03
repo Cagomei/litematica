@@ -21,43 +21,47 @@ import litematica.schematic.container.BlockContainerFactory;
 public class SchematicType
 {
     public static final SchematicType LITEMATICA = SchematicType.builder()
-         .setTranslationKey("litematica.schematic.type.litematica")
-         .setBlockContainerFactory(LitematicaSchematic::createDefaultBlockContainer)
-         .setSchematicFromDataFactory(LitematicaSchematic::fromData)
-         .setSchematicFromRegionsFactory(LitematicaSchematic::fromRegions)
-         .setDataValidator(LitematicaSchematic::isValidData)
-         .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
-         .setHasName(true)
-         .build();
+        .setTranslationKey("litematica.schematic.type.litematica")
+        .setBlockContainerFactory(LitematicaSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(LitematicaSchematic::fromData)
+        .setSchematicFromRegionsFactory(LitematicaSchematic::fromRegions)
+        .setMetadataFromDataFactory(LitematicaSchematic::createAndReadMetadata)
+        .setDataValidator(LitematicaSchematic::isValidData)
+        .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setHasName(true)
+        .build();
 
     public static final SchematicType SCHEMATICA = SchematicType.builder()
-         .setTranslationKey("litematica.schematic.type.schematica")
-         .setBlockContainerFactory(SchematicaSchematic::createDefaultBlockContainer)
-         .setSchematicFromDataFactory(SchematicaSchematic::fromData)
-         .setSchematicFromRegionsFactory(SchematicaSchematic::fromRegions)
-         .setDataValidator(SchematicaSchematic::isValidData)
-         .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
-         .setHasName(true)
-         .build();
+        .setTranslationKey("litematica.schematic.type.schematica")
+        .setBlockContainerFactory(SchematicaSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(SchematicaSchematic::fromData)
+        .setSchematicFromRegionsFactory(SchematicaSchematic::fromRegions)
+        .setMetadataFromDataFactory(SchematicaSchematic::createAndReadMetadata)
+        .setDataValidator(SchematicaSchematic::isValidData)
+        .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setHasName(true)
+        .build();
 
     public static final SchematicType SPONGE = SchematicType.builder()
-         .setTranslationKey("litematica.schematic.type.sponge")
-         .setBlockContainerFactory(SpongeSchematic::createDefaultBlockContainer)
-         .setSchematicFromDataFactory(SpongeSchematic::fromData)
-         .setSchematicFromRegionsFactory(SpongeSchematic::fromRegions)
-         .setDataValidator(SpongeSchematic::isValidData)
-         .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
-         .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext))
-         .setHasName(true)
-         .build();
+        .setTranslationKey("litematica.schematic.type.sponge")
+        .setBlockContainerFactory(SpongeSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(SpongeSchematic::fromData)
+        .setSchematicFromRegionsFactory(SpongeSchematic::fromRegions)
+        .setMetadataFromDataFactory(SpongeSchematic::createAndReadMetadata)
+        .setDataValidator(SpongeSchematic::isValidData)
+        .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext))
+        .setHasName(true)
+        .build();
 
     public static final SchematicType VANILLA = SchematicType.builder()
         .setTranslationKey("litematica.schematic.type.vanilla")
         .setBlockContainerFactory(VanillaSchematic::createDefaultBlockContainer)
         .setSchematicFromDataFactory(VanillaSchematic::fromData)
         .setSchematicFromRegionsFactory(VanillaSchematic::fromRegions)
+        .setMetadataFromDataFactory(VanillaSchematic::createAndReadMetadata)
         .setDataValidator(VanillaSchematic::isValidData)
         .setExtension(VanillaSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(VanillaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
@@ -72,6 +76,7 @@ public class SchematicType
 
     private final String extension;
     private final BlockContainerFactory containerFactory;
+    private final Function<DataView, Optional<SchematicMetadata>> metadataFromDataFactory;
     private final Function<DataView, Optional<Schematic>> schematicFromDataFactory;
     private final Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory;
     private final Function<String, Boolean> extensionValidator;
@@ -83,6 +88,7 @@ public class SchematicType
                           BlockContainerFactory containerFactory,
                           Function<DataView, Optional<Schematic>> schematicFromDataFactory,
                           Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory,
+                          Function<DataView, Optional<SchematicMetadata>> metadataFromDataFactory,
                           Function<DataView, Boolean> dataValidator,
                           String extension,
                           Function<String, Boolean> extensionValidator,
@@ -93,6 +99,7 @@ public class SchematicType
         this.containerFactory = containerFactory;
         this.schematicFromDataFactory = schematicFromDataFactory;
         this.schematicFromRegionsFactory = schematicFromRegionsFactory;
+        this.metadataFromDataFactory = metadataFromDataFactory;
         this.extensionValidator = extensionValidator;
         this.dataValidator = dataValidator;
         this.hasName = hasName;
@@ -136,6 +143,11 @@ public class SchematicType
     public Optional<Schematic> createSchematicFromData(DataView dataIn)
     {
         return this.schematicFromDataFactory.apply(dataIn);
+    }
+
+    public Optional<SchematicMetadata> createMetadataFromData(DataView data)
+    {
+        return this.metadataFromDataFactory.apply(data);
     }
 
     public static List<SchematicType> getPossibleTypesFromFileName(Path file)
@@ -218,6 +230,7 @@ public class SchematicType
         private BlockContainerFactory containerFactory;
         private Function<DataView, Optional<Schematic>> schematicFromDataFactory;
         private Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory;
+        private Function<DataView, Optional<SchematicMetadata>> metadataFromDataFactory;
         private Function<String, Boolean> extensionValidator;
         private Function<DataView, Boolean> dataValidator;
         private String displayName = "?";
@@ -265,6 +278,12 @@ public class SchematicType
             return this;
         }
 
+        public SchematicType.Builder setMetadataFromDataFactory(Function<DataView, Optional<SchematicMetadata>> metadataFromDataFactory)
+        {
+            this.metadataFromDataFactory = metadataFromDataFactory;
+            return this;
+        }
+
         public SchematicType.Builder setHasName(boolean hasName)
         {
             this.hasName = hasName;
@@ -276,6 +295,7 @@ public class SchematicType
             if (this.containerFactory == null ||
                 this.schematicFromDataFactory == null ||
                 this.schematicFromRegionsFactory == null ||
+                this.metadataFromDataFactory == null ||
                 this.dataValidator == null ||
                 this.extension == null ||
                 this.extensionValidator == null ||
@@ -288,6 +308,7 @@ public class SchematicType
                                      this.containerFactory,
                                      this.schematicFromDataFactory,
                                      this.schematicFromRegionsFactory,
+                                     this.metadataFromDataFactory,
                                      this.dataValidator,
                                      this.extension,
                                      this.extensionValidator,

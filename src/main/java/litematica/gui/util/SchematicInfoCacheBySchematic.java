@@ -9,6 +9,7 @@ import malilib.util.FileNameUtils;
 import malilib.util.data.Identifier;
 import litematica.Reference;
 import litematica.schematic.LoadedSchematic;
+import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 
 public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<LoadedSchematic>
@@ -17,7 +18,8 @@ public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<Lo
     @Nullable
     protected SchematicInfo createSchematicInfo(LoadedSchematic loadedSchematic)
     {
-        SchematicMetadata metadata = loadedSchematic.schematic.getMetadata();
+        Schematic schematic = loadedSchematic.schematic;
+        SchematicMetadata metadata = schematic.getMetadata();
         String name;
 
         if (loadedSchematic.file.isPresent())
@@ -31,6 +33,6 @@ public class SchematicInfoCacheBySchematic extends AbstractSchematicInfoCache<Lo
 
         Identifier iconName = new Identifier(Reference.MOD_ID, name);
         DynamicTexture texture = this.createPreviewImage(iconName, metadata);
-        return new SchematicInfo(metadata, iconName, texture);
+        return new SchematicInfo(schematic.getType(), metadata, iconName, texture);
     }
 }

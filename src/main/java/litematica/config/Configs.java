@@ -356,6 +356,7 @@ public class Configs
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_MODIFICATION_TIME = new BooleanConfig("schematicInfoShowModificationTime", false, null);
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_NAME              = new BooleanConfig("schematicInfoShowName", true, null);
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_REGION_COUNT      = new BooleanConfig("schematicInfoShowRegionCount", false, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_TYPE    = new BooleanConfig("schematicInfoShowSchematicType", true, null);
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION = new BooleanConfig("schematicInfoShowSchematicVersion", false, null);
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_THUMBNAIL         = new BooleanConfig("schematicInfoShowThumbnail", true, null);
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS      = new BooleanConfig("schematicInfoShowTotalBlocks", true, null);
@@ -377,6 +378,7 @@ public class Configs
                 SCHEMATIC_INFO_SHOW_MODIFICATION_TIME,
                 SCHEMATIC_INFO_SHOW_NAME,
                 SCHEMATIC_INFO_SHOW_REGION_COUNT,
+                SCHEMATIC_INFO_SHOW_SCHEMATIC_TYPE,
                 SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION,
                 SCHEMATIC_INFO_SHOW_THUMBNAIL,
                 SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS,

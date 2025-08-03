@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import malilib.util.data.Identifier;
 import malilib.util.game.wrap.GameWrap;
 import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicType;
 
 public abstract class AbstractSchematicInfoCache<T>
 {
@@ -74,14 +75,17 @@ public abstract class AbstractSchematicInfoCache<T>
 
     public static class SchematicInfo
     {
+        public final SchematicType schematicType;
         public final SchematicMetadata schematicMetadata;
         public final Identifier iconName;
         @Nullable public final DynamicTexture texture;
 
-        protected SchematicInfo(SchematicMetadata schematicMetadata,
+        protected SchematicInfo(SchematicType schematicType,
+                                SchematicMetadata schematicMetadata,
                                 Identifier iconName,
                                 @Nullable DynamicTexture texture)
         {
+            this.schematicType = schematicType;
             this.schematicMetadata = schematicMetadata;
             this.iconName = iconName;
             this.texture = texture;

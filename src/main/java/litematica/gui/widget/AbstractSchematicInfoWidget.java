@@ -225,19 +225,22 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
                                      dateFormat.format(new Date(meta.getTimeModified())));
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue() && meta.getRegionCount() > 0)
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue() &&
+            meta.getRegionCount() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.region_count", meta.getRegionCount());
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENTITY_COUNT.getBooleanValue() && meta.getEntityCount() >= 0)
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENTITY_COUNT.getBooleanValue())
         {
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.entity_count", meta.getEntityCount());
+            String str = meta.getEntityCount() >= 0 ? String.valueOf(meta.getEntityCount()) : "???";
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.entity_count", str);
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT.getBooleanValue() && meta.getBlockEntityCount() >= 0)
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT.getBooleanValue())
         {
-            StyledTextLine.translate(lines, "litematica.label.schematic_info.block_entity_count", meta.getBlockEntityCount());
+            String str = meta.getBlockEntityCount() >= 0 ? String.valueOf(meta.getBlockEntityCount()) : "???";
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.block_entity_count", str);
         }
 
         Vec3i areaSize = meta.getEnclosingSize();
@@ -246,6 +249,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 
         boolean showVolume = Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_VOLUME.getBooleanValue() && meta.getTotalVolume() >= 0;
         boolean showTotalBlocks = Configs.Internal.SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS.getBooleanValue() && meta.getTotalBlocks() >= 0;
+        boolean showEnclosingSize = Configs.Internal.SCHEMATIC_INFO_SHOW_ENCLOSING_SIZE.getBooleanValue() && meta.getEnclosingSize().equals(Vec3i.ZERO) == false;
 
         if (this.getHeight() >= 240)
         {
@@ -259,7 +263,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_volume", meta.getTotalVolume());
             }
 
-            if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENCLOSING_SIZE.getBooleanValue())
+            if (showEnclosingSize)
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.enclosing_size");
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.enclosing_size.value", areaSizeStr);
@@ -271,8 +275,18 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks_and_volume",
                                          meta.getTotalBlocks(), meta.getTotalVolume());
+            }
+
+            if (showEnclosingSize)
+            {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.enclosing_size_and_value", areaSizeStr);
             }
+        }
+
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_SCHEMATIC_TYPE.getBooleanValue())
+        {
+            String name = this.currentInfo.schematicType.getDisplayName();
+            StyledTextLine.translate(lines, "litematica.label.schematic_info.schematic_type", name);
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION.getBooleanValue() && meta.getSchematicVersion() >= 0)

@@ -20,6 +20,7 @@ import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.DataView;
 import malilib.util.data.tag.ListData;
 import malilib.util.game.BlockUtils;
+import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
@@ -43,23 +44,16 @@ public class SpongeSchematic extends BaseSchematic
     @Override
     public boolean read(DataView data)
     {
-        Vec3i size = readSizeFromTag(data);
-
-        if (isSizeValid(size) == false)
-        {
-            return false;
-        }
-
         int version = getSpongeVersion(data);
 
         if (version == 1 || version == 2)
         {
-            return this.readFromTag_v1_2(data, size, version);
+            return this.readFromTag_v1_2(data, version);
         }
 
         if (version == 3)
         {
-            return this.readFromTag_v3(data, size, version);
+            return this.readFromTag_v3(data, version);
         }
 
         return false;
@@ -124,18 +118,17 @@ public class SpongeSchematic extends BaseSchematic
         // Version 3
         if (data.contains("Schematic", Constants.NBT.TAG_COMPOUND))
         {
-            DataView schemTag = data.getCompound("Schematic");
+            DataView schTag = data.getCompound("Schematic");
 
-            if (schemTag.contains("Width", Constants.NBT.TAG_ANY_NUMERIC) &&
-                schemTag.contains("Height", Constants.NBT.TAG_ANY_NUMERIC) &&
-                schemTag.contains("Length", Constants.NBT.TAG_ANY_NUMERIC) &&
-                schemTag.contains("Version", Constants.NBT.TAG_INT) &&
-                schemTag.contains("Blocks", Constants.NBT.TAG_COMPOUND) &&
-                schemTag.getCompound("Blocks").contains("Palette", Constants.NBT.TAG_COMPOUND) &&
-                schemTag.getCompound("Blocks").contains("Data", Constants.NBT.TAG_BYTE_ARRAY))
+            if (schTag.contains("Width", Constants.NBT.TAG_ANY_NUMERIC) &&
+                schTag.contains("Height", Constants.NBT.TAG_ANY_NUMERIC) &&
+                schTag.contains("Length", Constants.NBT.TAG_ANY_NUMERIC) &&
+                schTag.contains("Version", Constants.NBT.TAG_INT) &&
+                schTag.contains("Blocks", Constants.NBT.TAG_COMPOUND) &&
+                schTag.getCompound("Blocks").contains("Palette", Constants.NBT.TAG_COMPOUND) &&
+                schTag.getCompound("Blocks").contains("Data", Constants.NBT.TAG_BYTE_ARRAY))
             {
-                int version = schemTag.getInt("Version");
-                return version == 3 && isSizeValid(readSizeFromTag(schemTag));
+                return isSizeValid(readSizeFromTag(schTag));
             }
         }
 
@@ -144,20 +137,13 @@ public class SpongeSchematic extends BaseSchematic
 
     public static int getSpongeVersion(DataView data)
     {
-        Vec3i size = readSizeFromTag(data);
-
-        if (isSizeValid(size) == false)
-        {
-            return -1;
-        }
-
         if (isValidData_v1_2(data))
         {
             return data.getInt("Version");
         }
         else if (isValidData_v3(data))
         {
-            return 3;
+            return data.getCompound("Schematic").getInt("Version");
         }
 
         return -1;
@@ -170,19 +156,20 @@ public class SpongeSchematic extends BaseSchematic
                          tag.getShort("Length"));
     }
 
-    protected void createAndReadMetadata(DataView metaTag, Vec3i enclosingSize, int version)
+    public static SchematicMetadata createAndReadMetadata(DataView metaTag, Vec3i size, int version)
     {
-        this.metadata = new SchematicMetadata();
-        this.metadata.read(this.originalMetadataTag);
-        this.metadata.setSchematicVersion(version);
-        this.metadata.setEnclosingSize(enclosingSize);
+        SchematicMetadata metadata = new SchematicMetadata();
+        metadata.read(metaTag);
+        metadata.setSchematicVersion(version);
+        metadata.setEnclosingSize(size);
+        metadata.setTotalVolume((long) size.getX() * size.getY() * size.getZ());
 
         if (metaTag.contains("Date", Constants.NBT.TAG_LONG) &&
-            this.getMetadata().getTimeCreated() <= 0)
+            metadata.getTimeCreated() <= 0)
         {
             long time = metaTag.getLong("Date");
-            this.getMetadata().setTimeCreated(time);
-            this.getMetadata().setTimeModified(time);
+            metadata.setTimeCreated(time);
+            metadata.setTimeModified(time);
         }
 
         if (metaTag.contains("WorldEdit", Constants.NBT.TAG_COMPOUND))
@@ -192,13 +179,22 @@ public class SpongeSchematic extends BaseSchematic
 
             if (origin != null)
             {
-                this.metadata.setOriginalOrigin(origin);
+                metadata.setOriginalOrigin(origin);
             }
         }
+
+        return metadata;
     }
 
-    protected boolean readFromTag_v1_2(DataView data, Vec3i size, int version)
+    protected boolean readFromTag_v1_2(DataView data, int version)
     {
+        Vec3i size = readSizeFromTag(data);
+
+        if (isSizeValid(size) == false)
+        {
+            return false;
+        }
+
         BlockContainer container = readBlocksFromTag_v1_2(data, size);
 
         if (container == null)
@@ -230,14 +226,21 @@ public class SpongeSchematic extends BaseSchematic
         this.minecraftDataVersion = data.getIntOrDefault("DataVersion", -1);
         this.originalMetadataTag = data.getCompound("Metadata").copy();
         this.enclosingSize = size;
-        this.createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
+        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
     }
 
-    protected boolean readFromTag_v3(DataView data, Vec3i size, int version)
+    protected boolean readFromTag_v3(DataView data, int version)
     {
         CompoundData schTag = data.getCompound("Schematic");
+        Vec3i size = readSizeFromTag(schTag);
+
+        if (isSizeValid(size) == false)
+        {
+            return false;
+        }
+
         CompoundData blockTag = schTag.getCompound("Blocks");
         BlockContainer container = readBlocksFromTag_v3(blockTag, size);
 
@@ -270,7 +273,7 @@ public class SpongeSchematic extends BaseSchematic
         this.minecraftDataVersion = schTag.getIntOrDefault("DataVersion", -1);
         this.originalMetadataTag = schTag.getCompound("Metadata").copy();
         this.enclosingSize = size;
-        this.createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
+        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
     }
@@ -673,6 +676,46 @@ public class SpongeSchematic extends BaseSchematic
         writeEntitiesToTag_v3(region.getEntityList(), dataTag);
 
         return outerTag;
+    }
+
+    public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)
+    {
+        int spongeVersion = getSpongeVersion(data);
+
+        if (spongeVersion <= 0)
+        {
+            return Optional.empty();
+        }
+
+        DataView wrapperTag = data;
+
+        if (spongeVersion == 3)
+        {
+            wrapperTag = data.getCompound("Schematic");
+        }
+        else if (spongeVersion != 1 && spongeVersion != 2)
+        {
+            return Optional.empty();
+        }
+
+        Vec3i size = readSizeFromTag(wrapperTag); // The validity was already checked in getSpongeVersion()
+        DataView metaTag = wrapperTag.getCompound("Metadata");
+        SchematicMetadata metadata = createAndReadMetadata(metaTag, size, spongeVersion);
+
+        metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(wrapperTag.getInt("DataVersion")));
+        metadata.setEntityCount(wrapperTag.getList("Entities", Constants.NBT.TAG_COMPOUND).size());
+
+        if (spongeVersion == 1 || spongeVersion == 2)
+        {
+            String beTagName = spongeVersion == 1 ? "TileEntities" : "BlockEntities";
+            metadata.setBlockEntityCount(wrapperTag.getList(beTagName, Constants.NBT.TAG_COMPOUND).size());
+        }
+        else if (spongeVersion == 3)
+        {
+            metadata.setBlockEntityCount(wrapperTag.getCompound("Blocks").getList("BlockEntities", Constants.NBT.TAG_COMPOUND).size());
+        }
+
+        return Optional.of(metadata);
     }
 
     public static Optional<Schematic> fromData(DataView data)

@@ -3,6 +3,7 @@ package litematica.schematic;
 import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
+import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.position.Vec3i;
@@ -32,12 +33,39 @@ public class SchematicaSchematic extends BaseSchematic
 
     public static boolean isValidData(DataView data)
     {
+        if (data.contains("Width", Constants.NBT.TAG_SHORT) &&
+            data.contains("Height", Constants.NBT.TAG_SHORT) &&
+            data.contains("Length", Constants.NBT.TAG_SHORT) &&
+            data.contains("Blocks", Constants.NBT.TAG_BYTE_ARRAY) &&
+            data.contains("Data", Constants.NBT.TAG_BYTE_ARRAY))
+        {
+            return isSizeValid(SpongeSchematic.readSizeFromTag(data));
+        }
+
         return false;
     }
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
         return null;
+    }
+
+    public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)
+    {
+        if (isValidData(data) == false)
+        {
+            return Optional.empty();
+        }
+
+        SchematicMetadata metadata = new SchematicMetadata();
+
+        Vec3i size = SpongeSchematic.readSizeFromTag(data);
+        metadata.setEnclosingSize(size);
+        metadata.setTotalVolume((long) size.getX() * size.getY() * size.getZ());
+        metadata.setEntityCount(data.getList("Entities", Constants.NBT.TAG_COMPOUND).size());
+        metadata.setBlockEntityCount(data.getList("TileEntities", Constants.NBT.TAG_COMPOUND).size());
+
+        return Optional.of(metadata);
     }
 
     public static Optional<Schematic> fromData(DataView data)

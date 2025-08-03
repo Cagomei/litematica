@@ -1,10 +1,11 @@
 package litematica.schematic;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.DataView;
+import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
@@ -15,19 +16,18 @@ public class SchematicMetadata
     protected String author = "";
     protected String description = "";
     protected Vec3i enclosingSize = Vec3i.ZERO;
-    protected BlockPos originalOrigin = BlockPos.ORIGIN;
-    protected long timeCreated;
-    protected long timeModified;
     protected MinecraftVersion minecraftVersion = MinecraftVersion.MC_UNKNOWN;
-    protected int schematicVersion;
-    protected int regionCount;
-    protected int entityCount;
+    @Nullable protected BlockPos originalOrigin;
+    protected long timeCreated = -1;
+    protected long timeModified = -1;
+    protected int schematicVersion = -1;
+    protected int regionCount = -1;
+    protected int entityCount = -1;
     protected long totalVolume = -1;
     protected long totalBlocks = -1;
-    protected long blockEntityCount;
-    protected long blockTickCount;
-    @Nullable
-    protected int[] thumbnailPixelData;
+    protected long blockEntityCount = -1;
+    protected long blockTickCount = -1;
+    @Nullable protected int[] thumbnailPixelData;
 
     public String getSchematicName()
     {
@@ -105,9 +105,9 @@ public class SchematicMetadata
         return this.minecraftVersion;
     }
 
-    public BlockPos getOriginalOrigin()
+    public Optional<BlockPos> getOriginalOrigin()
     {
-        return this.originalOrigin;
+        return Optional.ofNullable(this.originalOrigin);
     }
 
     public boolean wasModified()
@@ -117,6 +117,11 @@ public class SchematicMetadata
 
     public void setSchematicName(String schematicName)
     {
+        if (schematicName == null)
+        {
+            schematicName = "?";
+        }
+
         this.schematicName = schematicName;
     }
 
@@ -207,7 +212,7 @@ public class SchematicMetadata
         this.minecraftVersion = minecraftVersion;
     }
 
-    public void setOriginalOrigin(BlockPos originalOrigin)
+    public void setOriginalOrigin(@Nullable BlockPos originalOrigin)
     {
         this.originalOrigin = originalOrigin;
     }
@@ -267,7 +272,11 @@ public class SchematicMetadata
         tag.putLong("TotalBlocks", this.totalBlocks);
         tag.putLong("BlockEntityCount", this.blockEntityCount);
         tag.putLong("BlockTickCount", this.blockTickCount);
-        tag.put("Origin", DataTypeUtils.createVec3iTag(this.originalOrigin));
+
+        if (this.originalOrigin != null)
+        {
+            tag.put("Origin", DataTypeUtils.createVec3iTag(this.originalOrigin));
+        }
 
         if (this.thumbnailPixelData != null)
         {
@@ -280,7 +289,7 @@ public class SchematicMetadata
     public void read(DataView dataIn)
     {
         this.schematicName = dataIn.getStringOrDefault("Name", "?");
-        this.author = dataIn.getStringOrDefault("Author", "?");
+        this.author = dataIn.getStringOrDefault("Author", "");
         this.description = dataIn.getStringOrDefault("Description", "");
         this.enclosingSize = DataTypeUtils.readVec3iOrDefault(dataIn, "EnclosingSize", Vec3i.ZERO);
 
@@ -289,7 +298,7 @@ public class SchematicMetadata
         this.schematicVersion = dataIn.getIntOrDefault("SchematicVersion", -1);
 
         int mcDataVersion = dataIn.getIntOrDefault("McDataVersion", -1);
-        this.minecraftVersion = MinecraftVersion.getVersionOrCreateSnapshotVersionByDataVersion(mcDataVersion);
+        this.minecraftVersion = MinecraftVersion.getOrCreateVersionFromDataVersion(mcDataVersion);
 
         this.regionCount = dataIn.getIntOrDefault("RegionCount", -1);
         this.entityCount = dataIn.getIntOrDefault("EntityCount", -1);
@@ -299,7 +308,6 @@ public class SchematicMetadata
         this.blockTickCount = dataIn.getLongOrDefault("BlockTickCount", -1);
 
         this.thumbnailPixelData = dataIn.getIntArrayOrDefault("PreviewImageData", null);
-        BlockPos origin = DataTypeUtils.readBlockPos(dataIn.getCompound("Origin"));
-        this.originalOrigin = origin != null ? origin : BlockPos.ORIGIN;
+        this.originalOrigin = DataTypeUtils.readBlockPos(dataIn.getCompound("Origin"));
     }
 }

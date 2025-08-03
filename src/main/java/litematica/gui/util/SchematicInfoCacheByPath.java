@@ -6,15 +6,15 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.nbt.NBTTagCompound;
 
 import malilib.util.FileNameUtils;
+import malilib.util.FileUtils;
 import malilib.util.data.Identifier;
-import malilib.util.nbt.NbtUtils;
+import malilib.util.data.tag.CompoundData;
+import malilib.util.data.tag.util.DataFileUtils;
 import litematica.Reference;
-import litematica.schematic.LoadedSchematic;
-import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicType;
 
 public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
 {
@@ -24,22 +24,37 @@ public class SchematicInfoCacheByPath extends AbstractSchematicInfoCache<Path>
     {
         // TODO Use a partial NBT read method to only read the metadata tag
         // TODO (that's only beneficial if it's stored before the bulk schematic data in the stream)
-        NBTTagCompound tag = NbtUtils.readNbtFromFile(file);
-        // FIXME
+        CompoundData data = DataFileUtils.readCompoundDataFromNbtFile(file);
 
-        if (tag != null)
+        if (data == null)
         {
-            Optional<LoadedSchematic> loadedSchematicOpt = LoadedSchematic.tryLoadSchematic(file);
+            return null;
+        }
 
-            if (loadedSchematicOpt.isPresent())
+        Optional<SchematicType> typeOpt = SchematicType.getTypeFromData(file, data);
+
+        if (typeOpt.isPresent() == false)
+        {
+            return null;
+        }
+
+        SchematicType schematicType = typeOpt.get();
+        Optional<SchematicMetadata> metadataOpt = schematicType.createMetadataFromData(data);
+
+        if (metadataOpt.isPresent())
+        {
+            SchematicMetadata metadata = metadataOpt.get();
+            String filePath = FileNameUtils.generateSimpleSafeFileName(file.toAbsolutePath().toString().toLowerCase(Locale.ROOT));
+            Identifier iconName = new Identifier(Reference.MOD_ID, filePath);
+            DynamicTexture texture = this.createPreviewImage(iconName, metadata);
+
+            if (metadata.getTimeCreated() <= 0)
             {
-                Schematic schematic = loadedSchematicOpt.get().schematic;
-                SchematicMetadata metadata = schematic.getMetadata();
-                String filePath = FileNameUtils.generateSimpleSafeFileName(file.toAbsolutePath().toString().toLowerCase(Locale.ROOT));
-                Identifier iconName = new Identifier(Reference.MOD_ID, filePath);
-                DynamicTexture texture = this.createPreviewImage(iconName, metadata);
-                return new SchematicInfo(metadata, iconName, texture);
+                metadata.setTimeCreated(FileUtils.getMTime(file));
+                metadata.setTimeModified(metadata.getTimeCreated());
             }
+
+            return new SchematicInfo(schematicType, metadata, iconName, texture);
         }
 
         return null;
