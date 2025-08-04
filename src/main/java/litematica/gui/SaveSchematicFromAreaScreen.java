@@ -156,7 +156,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
         if (schematicType != null)
         {
-            this.settings.schematicType = schematicType;
+            settings.schematicType = schematicType;
         }
 
         SaveSide side = this.saveSide.getValue();
@@ -199,8 +199,8 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         {
             LoadedSchematic loadedSchematic = new LoadedSchematic(schematic);
             SchematicHolder.INSTANCE.addSchematic(loadedSchematic, false);
-            MessageDispatcher.error("litematica.message.error.save_schematic.failed_to_save_from_area",
-                                    file.getFileName().toString());
+            MessageDispatcher.error(8000).translate("litematica.message.error.save_schematic.failed_to_save_from_area",
+                                                    file.getFileName().toString());
         }
     }
 

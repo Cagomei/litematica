@@ -7,7 +7,6 @@
 		"access.NextTickListEntryMixin",
 		"IMixinBlockRendererDispatcher",
 		"IMixinCompiledChunk",
-		"IMixinDataFixer",
 		"IMixinItemBlockSpecial",
 		"IMixinViewFrustum",
 		"IMixinWorldClient",

@@ -7,25 +7,24 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.client.Minecraft;
-
+import malilib.mixin.access.DataFixerMixin;
 import malilib.util.data.Constants;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.ListData;
+import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.BlockUtils;
+import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
-import litematica.mixin.IMixinDataFixer;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
 
 public abstract class BaseSchematic implements Schematic
 {
-    public static final int CURRENT_MINECRAFT_DATA_VERSION = ((IMixinDataFixer) Minecraft.getMinecraft().getDataFixer()).getVersion();
+    public static final int CURRENT_MINECRAFT_DATA_VERSION = ((DataFixerMixin) GameWrap.getClient().getDataFixer()).malilib$getVersion();
 
     protected final SchematicType type;
 

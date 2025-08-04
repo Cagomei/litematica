@@ -11,6 +11,7 @@ import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
 import litematica.schematic.container.BlockContainer;
+import litematica.schematic.container.SparseBlockContainer;
 
 public class VanillaSchematic extends BaseSchematic
 {
@@ -55,7 +56,7 @@ public class VanillaSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return null;
+        return new SparseBlockContainer(containerSize);
     }
 
     public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)

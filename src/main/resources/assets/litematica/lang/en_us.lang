@@ -154,7 +154,7 @@ litematica.hover.button.schematic_list.unload=Unload this schematic from memory.
 litematica.hover.button.schematic_manager.convert_format=Convert the selected schematic to another schematic format
 litematica.hover.button.schematic_manager.edit_description=Set or edit the description text on the schematic
 litematica.hover.button.schematic_manager.fix_extension=Fix the file name extension.\n\nThis schematic uses an incorrect file name extension. This allows you to automatically fix the issue by renaming the file.
-litematica.hover.button.schematic_manager.rename_schematic=Rename the schematic\n\nThe schematic name is shown on the right side info panel, and it's used as the default placement name.\n\n§eNote:§r This is different than the file name. Use the §eRename File§r button if you just want to rename the file. The file name is what is shown in the schematic browser on the left.
+litematica.hover.button.schematic_manager.rename_schematic=Rename the schematic\n\nThe schematic name (also shown on the right side info panel) is used as the default placement name, and it also shows up in the Loaded Schematics menu and other places that show the schematic name somewhere.\n\n§eNote:§r This is different than the schematic file name.\nUse the §eRename File§r button if you just want to rename the file. The file name is shown in the schematic browser file list on the left, but other than that it's only shown in some hover infos in the schematic or placement related menus.
 litematica.hover.button.schematic_manager.set_preview=Set a preview image/thumbnail to the schematic\n\nThe image is shown on the right side info panel
 litematica.hover.button.schematic_placement_list.sort_mode_button=The sort mode allows dragging the entries to reorder the placement list\n\n§dNote:§r You must click on the button to leave the sort mode to actually save the changes!
 litematica.hover.button.schematic_placement_settings.change_bb_color=Change the placement bounding box color
@@ -444,6 +444,7 @@ litematica.message.error.placement_list.remove_failed_locked=The placement is lo
 litematica.message.error.placement_list.save_failed=Failed to save the placement to file
 litematica.message.error.save_placement.write_to_file_failed.exception=Failed to write the placement to file §e'%s'§r (exception: §e%s§r)
 litematica.message.error.save_placement.write_to_file_failed.exists=Failed to write the placement to file §e'%s'§r, the file already exists.\n\n<c=ddd>Hold §e<i>Shift</i><c=ddd> to overwrite the file
+litematica.message.error.save_schematic.failed_to_create_schematic=Failed to create the schematic from the collected data!
 litematica.message.error.save_schematic.failed_to_convert=Failed to convert the schematic to the new format!
 litematica.message.error.save_schematic.failed_to_save_converted=Failed to save the schematic to file §e'%s'§r
 litematica.message.error.save_schematic.failed_to_save_from_area=Failed to save the schematic to file §e'%s'§r.\n§7The schematic has been added to the Loaded Schematics list as an "in-memory-only" schematic, so you can try to save it from there to another file.

@@ -28,6 +28,7 @@ import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.util.DataTypeUtils;
+import malilib.util.game.MinecraftVersion;
 import malilib.util.game.wrap.BlockWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
@@ -169,6 +170,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         int minCornerX = minCorner.getX();
         int minCornerY = minCorner.getY();
         int minCornerZ = minCorner.getZ();
+        int errorCount = 0;
 
         for (int y = box.minY; y <= box.maxY; y++)
         {
@@ -219,9 +221,16 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
                     else
                     {
                         Litematica.LOGGER.warn("Failed to save BlockEntity {} at {}", te, mutPos);
+                        errorCount++;
                     }
                 }
             }
+        }
+
+        if (errorCount > 0)
+        {
+            MessageDispatcher.warning("litematica.message.warn.schematic_read.failed_to_read_block_entities",
+                                      errorCount, blockEntityMapOut.size());
         }
     }
 
@@ -311,6 +320,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         int regionOriginY = regionPosAbs.getY();
         int regionOriginZ = regionPosAbs.getZ();
         int entityCount = 0;
+        int errorCount = 0;
 
         for (Entity entity : entities)
         {
@@ -351,7 +361,14 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             catch (Exception e)
             {
                 Litematica.LOGGER.warn("Failed to save entity {} at {}", entity, entity.getPositionVector());
+                errorCount++;
             }
+        }
+
+        if (errorCount > 0)
+        {
+            MessageDispatcher.warning("litematica.message.warn.schematic_read.failed_to_read_entities",
+                                      errorCount, entityListOut.size());
         }
 
         return entityCount;
@@ -367,6 +384,10 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             Schematic schematic = schematicOpt.get();
             this.setMetadataValues(schematic.getMetadata());
             this.schematicListener.accept(schematic);
+        }
+        else
+        {
+            MessageDispatcher.error(8000).translate("litematica.message.error.save_schematic.failed_to_create_schematic");
         }
     }
 
@@ -409,6 +430,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         long time = System.currentTimeMillis();
         meta.setTimeCreated(time);
         meta.setTimeModified(time);
+        meta.setMinecraftVersion(MinecraftVersion.CURRENT_VERSION);
     }
 
     @Override

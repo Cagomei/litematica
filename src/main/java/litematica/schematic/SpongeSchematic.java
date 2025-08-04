@@ -75,8 +75,10 @@ public class SpongeSchematic extends BaseSchematic
             break;
         }
 
-        ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();
         int version = 2;    // TODO add a way to specify this
+        this.metadata.setSchematicVersion(version);
+
+        ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();
 
         if (version == 3)
         {

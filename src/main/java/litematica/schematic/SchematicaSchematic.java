@@ -7,6 +7,7 @@ import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.position.Vec3i;
+import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
 
 public class SchematicaSchematic extends BaseSchematic
@@ -31,6 +32,13 @@ public class SchematicaSchematic extends BaseSchematic
         return data;
     }
 
+    @Override
+    public String getRootTagName()
+    {
+        // MCEdit and World Edit require the root compound tag to be named "Schematic".
+        return "Schematic";
+    }
+
     public static boolean isValidData(DataView data)
     {
         if (data.contains("Width", Constants.NBT.TAG_SHORT) &&
@@ -47,7 +55,7 @@ public class SchematicaSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return null;
+        return new ArrayBlockContainer(containerSize);
     }
 
     public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)

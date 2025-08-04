@@ -29,16 +29,24 @@ public interface Schematic
     ImmutableMap<String, SchematicRegion> getRegions();
 
     /**
-     * Write the schematic out to compound data
-     * @return the compound data representing the schematic
-     */
-    CompoundData write();
-
-    /**
      * Read the contents of the schematic from the provided data.
      * If the schematic contained anything before the call, it will be cleared/removed.
      * @param dataIn the data to read the schematic contents from
      * @return true if the read succeeded without errors, false if there was an error
      */
     boolean read(DataView dataIn);
+
+    /**
+     * Write the schematic out to compound data
+     * @return the compound data representing the schematic
+     */
+    CompoundData write();
+
+    /**
+     * @return the name of the root tag in the schematic file
+     */
+    default String getRootTagName()
+    {
+        return "";
+    }
 }

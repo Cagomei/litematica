@@ -36,7 +36,8 @@ public class NonResizingHashMapPalette<T> extends BasePalette<T>
     @SuppressWarnings("unchecked")
     protected int addNewValue(T value)
     {
-        int id = this.valueToIdMap.put(value, this.currentSize);
+        int id = this.currentSize;
+        this.valueToIdMap.put(value, this.currentSize);
         ++this.currentSize;
 
         if (id >= this.values.length)
