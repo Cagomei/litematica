@@ -754,11 +754,13 @@ public class RenderGlobalSchematic extends RenderGlobal
 
                         if (shouldRender)
                         {
+                            /*
                             boolean sleeping = this.mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) this.mc.getRenderViewEntity()).isPlayerSleeping();
                             double eY = EntityWrap.getY(entityTmp);
 
                             if ((entityTmp != this.mc.getRenderViewEntity() || this.mc.gameSettings.thirdPersonView != 0 || sleeping) &&
                                 (eY < 0.0D || eY >= 256.0D))// || this.world.isBlockLoaded(posMutable.set(entityTmp))))
+                            */
                             {
                                 ++this.countEntitiesRendered;
                                 this.renderManager.renderEntityStatic(entityTmp, 0f, false);
