@@ -291,12 +291,25 @@ public class VanillaSchematic extends BaseSchematic
         }
 
         SchematicMetadata metadata = new SchematicMetadata();
-        Vec3i size = readSizeFromTag(data);
 
-        metadata.setAuthor(data.getString("author"));
+        if (data.contains("Metadata", Constants.NBT.TAG_COMPOUND))
+        {
+            metadata.read(data.getCompound("Metadata"));
+        }
+
+        if (metadata.getAuthor().length() == 0)
+        {
+            metadata.setAuthor(data.getString("author"));
+        }
+
+        if (metadata.getMinecraftVersion().dataVersion <= 0)
+        {
+            metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(data.getInt("DataVersion")));
+        }
+
+        Vec3i size = readSizeFromTag(data);
         metadata.setEnclosingSize(size);
         metadata.setTotalVolume((long) size.getX() * size.getY() * size.getZ());
-        metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(data.getInt("DataVersion")));
         metadata.setEntityCount(data.getList("entities", Constants.NBT.TAG_COMPOUND).size());
 
         return Optional.of(metadata);
