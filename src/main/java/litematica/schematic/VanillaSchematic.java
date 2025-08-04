@@ -14,7 +14,7 @@ import litematica.schematic.container.BlockContainer;
 
 public class VanillaSchematic extends BaseSchematic
 {
-    public static final String FILE_NAME_EXTENSION = ".nbt";
+    public static final String FILE_NAME_EXTENSION = "nbt";
 
     public VanillaSchematic()
     {

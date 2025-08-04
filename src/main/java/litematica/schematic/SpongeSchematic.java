@@ -32,7 +32,7 @@ import litematica.schematic.data.EntityData;
 
 public class SpongeSchematic extends BaseSchematic
 {
-    public static final String FILE_NAME_EXTENSION = ".schem";
+    public static final String FILE_NAME_EXTENSION = "schem";
 
     protected CompoundData originalMetadataTag = new CompoundData();
 

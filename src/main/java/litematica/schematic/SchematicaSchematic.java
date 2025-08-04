@@ -11,7 +11,7 @@ import litematica.schematic.container.BlockContainer;
 
 public class SchematicaSchematic extends BaseSchematic
 {
-    public static final String FILE_NAME_EXTENSION = ".schematic";
+    public static final String FILE_NAME_EXTENSION = "schematic";
 
     public SchematicaSchematic()
     {

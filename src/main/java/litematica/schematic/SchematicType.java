@@ -157,7 +157,7 @@ public class SchematicType
 
     public static List<SchematicType> getPossibleTypesFromFileName(String fileName)
     {
-        String extension = "." + FileNameUtils.getFileNameExtension(fileName.toLowerCase(Locale.ROOT));
+        String extension = FileNameUtils.getFileNameExtension(fileName.toLowerCase(Locale.ROOT));
         List<SchematicType> list = new ArrayList<>();
 
         for (SchematicType type : KNOWN_TYPES)

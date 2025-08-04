@@ -17,10 +17,11 @@ import malilib.util.FileUtils;
 import litematica.Reference;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
-import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
+import litematica.gui.util.AbstractSchematicInfoCache.SchematicInfo;
 import litematica.scheduler.TaskScheduler;
 import litematica.scheduler.task.SetSchematicPreviewTask;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicType;
@@ -33,6 +34,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
     protected final GenericButton convertSchematicButton;
     protected final GenericButton deleteFileButton;
     protected final GenericButton editDescriptionButton;
+    protected final GenericButton fixExtensionButton;
     protected final GenericButton removePreviewButton;
     protected final GenericButton renameFileButton;
     protected final GenericButton renameSchematicButton;
@@ -45,13 +47,15 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         this.convertSchematicButton = GenericButton.create("litematica.button.schematic_manager.convert_format", this::convertSchematic);
         this.deleteFileButton       = GenericButton.create("litematica.button.schematic_manager.delete", this::deleteFile);
         this.editDescriptionButton  = GenericButton.create("litematica.button.schematic_manager.edit_description", this::editDescription);
+        this.fixExtensionButton     = GenericButton.create("litematica.button.schematic_manager.fix_extension", this::fixFileNameExtension);
         this.removePreviewButton    = GenericButton.create("litematica.button.schematic_manager.remove_preview", this::removePreview);
         this.renameFileButton       = GenericButton.create("litematica.button.schematic_manager.rename_file", this::renameFile);
         this.renameSchematicButton  = GenericButton.create("litematica.button.schematic_manager.rename_schematic", this::renameSchematic);
         this.setPreviewButton       = GenericButton.create("litematica.button.schematic_manager.set_preview", this::setPreview);
 
         this.convertSchematicButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.convert_format");
-        this.editDescriptionButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.set_description");
+        this.editDescriptionButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.edit_description");
+        this.fixExtensionButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.fix_extension");
         this.renameSchematicButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.rename_schematic");
         this.setPreviewButton.translateAndAddHoverString("litematica.hover.button.schematic_manager.set_preview");
 
@@ -76,9 +80,29 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
 
             Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
     
-            if (opt.isPresent() && opt.get().schematic.getMetadata().getPreviewImagePixelData() != null)
+            if (opt.isPresent())
             {
-                this.addWidget(this.removePreviewButton);
+                Schematic schematic = opt.get().schematic;
+
+                if (schematic.getMetadata().getPreviewImagePixelData() != null)
+                {
+                    this.addWidget(this.removePreviewButton);
+                }
+
+                /*
+                if (this.hasWrongExtension(entry, schematic.getType()))
+                {
+                    this.addWidget(this.fixExtensionButton);
+                }
+                */
+            }
+
+            // Temporary solution (WIP rewriting schematics, only Sponge schematics fully load atm)
+            SchematicInfo info = this.schematicInfoWidget.getSelectedSchematicInfo();
+
+            if (info != null && this.hasWrongExtension(entry, info.schematicType))
+            {
+                this.addWidget(this.fixExtensionButton);
             }
         }
     }
@@ -92,6 +116,7 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         this.renameSchematicButton.setPosition(this.x + 10, y);
         this.setPreviewButton.setPosition(this.renameSchematicButton.getRight() + 2, y);
         this.editDescriptionButton.setPosition(this.setPreviewButton.getRight() + 2, y);
+        this.fixExtensionButton.setPosition(this.editDescriptionButton.getRight() + 2, y);
 
         y += 21;
         this.renameFileButton.setPosition(this.x + 10, y);
@@ -135,8 +160,9 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         {
             String title = "litematica.title.screen.schematic_manager.confirm_file_deletion";
             String msg = "litematica.info.schematic_manager.confirm_file_deletion";
-            String fileName = entry.getFullPath().toAbsolutePath().toString();
-            ConfirmActionScreen screen = new ConfirmActionScreen(320, title, this::executeFileDelete, msg, fileName);
+            Path file = entry.getFullPath().toAbsolutePath();
+            String fileName = file.toString();
+            ConfirmActionScreen screen = new ConfirmActionScreen(320, title, () -> this.executeFileDelete(file), msg, fileName);
             screen.setParent(this);
             openPopupScreen(screen);
         }
@@ -158,6 +184,48 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         }
     }
 
+    protected void fixFileNameExtension()
+    {
+        DirectoryEntry entry = this.getListWidget().getLastSelectedEntry();
+        //Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
+        SchematicInfo info = this.schematicInfoWidget.getSelectedSchematicInfo();
+
+        //if (entry != null && opt.isPresent())
+        if (entry != null && info != null)
+        {
+            //SchematicType type = opt.get().schematic.getType();
+            SchematicType type = info.schematicType;
+
+            if (this.hasWrongExtension(entry, type))
+            {
+                String oldName = entry.getName();
+                int dotIndex = oldName.lastIndexOf('.');
+                String newExtension = type.getFileNameExtension();
+                String newName = oldName.substring(0, dotIndex + 1) + newExtension;
+                Path file = entry.getFullPath();
+                Path newFile = file.getParent().resolve(newName);
+
+                if (FileUtils.renameFile(file, newFile, MessageDispatcher::error))
+                {
+                    this.onSchematicChange();
+                }
+                else
+                {
+                    MessageDispatcher.error("litematica.message.error.schematic_manager.fix_extension.rename_failed");
+                }
+            }
+        }
+        else
+        {
+            MessageDispatcher.error("litematica.message.error.schematic_manager.fix_extension.nothing_selected");
+        }
+    }
+
+    protected boolean hasWrongExtension(DirectoryEntry entry, SchematicType type)
+    {
+        return FileNameUtils.getFileNameExtension(entry.getName()).equalsIgnoreCase(type.getFileNameExtension()) == false;
+    }
+
     protected void removePreview()
     {
         Optional<LoadedSchematic> opt = this.getLastSelectedSchematic();
@@ -174,24 +242,17 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         }
     }
 
-    protected boolean executeFileDelete()
+    protected boolean executeFileDelete(Path file)
     {
-        DirectoryEntry entry = this.getListWidget().getLastSelectedEntry();
-
-        if (entry != null)
+        try
         {
-            Path file = entry.getFullPath();
-
-            try
-            {
-                boolean success = FileUtils.delete(file);
-                this.onSchematicChange();
-                return success;
-            }
-            catch (Exception e)
-            {
-                MessageDispatcher.error("malilib.message.error.failed_to_delete_file", file.toAbsolutePath().toString());
-            }
+            boolean success = FileUtils.delete(file);
+            this.onSchematicChange();
+            return success;
+        }
+        catch (Exception e)
+        {
+            MessageDispatcher.error("malilib.message.error.failed_to_delete_file", file.toAbsolutePath().toString());
         }
 
         return false;

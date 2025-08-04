@@ -160,7 +160,7 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
 
         if (name.endsWith(extension) == false)
         {
-            name += extension;
+            name += "." + extension;
         }
 
         Path file = dir.resolve(name);

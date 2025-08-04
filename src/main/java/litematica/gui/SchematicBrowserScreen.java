@@ -111,7 +111,7 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
 
         if (opt.isPresent() == false)
         {
-            MessageDispatcher.error("litematica.message.error.schematic_load.invalid_schematic_file");
+            MessageDispatcher.error("litematica.message.error.schematic_load.invalid_schematic_file", entry.getName());
             return null;
         }
 

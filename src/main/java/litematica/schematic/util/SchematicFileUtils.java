@@ -37,7 +37,7 @@ public class SchematicFileUtils
 
         if (fileName.endsWith(extension) == false)
         {
-            fileName = fileName + extension;
+            fileName = fileName + "." + extension;
             file = file.getParent().resolve(fileName);
         }
 

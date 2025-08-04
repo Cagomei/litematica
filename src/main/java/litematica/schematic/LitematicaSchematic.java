@@ -13,7 +13,7 @@ import litematica.schematic.container.BlockContainer;
 
 public class LitematicaSchematic extends BaseSchematic
 {
-    public static final String FILE_NAME_EXTENSION = ".litematic";
+    public static final String FILE_NAME_EXTENSION = "litematic";
     public static final int CURRENT_SCHEMATIC_VERSION = 4;
 
     public LitematicaSchematic()

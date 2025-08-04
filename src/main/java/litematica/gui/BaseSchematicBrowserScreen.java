@@ -112,6 +112,7 @@ public class BaseSchematicBrowserScreen extends BaseListScreen<BaseFileBrowserWi
     {
         Path fullPath = entry != null ? entry.getFullPath() : null;
         this.lastSelectedSchematicFile = fullPath;
+        this.lastSelectedSchematic = Optional.empty();
         this.schematicInfoWidget.onSelectionChange(fullPath);
     }
 
