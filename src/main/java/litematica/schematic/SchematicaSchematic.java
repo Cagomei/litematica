@@ -3,12 +3,14 @@ package litematica.schematic;
 import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
+import malilib.util.ListUtils;
 import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.position.Vec3i;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
+import litematica.util.PositionUtils;
 
 public class SchematicaSchematic extends BaseSchematic
 {
@@ -94,7 +96,9 @@ public class SchematicaSchematic extends BaseSchematic
         {
             SchematicaSchematic schematic = new SchematicaSchematic();
 
+            SchematicRegion region = ListUtils.getFirstEntry(regions.values());
             schematic.regions = regions;
+            schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
             schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
 
             return Optional.of(schematic);

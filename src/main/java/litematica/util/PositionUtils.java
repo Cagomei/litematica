@@ -161,6 +161,13 @@ public class PositionUtils
         return false;
     }
 
+    public static Vec3i getAbsoluteSize(Vec3i size)
+    {
+        return new Vec3i(Math.abs(size.getX()),
+                         Math.abs(size.getY()),
+                         Math.abs(size.getZ()));
+    }
+
     public static Vec3i getAbsoluteAreaSize(SelectionBox box)
     {
         BlockPos corner1 = box.getCorner1();

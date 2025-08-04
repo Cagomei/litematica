@@ -13,12 +13,13 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.PacketBuffer;
 
 import malilib.overlay.message.MessageDispatcher;
+import malilib.util.ListUtils;
 import malilib.util.data.Constants;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.tag.CompoundData;
-import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.data.tag.DataView;
 import malilib.util.data.tag.ListData;
+import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
@@ -29,6 +30,7 @@ import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.container.TightLongBackedBitArray;
 import litematica.schematic.data.EntityData;
+import litematica.util.PositionUtils;
 
 public class SpongeSchematic extends BaseSchematic
 {
@@ -62,34 +64,31 @@ public class SpongeSchematic extends BaseSchematic
     @Override
     public CompoundData write()
     {
-        if (this.regions.size() != 1)
-        {
-            return new CompoundData();
-        }
+        CompoundData data = new CompoundData();
+        int regionCount = this.regions.size();
 
-        SchematicRegion region = null;
-
-        for (SchematicRegion r : this.regions.values())
+        if (regionCount != 1)
         {
-            region = r;
-            break;
+            MessageDispatcher.error("litematica.message.error.schematic_save.wrong_region_count", regionCount, 1);
+            return data;
         }
 
         int version = 2;    // TODO add a way to specify this
         this.metadata.setSchematicVersion(version);
 
+        SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
         ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();
 
         if (version == 3)
         {
-            return this.write_v3(region, container, version);
+            this.write_v3(data, region, container, version);
         }
         else if (version == 1 || version == 2)
         {
-            return this.write_v1_2(region, container, version);
+            this.write_v1_2(data, region, container, version);
         }
 
-        return new CompoundData();
+        return data;
     }
 
     public static boolean isValidData(DataView data)
@@ -472,7 +471,9 @@ public class SpongeSchematic extends BaseSchematic
 
     protected static void writeMetadataToTag(CompoundData tag, CompoundData originalMetaTag, SchematicMetadata meta)
     {
-        CompoundData metaTag = meta.write(originalMetaTag);
+        CompoundData metaTag = originalMetaTag.copy();
+
+        meta.write(metaTag);
 
         if (meta.getTimeCreated() > 0 && originalMetaTag.contains("Date", Constants.NBT.TAG_LONG) == false)
         {
@@ -644,40 +645,46 @@ public class SpongeSchematic extends BaseSchematic
         dataTag.putInt("DataVersion", this.minecraftDataVersion);
     }
 
-    public CompoundData write_v1_2(SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v1_2(CompoundData dataTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
     {
-        CompoundData dataTag = new CompoundData();
-
-        Vec3i size = region.getSize();
+        Vec3i size = PositionUtils.getAbsoluteSize(region.getSize());
         writeMetadataToTag(dataTag, this.originalMetadataTag, this.metadata);
         this.writeSizeAndVersions(dataTag, size, version);
 
         dataTag.putInt("PaletteMax", blockContainer.getPalette().getSize() - 1);
-        writeBlockDataToTag(blockContainer, dataTag, version);
+
+        if (writeBlockDataToTag(blockContainer, dataTag, version) == false)
+        {
+            return false;
+        }
+
         writeBlockEntitiesToTag_v1_2(region.getBlockEntityMap(), dataTag, version);
         writeEntitiesToTag_v1_2(region.getEntityList(), dataTag, version);
 
-        return dataTag;
+        return true;
     }
 
-    public CompoundData write_v3(SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v3(CompoundData data, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
     {
-        CompoundData outerTag = new CompoundData();
         CompoundData dataTag = new CompoundData();
-        outerTag.put("Schematic", dataTag);
+        data.put("Schematic", dataTag);
 
         Vec3i size = region.getSize();
         writeMetadataToTag(dataTag, this.originalMetadataTag, this.metadata);
         this.writeSizeAndVersions(dataTag, size, version);
 
         CompoundData blockTag = new CompoundData();
-        dataTag.put("Blocks", blockTag);
 
-        writeBlockDataToTag(blockContainer, blockTag, version);
+        if (writeBlockDataToTag(blockContainer, blockTag, version) == false)
+        {
+            return false;
+        }
+
+        dataTag.put("Blocks", blockTag);
         writeBlockEntitiesToTag_v3(region.getBlockEntityMap(), blockTag);
         writeEntitiesToTag_v3(region.getEntityList(), dataTag);
 
-        return outerTag;
+        return true;
     }
 
     public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)
@@ -738,7 +745,9 @@ public class SpongeSchematic extends BaseSchematic
         {
             SpongeSchematic schematic = new SpongeSchematic();
 
+            SchematicRegion region = ListUtils.getFirstEntry(regions.values());
             schematic.regions = regions;
+            schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
             schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
 
             return Optional.of(schematic);

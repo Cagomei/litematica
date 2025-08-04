@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -48,6 +49,7 @@ import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
 import litematica.selection.CornerDefinedBox;
+import litematica.selection.SelectionBox;
 import litematica.util.PositionUtils;
 import litematica.util.WorldUtils;
 import litematica.util.value.ReplaceBehavior;
@@ -403,7 +405,8 @@ public class SchematicPlacingUtils
     public static boolean placeToWorldWithinChunk(SchematicPlacement schematicPlacement, ChunkPos chunkPos, World world, ReplaceBehavior replace, boolean notifyNeighbors)
     {
         Schematic schematic = schematicPlacement.getSchematic();
-        Set<String> regionsTouchingChunk = PositionUtils.getSubRegionNamesTouchingChunk(chunkPos.x, chunkPos.z, schematicPlacement.getSubRegionBoxes(EnabledCondition.ENABLED));
+        ImmutableMap<String, SelectionBox> enabledRegions = schematicPlacement.getSubRegionBoxes(EnabledCondition.ENABLED);
+        Set<String> regionsTouchingChunk = PositionUtils.getSubRegionNamesTouchingChunk(chunkPos.x, chunkPos.z, enabledRegions);
         BlockPos origin = schematicPlacement.getPosition();
         boolean allSuccess = true;
 

@@ -3,7 +3,6 @@ package litematica.schematic.container;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.init.Blocks;
 
 import malilib.util.data.palette.HashMapPalette;
 import malilib.util.data.palette.LinearPalette;
@@ -14,7 +13,7 @@ import malilib.util.world.BlockState;
 
 public abstract class BaseBlockContainer implements BlockContainer
 {
-    public static final BlockState AIR_BLOCK_STATE = BlockState.of(Blocks.AIR.getDefaultState());
+    public static final BlockState AIR_BLOCK_STATE = BlockState.AIR;
     protected static final int MAX_BITS_LINEAR = 4;
 
     protected Palette<BlockState> palette;

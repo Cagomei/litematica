@@ -87,6 +87,8 @@ public class NonResizingHashMapPalette<T> extends BasePalette<T>
             this.values[id] = val;
         }
 
+        this.currentSize = size;
+
         return true;
     }
 

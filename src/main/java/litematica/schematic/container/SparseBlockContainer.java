@@ -20,7 +20,7 @@ public class SparseBlockContainer extends BaseBlockContainer
     @Override
     public BlockState getBlockState(int x, int y, int z)
     {
-        long pos = (long) y << 32 | (long) (z & 0xFFFF) << 16 | (long) (x & 0xFFFF);
+        long pos = getPosAsLong(x, y, z);
         BlockState state = this.blocks.get(pos);
         return state != null ? state : AIR_BLOCK_STATE;
     }
@@ -28,10 +28,14 @@ public class SparseBlockContainer extends BaseBlockContainer
     @Override
     public void setBlockState(int x, int y, int z, BlockState state)
     {
-        long pos = (long) y << 32 | (long) (z & 0xFFFF) << 16 | (long) (x & 0xFFFF);
-
+        long pos = getPosAsLong(x, y, z);
         BlockState oldState = this.blocks.put(pos, state);
-        int id = this.palette.idFor(state);
+        this.updateBlockCounts(state, oldState);
+    }
+
+    protected void updateBlockCounts(BlockState newState, BlockState oldState)
+    {
+        int id = this.palette.idFor(newState);
 
         if (id >= this.blockCounts.length)
         {
@@ -40,12 +44,16 @@ public class SparseBlockContainer extends BaseBlockContainer
             System.arraycopy(oldArr, 0, this.blockCounts, 0, oldArr.length);
         }
 
-        if (oldState != state)
+        if (oldState != newState)
         {
             if (oldState != null)
             {
                 int oldId = this.palette.idFor(oldState);
-                --this.blockCounts[oldId];
+
+                if (oldId >= 0)
+                {
+                    --this.blockCounts[oldId];
+                }
             }
 
             ++this.blockCounts[id];
@@ -70,5 +78,25 @@ public class SparseBlockContainer extends BaseBlockContainer
     public Long2ObjectOpenHashMap<BlockState> getBlockMap()
     {
         return this.blocks;
+    }
+
+    public static long getPosAsLong(int x, int y, int z)
+    {
+        return (long) (y & 0xFFFF) << 48 | (long) (z & 0xFFFFFF) << 24 | (long) (x & 0xFFFFFF);
+    }
+
+    public static int getXFromLong(long data)
+    {
+        return (int) (data & 0xFFFFFF);
+    }
+
+    public static int getYFromLong(long data)
+    {
+        return (int) ((data >>> 48) & 0xFFFF);
+    }
+
+    public static int getZFromLong(long data)
+    {
+        return (int) ((data >>> 24) & 0xFFFFFF);
     }
 }
