@@ -158,7 +158,7 @@ litematica.hover.button.schematic_manager.rename_schematic=Rename the schematic\
 litematica.hover.button.schematic_manager.set_preview=Set a preview image/thumbnail to the schematic\n\nThe image is shown on the right side info panel
 litematica.hover.button.schematic_placement_list.sort_mode_button=The sort mode allows dragging the entries to reorder the placement list\n\n§dNote:§r You must click on the button to leave the sort mode to actually save the changes!
 litematica.hover.button.schematic_placement_settings.change_bb_color=Change the placement bounding box color
-litematica.hover.button.schematic_placement_settings.change_schematic=Change the schematic file this placement uses
+litematica.hover.button.schematic_placement_settings.change_schematic=Change the schematic this placement uses
 litematica.hover.button.schematic_placement_settings.copy_paste_settings=§eCopy or Paste placement settings§r\n- Click to open a text field where you can copy\n   or paste the setting string to/from\n- Shift + Left click to copy to the clipboard\n- Ctrl + Shift + Right click to paste from the clipboard
 litematica.hover.button.schematic_placement_settings.enclosing_box.off=Enclosing box rendering: §cOFF
 litematica.hover.button.schematic_placement_settings.enclosing_box.on=Enclosing box rendering: §aON
@@ -451,7 +451,7 @@ litematica.message.error.save_schematic.failed_to_save_from_area=Failed to save 
 litematica.message.error.save_schematic.invalid_directory=Invalid directory §e'%s'§r
 litematica.message.error.save_schematic.no_file_name=Empty file name!
 litematica.message.error.save_schematic.no_type_selected=No schematic type selected!\n§7Select the schematic type/format using the dropdown widget.
-litematica.message.error.schematic_load.invalid_schematic_file=Invalid or broken schematic file [ §e%s§r ]
+litematica.message.error.schematic_load.failed_to_load=Failed to load schematic from file §e%s§r
 litematica.message.error.schematic_load.no_schematic_selected=No schematic file selected!
 litematica.message.error.schematic_manager.failed_to_save_schematic=Failed to save the schematic back to the file
 litematica.message.error.schematic_manager.fix_extension.nothing_selected=Fix extension failed: Nothing selected
@@ -701,7 +701,8 @@ litematica.message.error.schematic_read.sponge.failed_to_read_blocks=Failed to r
 litematica.message.error.schematic_save.interrupted=Schematic saving interrupted or stopped
 litematica.message.error.schematic_save.missing_container=One of the data containers not found for sub-region '%s'
 litematica.message.error.schematic_save.missing_entity_list=Entity list not found for sub-region '%s'
-litematica.message.error.schematic_save.serializing_schematic_data_failed=Failed to serialize schematic data, exception:\n\n%s
+litematica.message.error.schematic_save.serializing_failed.empty=Failed to serialize schematic data, got empty output data
+litematica.message.error.schematic_save.serializing_failed.exception=Failed to serialize schematic data, exception:\n\n%s
 litematica.message.error.schematic_write.schematica.palette.invalid_id=SchematicaSchematic: Block id %s for block '%s' is out of range, max = %s
 litematica.message.error.update_blocks_aborted=Aborted updating the blocks in the area
 

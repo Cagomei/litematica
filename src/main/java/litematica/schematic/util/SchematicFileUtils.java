@@ -4,7 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import malilib.overlay.message.MessageDispatcher;
-import malilib.util.data.tag.BaseData;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.util.DataFileUtils;
 import litematica.schematic.Schematic;
@@ -55,7 +54,7 @@ public class SchematicFileUtils
             return false;
         }
 
-        BaseData data;
+        CompoundData data;
 
         try
         {
@@ -63,8 +62,14 @@ public class SchematicFileUtils
         }
         catch (Exception e)
         {
-            String key = "litematica.message.error.schematic_save.serializing_schematic_data_failed";
+            String key = "litematica.message.error.schematic_save.serializing_failed.exception";
             MessageDispatcher.error().console(e).translate(key, e.getMessage());
+            return false;
+        }
+
+        if (data == null || data.size() == 0)
+        {
+            MessageDispatcher.error("litematica.message.error.schematic_save.serializing_failed.empty");
             return false;
         }
 

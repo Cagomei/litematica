@@ -1,6 +1,7 @@
 package litematica.gui;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import malilib.gui.widget.button.GenericButton;
@@ -54,7 +55,17 @@ public class SchematicSelectorScreen extends BaseSchematicBrowserScreen
 
         if (file != null)
         {
-            SchematicHolder.INSTANCE.getOrLoad(file).ifPresent(this.schematicConsumer);
+            Optional<LoadedSchematic> opt = SchematicHolder.INSTANCE.getOrLoad(file);
+
+            if (opt.isPresent())
+            {
+                this.schematicConsumer.accept(opt.get());
+            }
+            else
+            {
+                MessageDispatcher.error("litematica.message.error.schematic_load.failed_to_load",
+                                        file.toString());
+            }
         }
         else
         {
