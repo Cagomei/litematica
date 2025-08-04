@@ -242,6 +242,10 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
     public void updateWidgetStates()
     {
         this.updateLabels();
+
+        Icon icon = SchematicTypeIcons.INSTANCE.getIcon(this.placement.getLoadedSchematic()).orElse(DefaultIcons.EXCLAMATION_11);
+        this.schematicTypeIcon.setIcon(icon);
+
         super.updateWidgetStates();
     }
 
