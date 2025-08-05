@@ -8,14 +8,16 @@ public class ScheduledBlockTickData
 {
     public final BlockPos pos;
     public final Block block;
+    public final String blockName;
     public final int priority;
     public final long delay;
     public final long tickId;
 
-    public ScheduledBlockTickData(BlockPos pos, Block block, int priority, long delay, long tickId)
+    public ScheduledBlockTickData(BlockPos pos, Block block, String blockName, int priority, long delay, long tickId)
     {
         this.pos = pos;
         this.block = block;
+        this.blockName = blockName;
         this.priority = priority;
         this.delay = delay;
         this.tickId = tickId;

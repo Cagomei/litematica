@@ -32,6 +32,7 @@ import malilib.util.game.MinecraftVersion;
 import malilib.util.game.wrap.BlockWrap;
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
+import malilib.util.game.wrap.RegistryUtils;
 import malilib.util.position.BlockPos;
 import malilib.util.position.BlockPos.MutBlockPos;
 import malilib.util.position.ChunkPos;
@@ -298,6 +299,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
             ScheduledBlockTickData tickData = new ScheduledBlockTickData(relPos,
                                                                          entry.getBlock(),
+                                                                         RegistryUtils.getBlockIdStr(entry.getBlock()),
                                                                          entry.priority,
                                                                          delay,
                                                                          tickId);

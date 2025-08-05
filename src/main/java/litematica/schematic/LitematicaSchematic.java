@@ -8,7 +8,6 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.Constants;
@@ -236,7 +235,7 @@ public class LitematicaSchematic extends BaseSchematic
     {
         Map<BlockPos, ScheduledBlockTickData> tickMap = new HashMap<>();
         final int size = list.size();
-        int tickIdCounter = 0;
+        long tickIdCounter = 0;
 
         for (int i = 0; i < size; ++i)
         {
@@ -245,19 +244,16 @@ public class LitematicaSchematic extends BaseSchematic
             if (tag.contains("Block", Constants.NBT.TAG_STRING) &&
                 tag.contains("Time", Constants.NBT.TAG_ANY_NUMERIC)) // XXX these were accidentally saved as longs in version 3
             {
-                Block block = RegistryUtils.getBlockByIdStr(tag.getString("Block"));
+                String blockName = tag.getString("Block");
+                Block block = RegistryUtils.getBlockByIdStr(blockName);
+                BlockPos pos = DataTypeUtils.readBlockPos(tag);
+                int priority = tag.getInt("Priority");
+                long delay = tag.getInt("Time");
+                long tickId = tag.getLongOrDefault("TickId", tickIdCounter++);
+                // Note: the time is a relative delay at this point
+                ScheduledBlockTickData entry = new ScheduledBlockTickData(pos, block, blockName, priority, delay, tickId);
 
-                if (block != null && block != Blocks.AIR)
-                {
-                    BlockPos pos = DataTypeUtils.readBlockPos(tag);
-                    int priority = tag.getInt("Priority");
-                    long delay = tag.getInt("Time");
-                    int tickId = tag.getIntOrDefault("TickId", tickIdCounter++);
-                    // Note: the time is a relative delay at this point
-                    ScheduledBlockTickData entry = new ScheduledBlockTickData(pos, block, priority, delay, tickId);
-
-                    tickMap.put(pos, entry);
-                }
+                tickMap.put(pos, entry);
             }
         }
 
