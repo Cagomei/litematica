@@ -3,6 +3,7 @@ package litematica.schematic;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
+import malilib.util.StringUtils;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.data.tag.util.DataTypeUtils;
@@ -12,7 +13,9 @@ import malilib.util.position.Vec3i;
 
 public class SchematicMetadata
 {
-    protected String schematicName = "?";
+    public static final String DEFAULT_NAME = "<no name>";
+
+    protected String schematicName = DEFAULT_NAME;
     protected String author = "";
     protected String description = "";
     protected Vec3i enclosingSize = Vec3i.ZERO;
@@ -119,7 +122,7 @@ public class SchematicMetadata
     {
         if (schematicName == null)
         {
-            schematicName = "?";
+            schematicName = DEFAULT_NAME;
         }
 
         this.schematicName = schematicName;
@@ -261,27 +264,60 @@ public class SchematicMetadata
     public CompoundData write(CompoundData tag)
     {
         tag.putString("Name", this.schematicName);
-        tag.putString("Author", this.author);
-        tag.putString("Description", this.description);
-        tag.put("EnclosingSize", DataTypeUtils.createVec3iTag(this.enclosingSize));
+
+        if (StringUtils.isEmpty(this.author) == false)
+        {
+            tag.putString("Author", this.author);
+        }
+
+        if (StringUtils.isEmpty(this.description) == false)
+        {
+            tag.putString("Description", this.description);
+        }
+
+        if (this.schematicVersion >= 0)
+        {
+            tag.putInt("SchematicVersion", this.schematicVersion);
+        }
 
         tag.putLong("TimeCreated", this.timeCreated);
-        tag.putLong("TimeModified", this.timeModified);
-        tag.putInt("SchematicVersion", this.schematicVersion);
+
+        if (this.timeModified > 0 && this.timeModified != this.timeCreated)
+        {
+            tag.putLong("TimeModified", this.timeModified);
+        }
+
+        tag.put("EnclosingSize", DataTypeUtils.createVec3iTag(this.enclosingSize));
 
         if (this.minecraftVersion != null)
         {
-            tag.putString("McVersion", this.minecraftVersion.displayName);
             tag.putInt("McDataVersion", this.minecraftVersion.dataVersion);
-            tag.putInt("McProtocolVersion", this.minecraftVersion.protocolVersion);
+            tag.putString("McVersion", this.minecraftVersion.displayName);
         }
 
         tag.putInt("RegionCount", this.regionCount);
-        tag.putInt("EntityCount", this.entityCount);
+
+        if (this.entityCount >= 0)
+        {
+            tag.putInt("EntityCount", this.entityCount);
+        }
+
         tag.putLong("TotalVolume", this.totalVolume);
-        tag.putLong("TotalBlocks", this.totalBlocks);
-        tag.putLong("BlockEntityCount", this.blockEntityCount);
-        tag.putLong("BlockTickCount", this.blockTickCount);
+
+        if (this.totalBlocks >= 0)
+        {
+            tag.putLong("TotalBlocks", this.totalBlocks);
+        }
+
+        if (this.blockEntityCount >= 0)
+        {
+            tag.putLong("BlockEntityCount", this.blockEntityCount);
+        }
+
+        if (this.blockTickCount >= 0)
+        {
+            tag.putLong("BlockTickCount", this.blockTickCount);
+        }
 
         if (this.originalOrigin != null)
         {
@@ -298,7 +334,7 @@ public class SchematicMetadata
 
     public void read(DataView dataIn)
     {
-        this.schematicName = dataIn.getStringOrDefault("Name", "?");
+        this.schematicName = dataIn.getStringOrDefault("Name", DEFAULT_NAME);
         this.author = dataIn.getStringOrDefault("Author", "");
         this.description = dataIn.getStringOrDefault("Description", "");
         this.enclosingSize = DataTypeUtils.readVec3iOrDefault(dataIn, "EnclosingSize", Vec3i.ZERO);
