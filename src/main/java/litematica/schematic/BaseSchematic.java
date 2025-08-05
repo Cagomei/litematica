@@ -3,10 +3,12 @@ package litematica.schematic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 
 import malilib.mixin.access.DataFixerMixin;
+import malilib.util.ListUtils;
 import malilib.util.data.Constants;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.tag.CompoundData;
@@ -141,5 +143,22 @@ public abstract class BaseSchematic implements Schematic
         }
 
         return listData;
+    }
+
+    public static Optional<SchematicRegion> getOrConvertToSingleRegion(ImmutableMap<String, SchematicRegion> regions,
+                                                                       SchematicType targetType)
+    {
+        if (regions.size() < 1)
+        {
+            return Optional.empty();
+        }
+
+        if (regions.size() == 1)
+        {
+            return Optional.ofNullable(ListUtils.getFirstEntry(regions.values()));
+        }
+
+        // TODO convert from multi-region
+        return Optional.empty();
     }
 }

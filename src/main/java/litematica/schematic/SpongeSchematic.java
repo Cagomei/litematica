@@ -743,20 +743,22 @@ public class SpongeSchematic extends BaseSchematic
 
     public static Optional<Schematic> fromRegions(ImmutableMap<String, SchematicRegion> regions)
     {
-        if (regions.size() == 1)
+        Optional<SchematicRegion> regionOpt = getOrConvertToSingleRegion(regions, SchematicType.SPONGE);
+
+        if (regionOpt.isPresent() == false)
         {
-            SpongeSchematic schematic = new SpongeSchematic();
-
-            SchematicRegion region = ListUtils.getFirstEntry(regions.values());
-            schematic.regions = regions;
-            schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
-            schematic.minecraftDataVersion = region.getMinecraftDataVersion();
-            schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
-
-            return Optional.of(schematic);
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        SchematicRegion region = regionOpt.get();
+        SpongeSchematic schematic = new SpongeSchematic();
+
+        schematic.regions = regions;
+        schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
+        schematic.minecraftDataVersion = region.getMinecraftDataVersion();
+        schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
+
+        return Optional.of(schematic);
     }
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)

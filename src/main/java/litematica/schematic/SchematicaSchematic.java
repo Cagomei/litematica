@@ -3,7 +3,6 @@ package litematica.schematic;
 import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
-import malilib.util.ListUtils;
 import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
@@ -92,18 +91,20 @@ public class SchematicaSchematic extends BaseSchematic
 
     public static Optional<Schematic> fromRegions(ImmutableMap<String, SchematicRegion> regions)
     {
-        if (regions.size() == 1)
+        Optional<SchematicRegion> regionOpt = getOrConvertToSingleRegion(regions, SchematicType.SCHEMATICA);
+
+        if (regionOpt.isPresent() == false)
         {
-            SchematicaSchematic schematic = new SchematicaSchematic();
-
-            SchematicRegion region = ListUtils.getFirstEntry(regions.values());
-            schematic.regions = regions;
-            schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
-            schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
-
-            return Optional.of(schematic);
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        SchematicRegion region = regionOpt.get();
+        SchematicaSchematic schematic = new SchematicaSchematic();
+
+        schematic.regions = regions;
+        schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
+        schematic.minecraftDataVersion = region.getMinecraftDataVersion();
+
+        return Optional.of(schematic);
     }
 }

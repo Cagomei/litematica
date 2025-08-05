@@ -331,18 +331,20 @@ public class VanillaSchematic extends BaseSchematic
 
     public static Optional<Schematic> fromRegions(ImmutableMap<String, SchematicRegion> regions)
     {
-        if (regions.size() == 1)
+        Optional<SchematicRegion> regionOpt = getOrConvertToSingleRegion(regions, SchematicType.VANILLA);
+
+        if (regionOpt.isPresent() == false)
         {
-            VanillaSchematic schematic = new VanillaSchematic();
-
-            SchematicRegion region = ListUtils.getFirstEntry(regions.values());
-            schematic.regions = regions;
-            schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
-            schematic.minecraftDataVersion = region.getMinecraftDataVersion();
-
-            return Optional.of(schematic);
+            return Optional.empty();
         }
 
-        return Optional.empty();
+        SchematicRegion region = regionOpt.get();
+        VanillaSchematic schematic = new VanillaSchematic();
+
+        schematic.regions = regions;
+        schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
+        schematic.minecraftDataVersion = region.getMinecraftDataVersion();
+
+        return Optional.of(schematic);
     }
 }
