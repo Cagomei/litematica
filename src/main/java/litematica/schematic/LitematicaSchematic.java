@@ -14,6 +14,7 @@ import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.data.tag.ListData;
+import malilib.util.data.tag.LongArrayData;
 import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.game.wrap.RegistryUtils;
@@ -303,8 +304,117 @@ public class LitematicaSchematic extends BaseSchematic
 
     protected CompoundData writeRegions()
     {
-        CompoundData data = new CompoundData();
-        return data;
+        CompoundData regionsTag = new CompoundData();
+
+        if (this.getRegions().isEmpty())
+        {
+            return regionsTag;
+        }
+
+        for (Map.Entry<String, SchematicRegion> entry : this.getRegions().entrySet())
+        {
+            String regionName = entry.getKey();
+            SchematicRegion region = entry.getValue();
+            BlockContainer container = region.getBlockContainer();
+            ArrayBlockContainer arrayBlockContainer;
+
+            if (container instanceof ArrayBlockContainer)
+            {
+                arrayBlockContainer = (ArrayBlockContainer) container;
+            }
+            else
+            {
+                // TODO convert the container
+                MessageDispatcher.error("TODO: Convert the BlockContainer into an ArrayBlockContainer for serialization");
+                continue;
+            }
+
+            Map<BlockPos, CompoundData> blockEntityMap = region.getBlockEntityMap();
+            List<EntityData> entityList = region.getEntityList();
+            Map<BlockPos, ScheduledBlockTickData> blockTicksMap = region.getBlockTickMap();
+
+            CompoundData regionTag = new CompoundData();
+
+            regionTag.putInt("DataVersion", region.getMinecraftDataVersion());
+            regionTag.put("BlockStatePalette", writePaletteToLitematicaFormatTag(container.getPalette()));
+            regionTag.put("BlockStates", new LongArrayData(arrayBlockContainer.getBackingLongArray()));
+
+            if (blockEntityMap.isEmpty() == false)
+            {
+                regionTag.put("TileEntities", this.writeBlockEntitiesToListData(blockEntityMap));
+            }
+
+            if (blockTicksMap.isEmpty() == false)
+            {
+                regionTag.put("PendingBlockTicks", this.writeBlockTicksToListData(blockTicksMap));
+            }
+
+            // The entity list will not exist, if saveEntities is false when creating the schematic
+            if (entityList.isEmpty() == false)
+            {
+                regionTag.put("Entities", this.writeEntitiesToListData(entityList));
+            }
+
+            regionTag.put("Position", DataTypeUtils.createVec3iTag(region.getRelativePosition()));
+            regionTag.put("Size", DataTypeUtils.createVec3iTag(region.getSize()));
+
+            regionsTag.put(regionName, regionTag);
+        }
+
+        return regionsTag;
+    }
+
+    protected ListData writeBlockEntitiesToListData(Map<BlockPos, CompoundData> blockEntityMap)
+    {
+        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
+
+        for (Map.Entry<BlockPos, CompoundData> entry : blockEntityMap.entrySet())
+        {
+            CompoundData tag = entry.getValue().copy();
+            DataTypeUtils.putVec3i(tag, entry.getKey());
+            list.add(tag);
+        }
+
+        return list;
+    }
+
+    protected ListData writeBlockTicksToListData(Map<BlockPos, ScheduledBlockTickData> blockTicksMap)
+    {
+        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
+
+        if (blockTicksMap.isEmpty())
+        {
+            return list;
+        }
+
+        for (ScheduledBlockTickData entry : blockTicksMap.values())
+        {
+            CompoundData tag = new CompoundData();
+
+            tag.putString("Block", entry.blockName);
+            tag.putInt("Priority", entry.priority);
+            tag.putInt("Time", (int) entry.delay);
+            tag.putLong("TickId", entry.tickId);
+            DataTypeUtils.putVec3i(tag, entry.pos);
+
+            list.add(tag);
+        }
+
+        return list;
+    }
+
+    protected ListData writeEntitiesToListData(List<EntityData> entityList)
+    {
+        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
+
+        for (EntityData entityData : entityList)
+        {
+            CompoundData tag = entityData.data.copy();
+            DataTypeUtils.writeVec3dToListTag(tag, entityData.pos);
+            list.add(tag);
+        }
+
+        return list;
     }
 
     public static boolean isValidData(DataView data)
