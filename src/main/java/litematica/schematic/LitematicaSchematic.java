@@ -46,6 +46,7 @@ public class LitematicaSchematic extends BaseSchematic
         }
 
         int version = data.getIntOrDefault("Version", -1);
+        this.minecraftDataVersion = data.getIntOrDefault("MinecraftDataVersion", -1);
 
         /* This can't happen after the isValid() check
         if (version == -1)
@@ -59,8 +60,13 @@ public class LitematicaSchematic extends BaseSchematic
             MessageDispatcher.warning("litematica.error.schematic_read.unknown_schematic_version", version);
         }
 
-        this.regions = this.readRegions(data, version);
-        this.minecraftDataVersion = data.getIntOrDefault("MinecraftDataVersion", -1);
+        if (this.minecraftDataVersion > CURRENT_MINECRAFT_DATA_VERSION)
+        {
+            MessageDispatcher.warning("litematica.error.schematic_read.future_data_version",
+                                      this.minecraftDataVersion, CURRENT_MINECRAFT_DATA_VERSION);
+        }
+
+        this.regions = this.readRegions(data, version, this.minecraftDataVersion);
         this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
         this.enclosingSize = this.metadata.getEnclosingSize();
 
@@ -72,6 +78,9 @@ public class LitematicaSchematic extends BaseSchematic
     {
         CompoundData data = new CompoundData();
 
+        // Note: The Metadata and other small bits should preferably be written before
+        // the main Regions tag, so that a faster partial read from disk is possible
+        // to just read the Metadata for the schematic browser info panel.
         data.putInt("Version", CURRENT_SCHEMATIC_VERSION);
         data.putInt("MinecraftDataVersion", this.minecraftDataVersion);
         data.put("Metadata", this.metadata.write(new CompoundData()));
@@ -80,7 +89,7 @@ public class LitematicaSchematic extends BaseSchematic
         return data;
     }
 
-    protected ImmutableMap<String, SchematicRegion> readRegions(DataView data, int version)
+    protected ImmutableMap<String, SchematicRegion> readRegions(DataView data, int version, int mainDataVersion)
     {
         ImmutableMap.Builder<String, SchematicRegion> builder = ImmutableMap.builder();
 
@@ -171,7 +180,10 @@ public class LitematicaSchematic extends BaseSchematic
                 entityList = new ArrayList<>();
             }
 
-            SchematicRegion region = new SchematicRegion(regionPos, regionSize, container, blockEntityMap, blockTickMap, entityList);
+            int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
+            SchematicRegion region = new SchematicRegion(regionPos, regionSize, container, blockEntityMap,
+                                                         blockTickMap, entityList, dataVersion);
+
             builder.put(regionName, region);
         }
 

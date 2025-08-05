@@ -43,6 +43,7 @@ import litematica.Litematica;
 import litematica.mixin.access.NextTickListEntryMixin;
 import litematica.render.infohud.InfoHud;
 import litematica.scheduler.tasks.TaskProcessChunkBase;
+import litematica.schematic.BaseSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicMetadata;
 import litematica.schematic.SchematicRegion;
@@ -405,8 +406,9 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
             BlockPos relPos = box.getCorner1().subtract(this.origin);
             Vec3i size = box.getSize();
+            int dv = BaseSchematic.CURRENT_MINECRAFT_DATA_VERSION;
 
-            SchematicRegion region = new SchematicRegion(relPos, size, container, blockEntityMap, blockTickMap, entityList);
+            SchematicRegion region = new SchematicRegion(relPos, size, container, blockEntityMap, blockTickMap, entityList, dv);
             regionBuilder.put(regionName, region);
         }
 

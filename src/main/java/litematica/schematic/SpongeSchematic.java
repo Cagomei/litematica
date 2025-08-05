@@ -221,12 +221,13 @@ public class SpongeSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap, new HashMap<>(), entityList);
-
-        this.regions = ImmutableMap.of("Schematic", region);
         this.minecraftDataVersion = data.getIntOrDefault("DataVersion", -1);
-        this.originalMetadataTag = data.getCompound("Metadata").copy();
+        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
+                                                     new HashMap<>(), entityList, this.minecraftDataVersion);
+
         this.enclosingSize = size;
+        this.originalMetadataTag = data.getCompound("Metadata").copy();
+        this.regions = ImmutableMap.of("Schematic", region);
         this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
@@ -268,12 +269,13 @@ public class SpongeSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap, new HashMap<>(), entityList);
-
-        this.regions = ImmutableMap.of("Schematic", region);
         this.minecraftDataVersion = schTag.getIntOrDefault("DataVersion", -1);
-        this.originalMetadataTag = schTag.getCompound("Metadata").copy();
+        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
+                                                     new HashMap<>(), entityList, this.minecraftDataVersion);
+
         this.enclosingSize = size;
+        this.originalMetadataTag = schTag.getCompound("Metadata").copy();
+        this.regions = ImmutableMap.of("Schematic", region);
         this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
@@ -748,7 +750,7 @@ public class SpongeSchematic extends BaseSchematic
             SchematicRegion region = ListUtils.getFirstEntry(regions.values());
             schematic.regions = regions;
             schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
-            schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
+            schematic.minecraftDataVersion = region.getMinecraftDataVersion();
             schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
 
             return Optional.of(schematic);

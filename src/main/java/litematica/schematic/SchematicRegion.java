@@ -18,13 +18,15 @@ public class SchematicRegion
     protected final Map<BlockPos, CompoundData> blockEntityData;
     protected final Map<BlockPos, ScheduledBlockTickData> blockTickData;
     protected final List<EntityData> entityData;
+    protected final int minecraftDataVersion;
 
     public SchematicRegion(BlockPos relativePosition,
                            Vec3i size,
                            BlockContainer blockContainer,
                            Map<BlockPos, CompoundData> blockEntityData,
                            Map<BlockPos, ScheduledBlockTickData> blockTickData,
-                           List<EntityData> entityData)
+                           List<EntityData> entityData,
+                           int minecraftDataVersion)
     {
         this.relativePosition = relativePosition;
         this.size = size;
@@ -32,6 +34,7 @@ public class SchematicRegion
         this.blockEntityData = blockEntityData;
         this.blockTickData = blockTickData;
         this.entityData = entityData;
+        this.minecraftDataVersion = minecraftDataVersion;
     }
 
     /**
@@ -82,5 +85,10 @@ public class SchematicRegion
     public Map<BlockPos, ScheduledBlockTickData> getBlockTickMap()
     {
         return this.blockTickData;
+    }
+
+    public int getMinecraftDataVersion()
+    {
+        return this.minecraftDataVersion;
     }
 }

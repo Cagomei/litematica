@@ -532,6 +532,7 @@ litematica.error.schematic_projects.null_player=Player was null
 litematica.error.schematic_projects.save_already_in_progress=Save already in progress
 
 litematica.error.schematic_read.cant_read_nbt=Failed to read schematic data from file '§e%s§r'
+litematica.error.schematic_read.future_data_version=Found a "future" DataVersion §b%s§r, current game DataVersion is §b%s§r.\n\nThe schematic might not load correctly!
 litematica.error.schematic_read.litematica.invalid_block_data_array=Invalid or missing block data array for region '§e%s§r'
 litematica.error.schematic_read.litematica.invalid_tag_in_regions=Invalid tag type for tag '§e%s§r' inside the 'Regions' tag
 litematica.error.schematic_read.litematica.missing_pos_or_size=Missing position or size for region '§e%s§r'

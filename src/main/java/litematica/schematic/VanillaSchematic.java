@@ -64,11 +64,12 @@ public class VanillaSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap, new HashMap<>(), entityList);
-
-        this.regions = ImmutableMap.of("Schematic", region);
         this.minecraftDataVersion = data.getIntOrDefault("DataVersion", -1);
+        SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
+                                                     new HashMap<>(), entityList, this.minecraftDataVersion);
+
         this.enclosingSize = size;
+        this.regions = ImmutableMap.of("Schematic", region);
         this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
 
         return true;
@@ -337,7 +338,7 @@ public class VanillaSchematic extends BaseSchematic
             SchematicRegion region = ListUtils.getFirstEntry(regions.values());
             schematic.regions = regions;
             schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
-            schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
+            schematic.minecraftDataVersion = region.getMinecraftDataVersion();
 
             return Optional.of(schematic);
         }
