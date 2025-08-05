@@ -50,13 +50,13 @@ public class LitematicaSchematic extends BaseSchematic
         /* This can't happen after the isValid() check
         if (version == -1)
         {
-            MessageDispatcher.error("litematica.error.schematic_load.no_version");
+            MessageDispatcher.error("litematica.error.schematic_read.no_version");
         }
         */
 
         if (version == 0 || version > CURRENT_SCHEMATIC_VERSION)
         {
-            MessageDispatcher.warning("litematica.error.schematic_load.unknown_schematic_version", version);
+            MessageDispatcher.warning("litematica.error.schematic_read.unknown_schematic_version", version);
         }
 
         this.regions = this.readRegions(data, version);
@@ -90,7 +90,7 @@ public class LitematicaSchematic extends BaseSchematic
         {
             if (regionsTag.contains(regionName, Constants.NBT.TAG_COMPOUND) == false)
             {
-                MessageDispatcher.error("litematica.error.schematic_load.invalid_tag_in_regions", regionName);
+                MessageDispatcher.error("litematica.error.schematic_read.litematica.invalid_tag_in_regions", regionName);
                 continue;
             }
 
@@ -100,7 +100,7 @@ public class LitematicaSchematic extends BaseSchematic
 
             if (regionPos == null || regionSize == null)
             {
-                MessageDispatcher.error("litematica.error.schematic_load.litematica.missing_pos_or_size", regionName);
+                MessageDispatcher.error("litematica.error.schematic_read.litematica.missing_pos_or_size", regionName);
                 continue;
             }
 
@@ -122,7 +122,7 @@ public class LitematicaSchematic extends BaseSchematic
             }
             else
             {
-                MessageDispatcher.error("litematica.error.schematic_load.litematica.version_0", regionName);
+                MessageDispatcher.error("litematica.error.schematic_read.litematica.version_0", regionName);
             }
 
             if (version >= 3)
@@ -146,7 +146,7 @@ public class LitematicaSchematic extends BaseSchematic
 
             if (container == null)
             {
-                MessageDispatcher.error("litematica.error.schematic_read.region_container", regionName);
+                MessageDispatcher.error("litematica.error.schematic_read.litematica.region_container", regionName);
                 continue;
             }
 

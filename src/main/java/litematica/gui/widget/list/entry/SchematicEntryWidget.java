@@ -141,7 +141,7 @@ public class SchematicEntryWidget extends BaseSchematicEntryWidget
         }
         else
         {
-            MessageDispatcher.error("litematica.error.schematic_read_from_file_failed.no_file");
+            MessageDispatcher.error("litematica.error.schematic_read.no_file_set");
         }
     }
 

@@ -21,7 +21,7 @@ public class SchematicFileUtils
 
         if (data == null)
         {
-            MessageDispatcher.error("litematica.error.schematic_read_from_file_failed.cant_read",
+            MessageDispatcher.error("litematica.error.schematic_read.cant_read_nbt",
                                     file.toAbsolutePath().toString());
             return false;
         }
@@ -42,14 +42,14 @@ public class SchematicFileUtils
 
         if (overwrite == false && Files.exists(file))
         {
-            MessageDispatcher.error("litematica.error.schematic_write_to_file_failed.exists",
+            MessageDispatcher.error("litematica.error.schematic_write.file_exists",
                                     file.toAbsolutePath().toString());
             return false;
         }
 
         if (Files.isWritable(file))
         {
-            MessageDispatcher.error("litematica.error.schematic_write_to_file_failed.not_writable",
+            MessageDispatcher.error("litematica.error.schematic_write.file_not_writable",
                                     file.toAbsolutePath().toString());
             return false;
         }

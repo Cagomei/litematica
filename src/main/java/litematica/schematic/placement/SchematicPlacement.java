@@ -624,7 +624,7 @@ public class SchematicPlacement extends BasePlacement
             this.isSchematicLoaded() == false &&
             this.loadAndSetSchematicFromFile(this.schematicFileOpt.get()) == false)
         {
-            MessageDispatcher.error().translate("litematica.error.schematic_load.failed",
+            MessageDispatcher.error().translate("litematica.error.schematic_read.load_failed",
                                                 this.schematicFileOpt.get().toAbsolutePath().toString());
             return false;
         }

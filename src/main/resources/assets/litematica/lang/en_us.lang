@@ -513,18 +513,7 @@ litematica.error.area_editor.switch_mode.no_selection=Can't switch to the §6Mul
 
 litematica.error.execute_operation_no_tool=As a safety measure the §eExecute Operation§r hotkey requires you to hold the tool item, and the main rendering toggle option and the tool item both need to be enabled (Visuals -> §eMain Rendering Toggle§r ['%s'] and Generic -> §eTool Item Functionality§r ['%s']). This requirement can be disabled in Generic -> §eExecute Requires Holding Tool§r.
 
-litematica.error.schematic_conversion.schematic_to_litematica.failed_to_create_schematic=Failed to create the Litematica schematic
-litematica.error.schematic_conversion.schematic_to_litematica.failed_to_read_schematic=Failed to load the schematic
-litematica.error.schematic_conversion.structure_to_litematica_failed=Failed to convert the vanilla structure to a Litematica schematic
-
 litematica.error.schematic.create.no_selections=No valid selection regions!
-
-litematica.error.schematic_load.cant_read_file=Can't read the schematic file §e'%s'§r (doesn't exist or permission issue)
-litematica.error.schematic_load.failed=Failed to read the schematic from file §e'%s'§r
-litematica.error.schematic_load.invalid_tag_in_regions=Invalid tag type for tag '§e%s§r' inside the 'Regions' tag
-litematica.error.schematic_load.no_version=The schematic doesn't have version information. It may be loaded incorrectly!
-litematica.error.schematic_load.unknown_schematic_version=Unknown (future?) schematic version §b%d§r. It may be loaded incorrectly!
-litematica.error.schematic_load.unsupported_type=Unknown or unsupported file type for §e'%s'§r
 
 litematica.error.schematic_placements.coordinate_locked=Can't move because of an active coordinate lock
 litematica.error.schematic_placements.load_fail=Failed to load the placement from file '§e%s§r'
@@ -542,28 +531,23 @@ litematica.error.schematic_projects.in_projects_mode_but_no_project_open=Current
 litematica.error.schematic_projects.null_player=Player was null
 litematica.error.schematic_projects.save_already_in_progress=Save already in progress
 
-litematica.error.schematic_read_from_file_failed.cant_read=Failed to read schematic from file §e'%s'
-litematica.error.schematic_read_from_file_failed.no_file=Failed to read schematic from file: no file available (in-memory schematic?)
+litematica.error.schematic_read.cant_read_nbt=Failed to read schematic data from file '§e%s§r'
 litematica.error.schematic_read.litematica.invalid_block_data_array=Invalid or missing block data array for region '§e%s§r'
-litematica.error.schematic_load.litematica.missing_pos_or_size=Missing position or size for region '§e%s§r'
+litematica.error.schematic_read.litematica.invalid_tag_in_regions=Invalid tag type for tag '§e%s§r' inside the 'Regions' tag
+litematica.error.schematic_read.litematica.missing_pos_or_size=Missing position or size for region '§e%s§r'
 litematica.error.schematic_read.litematica.palette_read_failed=Failed to read the block state palette for region '§e%s§r'
-litematica.error.schematic_load.litematica.version_0=Apparent version 0 schematic? (Those don't exist.)
-litematica.error.schematic_read.region_container=Failed to read block container for region '§e%s§r'
-litematica.error.schematic_rename.read_failed=Failed to read the schematic from file §e'%s'
+litematica.error.schematic_read.litematica.region_container=Failed to create the block container for region '§e%s§r'
+litematica.error.schematic_read.litematica.version_0=Apparent version 0 schematic? (Those don't exist.)
+litematica.error.schematic_read.load_failed=Failed to load the schematic from file §e'%s'§r
+litematica.error.schematic_read.no_file_set=Failed to load the schematic from file, no file known (in-memory-only schematic?)
+litematica.error.schematic_read.no_version=The schematic doesn't have version information. It may be loaded incorrectly!
+litematica.error.schematic_read.unknown_schematic_version=Unknown (future?) schematic version §b%d§r. It may be loaded incorrectly!
+#litematica.error.schematic_read.unsupported_type=Unknown or unsupported file type for §e'%s'§r
 
-litematica.error.schematic_save.directory_doesnt_exist=No such directory: '%s'
-litematica.error.schematic_save.file_already_exists=File '%s' already exists
-litematica.error.schematic_save.schematic_creation_failed=Failed to create the schematic!
+litematica.error.schematic_write.file_exists=Failed to write the schematic to file '§e%s§r', file already exists
+litematica.error.schematic_write.file_not_writable=Failed to write the schematic to file '§e%s§r', file is not writable
 
-litematica.error.schematic_write_to_file_failed.directory_creation_failed=Failed to create schematic directory '%s'
-litematica.error.schematic_write_to_file_failed.exists=Failed to write the schematic to file §e'%s'§r, file already exists
-litematica.error.schematic_write_to_file_failed.not_writable=Failed to write the schematic to file §e'%s'§r, file is not writable
-litematica.error.structure_write_to_file_failed.exception=Failed to write the structure to file '%s' (exception)
-litematica.error.structure_write_to_file_failed.exists=Failed to write the structure to file '%s', file already exists
-
-litematica.info.schematic_manager.preview.right_click_to_cancel=Right click the button to cancel a pending preview task
-
-litematica.gui.button.area_selections.create_directory=Create directory
+litematica.gui.button.area_selections.create_directory=Create Directory
 
 litematica.gui.button.hover.area_editor.analyze_area=§7Creates a Material List from the current selection
 litematica.gui.button.hover.area_editor.corner_mode.corners=§fCorners Mode:\n§7Left click to set the first/origin corner,\n§7right click to set the second corner.\n§7Middle click to select a corner, and then you can Alt + scroll\n§7to nudge it around in the looking direction.
