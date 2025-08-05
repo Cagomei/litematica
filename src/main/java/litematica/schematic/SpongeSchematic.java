@@ -196,7 +196,7 @@ public class SpongeSchematic extends BaseSchematic
             return false;
         }
 
-        BlockContainer container = readBlocksFromTag_v1_2(data, size);
+        BlockContainer container = this.readBlocksFromTag_v1_2(data, size);
 
         if (container == null)
         {
@@ -204,7 +204,7 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         Map<BlockPos, CompoundData> blockEntityMap = new HashMap<>();
-        int errorCount = readBlockEntitiesFromTag_v1_2(data, blockEntityMap, version);
+        int errorCount = this.readBlockEntitiesFromTag_v1_2(data, blockEntityMap, version);
 
         if (errorCount > 0)
         {
@@ -213,7 +213,7 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         List<EntityData> entityList = new ArrayList<>();
-        errorCount = readEntitiesFromTag_v1_2(data, entityList, version);
+        errorCount = this.readEntitiesFromTag_v1_2(data, entityList, version);
 
         if (errorCount > 0)
         {
@@ -243,7 +243,7 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         CompoundData blockTag = schTag.getCompound("Blocks");
-        BlockContainer container = readBlocksFromTag_v3(blockTag, size);
+        BlockContainer container = this.readBlocksFromTag_v3(blockTag, size);
 
         if (container == null)
         {
@@ -251,7 +251,7 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         Map<BlockPos, CompoundData> blockEntityMap = new HashMap<>();
-        int errorCount = readBlockEntitiesFromTag_v3(blockTag, blockEntityMap);
+        int errorCount = this.readBlockEntitiesFromTag_v3(blockTag, blockEntityMap);
 
         if (errorCount > 0)
         {
@@ -280,7 +280,7 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     @Nullable
-    protected static BlockContainer readBlocksFromTag_v1_2(DataView data, Vec3i size)
+    protected BlockContainer readBlocksFromTag_v1_2(DataView data, Vec3i size)
     {
         CompoundData paletteTag = data.getCompound("Palette");
         byte[] blockData = data.getByteArray("BlockData");
@@ -288,7 +288,7 @@ public class SpongeSchematic extends BaseSchematic
 
         ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockData, size);
 
-        if (readPaletteFromCompound(paletteTag, container.getPalette()) == false)
+        if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.sponge.failed_to_read_blocks");
             return null;
@@ -298,7 +298,7 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     @Nullable
-    protected static BlockContainer readBlocksFromTag_v3(DataView data, Vec3i size)
+    protected BlockContainer readBlocksFromTag_v3(DataView data, Vec3i size)
     {
         CompoundData paletteTag = data.getCompound("Palette");
         byte[] blockData = data.getByteArray("Data");
@@ -306,7 +306,7 @@ public class SpongeSchematic extends BaseSchematic
 
         ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockData, size);
 
-        if (readPaletteFromCompound(paletteTag, container.getPalette()) == false)
+        if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.sponge.failed_to_read_blocks");
             return null;
@@ -315,7 +315,7 @@ public class SpongeSchematic extends BaseSchematic
         return container;
     }
 
-    protected static boolean readPaletteFromCompound(DataView data, Palette<BlockState> palette)
+    protected boolean readPaletteFromCompound(DataView data, Palette<BlockState> palette)
     {
         final int size = data.size();
         List<BlockState> list = new ArrayList<>(size);
@@ -355,7 +355,7 @@ public class SpongeSchematic extends BaseSchematic
         return palette.setMapping(list);
     }
 
-    protected static int readBlockEntitiesFromTag_v1_2(DataView tag, Map<BlockPos, CompoundData> blockEntityMapOut, int version)
+    protected int readBlockEntitiesFromTag_v1_2(DataView tag, Map<BlockPos, CompoundData> blockEntityMapOut, int version)
     {
         String tagName = version == 1 ? "TileEntities" : "BlockEntities";
         ListData listData = tag.getList(tagName, Constants.NBT.TAG_COMPOUND);
@@ -364,7 +364,7 @@ public class SpongeSchematic extends BaseSchematic
 
         for (int i = 0; i < size; ++i)
         {
-            CompoundData beTag = listData.getCompoundAt(i);
+            CompoundData beTag = listData.getCompoundAt(i).copy();
             BlockPos pos = DataTypeUtils.readBlockPosFromArrayTag(beTag, "Pos");
 
             if (pos == null)
@@ -390,7 +390,7 @@ public class SpongeSchematic extends BaseSchematic
         return errorCount;
     }
 
-    protected static int readBlockEntitiesFromTag_v3(DataView tag, Map<BlockPos, CompoundData> blockEntityMapOut)
+    protected int readBlockEntitiesFromTag_v3(DataView tag, Map<BlockPos, CompoundData> blockEntityMapOut)
     {
         ListData listData = tag.getList("BlockEntities", Constants.NBT.TAG_COMPOUND);
         final int size = listData.size();
@@ -407,14 +407,14 @@ public class SpongeSchematic extends BaseSchematic
                 continue;
             }
 
-            CompoundData dataTag = beTag.getCompound("Data");
+            CompoundData dataTag = beTag.getCompound("Data").copy();
             blockEntityMapOut.put(pos, dataTag);
         }
 
         return errorCount;
     }
 
-    protected static int readEntitiesFromTag_v1_2(DataView tag, List<EntityData> entityListOut, int version)
+    protected int readEntitiesFromTag_v1_2(DataView tag, List<EntityData> entityListOut, int version)
     {
         ListData listData = tag.getList("Entities", Constants.NBT.TAG_COMPOUND);
         final int size = listData.size();
@@ -422,7 +422,7 @@ public class SpongeSchematic extends BaseSchematic
 
         for (int i = 0; i < size; ++i)
         {
-            CompoundData entityTag = listData.getCompoundAt(i);
+            CompoundData entityTag = listData.getCompoundAt(i).copy();
             Vec3d pos = DataTypeUtils.readVec3dFromListTag(entityTag);
 
             if (pos == null)
@@ -462,7 +462,7 @@ public class SpongeSchematic extends BaseSchematic
                 continue;
             }
 
-            CompoundData entityData = entityTag.getCompound("Data");
+            CompoundData entityData = entityTag.getCompound("Data").copy();
             entityListOut.add(new EntityData(pos, entityData));
         }
 

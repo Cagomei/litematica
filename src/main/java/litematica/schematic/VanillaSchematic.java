@@ -138,7 +138,7 @@ public class VanillaSchematic extends BaseSchematic
 
             if (blockTag.contains("nbt", Constants.NBT.TAG_COMPOUND))
             {
-                blockEntityMapOut.put(pos, blockTag.getCompound("nbt"));
+                blockEntityMapOut.put(pos, blockTag.getCompound("nbt").copy());
             }
         }
 
@@ -158,7 +158,7 @@ public class VanillaSchematic extends BaseSchematic
 
             if (pos != null && tag.contains("nbt", Constants.NBT.TAG_COMPOUND))
             {
-                entityListOut.add(new EntityData(pos, tag.getCompound("nbt")));
+                entityListOut.add(new EntityData(pos, tag.getCompound("nbt").copy()));
             }
             else
             {
