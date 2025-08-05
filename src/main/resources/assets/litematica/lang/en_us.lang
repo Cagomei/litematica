@@ -521,8 +521,9 @@ litematica.error.schematic.create.no_selections=No valid selection regions!
 
 litematica.error.schematic_load.cant_read_file=Can't read the schematic file §e'%s'§r (doesn't exist or permission issue)
 litematica.error.schematic_load.failed=Failed to read the schematic from file §e'%s'§r
-litematica.error.schematic_load.no_schematic_version_information=The schematic doesn't have version information, and can't be safely loaded!
-litematica.error.schematic_load.unsupported_schematic_version=Unsupported or future schematic version §b%d§r
+litematica.error.schematic_load.invalid_tag_in_regions=Invalid tag type for tag '§e%s§r' inside the 'Regions' tag
+litematica.error.schematic_load.no_version=The schematic doesn't have version information. It may be loaded incorrectly!
+litematica.error.schematic_load.unknown_schematic_version=Unknown (future?) schematic version §b%d§r. It may be loaded incorrectly!
 litematica.error.schematic_load.unsupported_type=Unknown or unsupported file type for §e'%s'§r
 
 litematica.error.schematic_placements.coordinate_locked=Can't move because of an active coordinate lock
@@ -543,7 +544,11 @@ litematica.error.schematic_projects.save_already_in_progress=Save already in pro
 
 litematica.error.schematic_read_from_file_failed.cant_read=Failed to read schematic from file §e'%s'
 litematica.error.schematic_read_from_file_failed.no_file=Failed to read schematic from file: no file available (in-memory schematic?)
-litematica.error.schematic_read_from_file_failed.region_container=Failed to read region §e'%s'§r from NBT for schematic §e'%s'
+litematica.error.schematic_read.litematica.invalid_block_data_array=Invalid or missing block data array for region '§e%s§r'
+litematica.error.schematic_load.litematica.missing_pos_or_size=Missing position or size for region '§e%s§r'
+litematica.error.schematic_read.litematica.palette_read_failed=Failed to read the block state palette for region '§e%s§r'
+litematica.error.schematic_load.litematica.version_0=Apparent version 0 schematic? (Those don't exist.)
+litematica.error.schematic_read.region_container=Failed to read block container for region '§e%s§r'
 litematica.error.schematic_rename.read_failed=Failed to read the schematic from file §e'%s'
 
 litematica.error.schematic_save.directory_doesnt_exist=No such directory: '%s'

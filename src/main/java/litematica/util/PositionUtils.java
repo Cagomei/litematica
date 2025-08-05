@@ -217,7 +217,7 @@ public class PositionUtils
         return (long) size.getX() * (long) size.getY() * (long) size.getZ();
     }
 
-    public static Vec3i getEnclosingAreaSize(Collection<? extends CornerDefinedBox> boxes)
+    public static Vec3i getEnclosingAreaSizeOfBoxes(Collection<? extends CornerDefinedBox> boxes)
     {
         return getEnclosingAreaSize(getEnclosingBox(boxes));
     }
@@ -340,6 +340,52 @@ public class PositionUtils
         }
 
         return new IntBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    @Nullable
+    public static Vec3i getEnclosingAreaSize(Collection<SchematicRegion> regions)
+    {
+        if (regions.isEmpty())
+        {
+            return null;
+        }
+
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+
+        for (SchematicRegion region : regions)
+        {
+            Vec3i size = region.getSize();
+            int offX = size.getX();
+            int offY = size.getY();
+            int offZ = size.getZ();
+
+            offX = offX >= 0 ? offX - 1 : offX + 1;
+            offY = offY >= 0 ? offY - 1 : offY + 1;
+            offZ = offZ >= 0 ? offZ - 1 : offZ + 1;
+
+            BlockPos pos = region.getRelativePosition();
+            int x1 = pos.getX();
+            int y1 = pos.getY();
+            int z1 = pos.getZ();
+            int x2 = x1 + offX;
+            int y2 = y1 + offY;
+            int z2 = z1 + offZ;
+
+            minX = Math.min(minX, Math.min(x1, x2));
+            minY = Math.min(minY, Math.min(y1, y2));
+            minZ = Math.min(minZ, Math.min(z1, z2));
+
+            maxX = Math.max(maxX, Math.max(x1, x2));
+            maxY = Math.max(maxY, Math.max(y1, y2));
+            maxZ = Math.max(maxZ, Math.max(z1, z2));
+        }
+
+        return new Vec3i(maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1);
     }
 
     @Nullable

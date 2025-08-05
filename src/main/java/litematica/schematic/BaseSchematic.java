@@ -1,7 +1,6 @@
 package litematica.schematic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -16,7 +15,6 @@ import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
-import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
 import litematica.schematic.container.BlockContainer;
@@ -101,45 +99,6 @@ public abstract class BaseSchematic implements Schematic
         }
 
         return palette.setMapping(list);
-    }
-
-    public static List<EntityData> readEntitiesFromList(ListData listData)
-    {
-        final int size = listData.size();
-        List<EntityData> entityList = new ArrayList<>(size);
-
-        for (int i = 0; i < size; ++i)
-        {
-            CompoundData compound = listData.getCompoundAt(i);
-            Vec3d posVec = DataTypeUtils.readVec3dFromListTag(compound);
-
-            if (posVec != null && compound.isEmpty() == false)
-            {
-                entityList.add(new EntityData(posVec, compound));
-            }
-        }
-
-        return entityList;
-    }
-
-    public static Map<BlockPos, CompoundData> readBlockEntitiesFromList(ListData listData)
-    {
-        final int size = listData.size();
-        Map<BlockPos, CompoundData> map = new HashMap<>();
-
-        for (int i = 0; i < size; ++i)
-        {
-            CompoundData compound = listData.getCompoundAt(i);
-            BlockPos pos = DataTypeUtils.readBlockPos(compound);
-            DataTypeUtils.removeBlockPosFromTag(compound);
-
-            if (pos != null && compound.isEmpty() == false)
-            {
-                map.put(pos, compound);
-            }
-        }
-
-        return map;
     }
 
     public static ListData writePaletteToLitematicaFormatTag(Palette<BlockState> palette)

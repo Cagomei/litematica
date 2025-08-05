@@ -416,7 +416,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
     protected void setMetadataValues(SchematicMetadata meta)
     {
         Collection<SelectionBox> boxes = this.subRegions.values();
-        meta.setEnclosingSize(PositionUtils.getEnclosingAreaSize(boxes));
+        meta.setEnclosingSize(PositionUtils.getEnclosingAreaSizeOfBoxes(boxes));
         meta.setTotalVolume(PositionUtils.getTotalVolume(boxes));
         meta.setTotalBlocks(this.totalBlocks);
         meta.setEntityCount(this.totalEntities);
