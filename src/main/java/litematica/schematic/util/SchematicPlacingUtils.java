@@ -649,41 +649,47 @@ public class SchematicPlacingUtils
             mirrorSub = mirrorSub == BlockMirror.X ? BlockMirror.Z : BlockMirror.X;
         }
 
-        for (EntityData info : entityList)
+        for (EntityData entityData : entityList)
         {
-            Entity entity = EntityWrap.createEntityAndPassengersFromNbt(info.data, world);
+            Vec3d pos = entityData.pos;
+            pos = PositionUtils.getTransformedPosition(pos, schematicPlacement.getMirror(), schematicPlacement.getRotation());
+            pos = PositionUtils.getTransformedPosition(pos, placement.getMirror(), placement.getRotation());
+            double x = pos.x + offX;
+            double y = pos.y + offY;
+            double z = pos.z + offZ;
 
-            if (entity != null)
+            if (x < minX && x >= maxX && z < minZ && z >= maxZ)
             {
-                Vec3d pos = info.pos;
-                pos = PositionUtils.getTransformedPosition(pos, schematicPlacement.getMirror(), schematicPlacement.getRotation());
-                pos = PositionUtils.getTransformedPosition(pos, placement.getMirror(), placement.getRotation());
-                double x = pos.x + offX;
-                double y = pos.y + offY;
-                double z = pos.z + offZ;
-
-                if (x >= minX && x < maxX && z >= minZ && z < maxZ)
-                {
-                    rotateEntity(entity, x, y, z, rotationCombined, mirrorMain, mirrorSub);
-                    //System.out.printf("post: %.1f - rot: %s, mm: %s, ms: %s\n", rotationYaw, rotationCombined, mirrorMain, mirrorSub);
-                    EntityWrap.spawnEntityAndPassengersInWorld(entity, world);
-                }
+                continue;
             }
+
+            CompoundData entityTag = entityData.data.copy();
+            DataTypeUtils.writeVec3dToListTag(entityTag, x, y, z);
+            Entity entity = EntityWrap.createEntityAndPassengersFromNbt(entityTag, world);
+
+            if (entity == null)
+            {
+                continue;
+            }
+
+            rotateEntity(entity, x, y, z, rotationCombined, mirrorMain, mirrorSub);
+            //System.out.printf("post: %.1f - rot: %s, mm: %s, ms: %s\n", rotationYaw, rotationCombined, mirrorMain, mirrorSub);
+            EntityWrap.spawnEntityAndPassengersInWorld(entity, world);
         }
     }
 
     public static void rotateEntity(Entity entity, double x, double y, double z, BlockRotation rotationCombined, BlockMirror mirrorMain, BlockMirror mirrorSub)
     {
         float rotationYaw = EntityWrap.getYaw(entity);
+        float rotationPitch = EntityWrap.getPitch(entity);
 
         if (mirrorMain != BlockMirror.NONE)          { rotationYaw = entity.getMirroredYaw(mirrorMain.getVanillaMirror()); }
         if (mirrorSub != BlockMirror.NONE)           { rotationYaw = entity.getMirroredYaw(mirrorSub.getVanillaMirror()); }
-        if (rotationCombined != BlockRotation.NONE)  { rotationYaw += EntityWrap.getYaw(entity) - entity.getRotatedYaw(rotationCombined.getVanillaRotation()); }
+        if (rotationCombined != BlockRotation.NONE)  { rotationYaw += rotationYaw - entity.getRotatedYaw(rotationCombined.getVanillaRotation()); }
 
-        entity.setLocationAndAngles(x, y, z, rotationYaw, EntityWrap.getPitch(entity));
-
+        entity.setLocationAndAngles(x, y, z, rotationYaw, rotationPitch);
         entity.prevRotationYaw = rotationYaw;
-        entity.prevRotationPitch = EntityWrap.getPitch(entity);
+        entity.prevRotationPitch = rotationPitch;
 
         if (entity instanceof EntityLivingBase)
         {
