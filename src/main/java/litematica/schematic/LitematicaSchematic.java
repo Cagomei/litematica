@@ -370,11 +370,17 @@ public class LitematicaSchematic extends BaseSchematic
 
     public static Optional<Schematic> fromRegions(ImmutableMap<String, SchematicRegion> regions)
     {
+        if (regions.size() < 1)
+        {
+            return Optional.empty();
+        }
+
         LitematicaSchematic schematic = new LitematicaSchematic();
 
         schematic.regions = regions;
         schematic.enclosingSize = PositionUtils.getEnclosingAreaSize(regions.values());
         schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
+        schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
 
         return Optional.of(schematic);
     }

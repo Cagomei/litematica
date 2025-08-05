@@ -382,7 +382,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         if (schematicOpt.isPresent())
         {
             Schematic schematic = schematicOpt.get();
-            this.setMetadataValues(schematic.getMetadata());
+            this.setMetadataValues(schematic.getMetadata(), regions.size());
             this.schematicListener.accept(schematic);
         }
         else
@@ -413,9 +413,10 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         return regionBuilder.build();
     }
 
-    protected void setMetadataValues(SchematicMetadata meta)
+    protected void setMetadataValues(SchematicMetadata meta, int regionCount)
     {
         Collection<SelectionBox> boxes = this.subRegions.values();
+        meta.setRegionCount(regionCount);
         meta.setEnclosingSize(PositionUtils.getEnclosingAreaSizeOfBoxes(boxes));
         meta.setTotalVolume(PositionUtils.getTotalVolume(boxes));
         meta.setTotalBlocks(this.totalBlocks);
@@ -429,7 +430,6 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
         long time = System.currentTimeMillis();
         meta.setTimeCreated(time);
-        meta.setTimeModified(time);
         meta.setMinecraftVersion(MinecraftVersion.CURRENT_VERSION);
     }
 

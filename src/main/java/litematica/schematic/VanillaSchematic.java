@@ -291,6 +291,7 @@ public class VanillaSchematic extends BaseSchematic
         }
 
         SchematicMetadata metadata = new SchematicMetadata();
+        Vec3i size = readSizeFromTag(data);
 
         if (data.contains("Metadata", Constants.NBT.TAG_COMPOUND))
         {
@@ -304,10 +305,10 @@ public class VanillaSchematic extends BaseSchematic
 
         if (metadata.getMinecraftVersion().dataVersion <= 0)
         {
-            metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(data.getInt("DataVersion")));
+            int dataVersion = data.getIntOrDefault("DataVersion", -1);
+            metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(dataVersion));
         }
 
-        Vec3i size = readSizeFromTag(data);
         metadata.setEnclosingSize(size);
         metadata.setTotalVolume((long) size.getX() * size.getY() * size.getZ());
         metadata.setEntityCount(data.getList("entities", Constants.NBT.TAG_COMPOUND).size());

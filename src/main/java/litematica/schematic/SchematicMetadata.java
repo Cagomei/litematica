@@ -127,11 +127,21 @@ public class SchematicMetadata
 
     public void setAuthor(String author)
     {
+        if (author == null)
+        {
+            author = "";
+        }
+
         this.author = author;
     }
 
     public void setDescription(String description)
     {
+        if (description == null)
+        {
+            description = "";
+        }
+
         this.description = description;
     }
 

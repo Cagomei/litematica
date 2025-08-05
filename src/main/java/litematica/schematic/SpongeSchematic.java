@@ -34,6 +34,7 @@ import litematica.util.PositionUtils;
 
 public class SpongeSchematic extends BaseSchematic
 {
+    public static final int CURRENT_SCHEMATIC_VERSION = 2;
     public static final String FILE_NAME_EXTENSION = "schem";
 
     protected CompoundData originalMetadataTag = new CompoundData();
@@ -73,7 +74,7 @@ public class SpongeSchematic extends BaseSchematic
             return data;
         }
 
-        int version = 2;    // TODO add a way to specify this
+        int version = CURRENT_SCHEMATIC_VERSION;    // TODO add a way to specify this
         this.metadata.setSchematicVersion(version);
 
         SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
@@ -170,7 +171,6 @@ public class SpongeSchematic extends BaseSchematic
         {
             long time = metaTag.getLong("Date");
             metadata.setTimeCreated(time);
-            metadata.setTimeModified(time);
         }
 
         if (metaTag.contains("WorldEdit", Constants.NBT.TAG_COMPOUND))
@@ -749,6 +749,7 @@ public class SpongeSchematic extends BaseSchematic
             schematic.regions = regions;
             schematic.enclosingSize = PositionUtils.getAbsoluteSize(region.getSize());
             schematic.minecraftDataVersion = CURRENT_MINECRAFT_DATA_VERSION;
+            schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
 
             return Optional.of(schematic);
         }
