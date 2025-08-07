@@ -237,7 +237,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
             StyledTextLine.translate(lines, "litematica.label.schematic_info.entity_count", str);
         }
 
-        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT.getBooleanValue())
+        if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCK_ENTITY_COUNT.getBooleanValue())
         {
             String str = meta.getBlockEntityCount() >= 0 ? String.valueOf(meta.getBlockEntityCount()) : "???";
             StyledTextLine.translate(lines, "litematica.label.schematic_info.block_entity_count", str);

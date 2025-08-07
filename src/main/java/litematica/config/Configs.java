@@ -346,21 +346,21 @@ public class Configs
         public static final BooleanConfig SCHEMATIC_LIST_ICON_BUTTONS   = new BooleanConfig("schematicListIconButtons", false);
         public static final OptionListConfig<SaveSide> SAVE_SIDE        = new OptionListConfig<>("saveSide", SaveSide.AUTO, SaveSide.VALUES);
 
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_AUTHOR            = new BooleanConfig("schematicInfoShowAuthor", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT = new BooleanConfig("schematicInfoShowBlockEntityCount", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_CREATION_TIME     = new BooleanConfig("schematicInfoShowCreationTime", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_DESCRIPTION       = new BooleanConfig("schematicInfoShowDescription", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_ENCLOSING_SIZE    = new BooleanConfig("schematicInfoShowEnclosingSize", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_ENTITY_COUNT      = new BooleanConfig("schematicInfoShowEntityCount", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_MC_VERSION        = new BooleanConfig("schematicInfoShowMCVersion", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_MODIFICATION_TIME = new BooleanConfig("schematicInfoShowModificationTime", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_NAME              = new BooleanConfig("schematicInfoShowName", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_REGION_COUNT      = new BooleanConfig("schematicInfoShowRegionCount", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_TYPE    = new BooleanConfig("schematicInfoShowSchematicType", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION = new BooleanConfig("schematicInfoShowSchematicVersion", false, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_THUMBNAIL         = new BooleanConfig("schematicInfoShowThumbnail", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS      = new BooleanConfig("schematicInfoShowTotalBlocks", true, null);
-        public static final BooleanConfig SCHEMATIC_INFO_SHOW_TOTAL_VOLUME      = new BooleanConfig("schematicInfoShowTotalVolume", false, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_AUTHOR             = new BooleanConfig("schematicInfoShowAuthor", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_BLOCK_ENTITY_COUNT = new BooleanConfig("schematicInfoShowBlockEntityCount", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_CREATION_TIME      = new BooleanConfig("schematicInfoShowCreationTime", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_DESCRIPTION        = new BooleanConfig("schematicInfoShowDescription", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_ENCLOSING_SIZE     = new BooleanConfig("schematicInfoShowEnclosingSize", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_ENTITY_COUNT       = new BooleanConfig("schematicInfoShowEntityCount", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_MC_VERSION         = new BooleanConfig("schematicInfoShowMCVersion", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_MODIFICATION_TIME  = new BooleanConfig("schematicInfoShowModificationTime", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_NAME               = new BooleanConfig("schematicInfoShowName", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_REGION_COUNT       = new BooleanConfig("schematicInfoShowRegionCount", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_TYPE     = new BooleanConfig("schematicInfoShowSchematicType", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_SCHEMATIC_VERSION  = new BooleanConfig("schematicInfoShowSchematicVersion", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_THUMBNAIL          = new BooleanConfig("schematicInfoShowThumbnail", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_TOTAL_BLOCKS       = new BooleanConfig("schematicInfoShowTotalBlocks", true, null);
+        public static final BooleanConfig SCHEMATIC_INFO_SHOW_TOTAL_VOLUME       = new BooleanConfig("schematicInfoShowTotalVolume", true, null);
 
         public static final ImmutableList<ConfigOption<?>> OPTIONS = ImmutableList.of(
                 CREATE_PLACEMENT_ON_LOAD,
@@ -369,7 +369,7 @@ public class Configs
                 SAVE_SIDE,
                 SCHEMATIC_LIST_ICON_BUTTONS,
                 SCHEMATIC_INFO_SHOW_AUTHOR,
-                SCHEMATIC_INFO_SHOW_BLOCKENTITY_COUNT,
+                SCHEMATIC_INFO_SHOW_BLOCK_ENTITY_COUNT,
                 SCHEMATIC_INFO_SHOW_CREATION_TIME,
                 SCHEMATIC_INFO_SHOW_DESCRIPTION,
                 SCHEMATIC_INFO_SHOW_ENCLOSING_SIZE,
