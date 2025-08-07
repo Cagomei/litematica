@@ -75,7 +75,7 @@ public class RayTraceUtils
 
         HitResult result = malilib.util.game.RayTraceUtils
                 .getRayTraceFromEntity(world, entity, RayTraceFluidHandling.NONE, false, range);
-        double closestVanilla = result.type != HitResult.Type.MISS ? result.pos.distanceTo(eyesPos) : -1D;
+        double closestVanilla = result.type != HitResult.Type.MISS ? result.pos.getDistanceTo(eyesPos) : -1D;
 
         AreaSelection area = DataManager.getAreaSelectionManager().getCurrentSelection();
         RayTraceWrapper wrapper = null;
@@ -402,19 +402,19 @@ public class RayTraceUtils
 
         if (traceSchematic != null && traceSchematic.type == HitResult.Type.BLOCK)
         {
-            double dist = eyesPos.squareDistanceTo(traceSchematic.pos);
+            double dist = eyesPos.getSquaredDistanceTo(traceSchematic.pos);
 
             if (distClosest < 0 || dist < distClosest)
             {
                 trace = traceSchematic;
-                distClosest = eyesPos.squareDistanceTo(traceSchematic.pos);
+                distClosest = eyesPos.getSquaredDistanceTo(traceSchematic.pos);
                 type = HitType.SCHEMATIC_BLOCK;
             }
         }
 
         if (traceClient.type == HitResult.Type.BLOCK)
         {
-            double dist = eyesPos.squareDistanceTo(traceClient.pos);
+            double dist = eyesPos.getSquaredDistanceTo(traceClient.pos);
 
             if (distClosest < 0 || dist < distClosest)
             {
@@ -465,7 +465,7 @@ public class RayTraceUtils
             return null;
         }
 
-        final double closestVanilla = traceVanilla.pos.squareDistanceTo(eyesPos);
+        final double closestVanilla = traceVanilla.pos.getSquaredDistanceTo(eyesPos);
 
         BlockPos closestVanillaPos = traceVanilla.blockPos;
         World worldSchematic = SchematicWorldHandler.getSchematicWorld();
@@ -478,7 +478,7 @@ public class RayTraceUtils
         {
             for (HitResult trace : list)
             {
-                double dist = trace.pos.squareDistanceTo(eyesPos);
+                double dist = trace.pos.getSquaredDistanceTo(eyesPos);
                 BlockPos pos = trace.blockPos;
 
                 // Comparing with >= instead of > fixes the case where the player's head is inside the first schematic block,
