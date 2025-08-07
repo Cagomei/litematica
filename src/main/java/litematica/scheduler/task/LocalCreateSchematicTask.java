@@ -180,8 +180,8 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             {
                 for (int x = box.minX; x <= box.maxX; x++)
                 {
-                    IBlockState state = chunk.getBlockState(x, y, z);
                     mutPos.set(x, y, z);
+                    IBlockState state = chunk.getBlockState(x, y, z).getActualState(world, mutPos);
 
                     if (this.shouldSaveBlock(state, mutPos) == false)
                     {
