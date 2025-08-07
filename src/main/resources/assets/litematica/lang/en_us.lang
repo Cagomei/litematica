@@ -69,7 +69,7 @@ litematica.button.schematic_placement_settings.mirror_value=Mirror: %s
 litematica.button.schematic_placement_settings.reset_sub_regions=<c=fa3>Reset All Sub-Regions
 litematica.button.schematic_placement_settings.rotation_value=Rotation: %s
 litematica.button.schematic_placement_settings.entry_name.enabled=<c=5f5>%s
-litematica.button.schematic_placement_settings.entry_name.disabled=<c=f55>%s
+litematica.button.schematic_placement_settings.entry_name.disabled=<c=888>%s
 litematica.button.schematic_placement_settings.toggle_all_off=All §cOFF§r
 litematica.button.schematic_placement_settings.toggle_all_on=All §aON§r
 litematica.button.schematic_placement_sub_region_settings.placement_settings=Placement Settings
@@ -77,7 +77,6 @@ litematica.button.schematic_placement_sub_region_settings.region_enabled=Region:
 litematica.button.schematic_placement_sub_region_settings.reset_region=Reset Sub-Region
 litematica.button.schematic_placements_list.configure=Configure
 litematica.button.schematic_placements_list.duplicate=Duplicate
-litematica.button.schematic_placements_list.enabled=%s
 litematica.button.schematic_placements_list.remove=§c-
 litematica.button.schematic_placements_list.save=Save
 litematica.button.schematic_save.save_side=Save Side: %s

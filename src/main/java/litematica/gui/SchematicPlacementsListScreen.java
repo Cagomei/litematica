@@ -19,7 +19,7 @@ import litematica.schematic.placement.SchematicPlacementManager;
 
 public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget<SchematicPlacement>>
 {
-    protected final HashMap<SchematicPlacement, Boolean> modifiedCache = new HashMap<>();
+    protected final HashMap<SchematicPlacement, Boolean> modifiedSinceSavedCache = new HashMap<>();
     protected final SchematicPlacementManager manager;
     protected final GenericButton iconsTextToggleButton;
     protected final GenericButton loadSchematicsScreenButton;
@@ -27,6 +27,8 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
     protected final GenericButton mainMenuButton;
     protected final GenericButton schematicPlacementFileBrowserButton;
     protected final GenericButton sortModeButton;
+    protected final GenericButton allOffButton;
+    protected final GenericButton allOnButton;
     protected boolean sortMode;
 
     public SchematicPlacementsListScreen()
@@ -35,6 +37,8 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
 
         this.manager = DataManager.getSchematicPlacementManager();
 
+        this.allOffButton                        = GenericButton.create(16, "litematica.button.schematic_placement_settings.toggle_all_off", this::toggleAllPlacementsOff);
+        this.allOnButton                         = GenericButton.create(16, "litematica.button.schematic_placement_settings.toggle_all_on", this::toggleAllPlacementsOn);
         this.iconsTextToggleButton               = GenericButton.create(16, this::getIconVsTextButtonLabel, this::toggleIconsVsText);
         this.loadSchematicsScreenButton          = GenericButton.create("litematica.button.change_menu.load_schematics", LitematicaIcons.SCHEMATIC_BROWSER);
         this.loadedSchematicsListScreenButton    = GenericButton.create("litematica.button.change_menu.loaded_schematics", LitematicaIcons.LOADED_SCHEMATICS);
@@ -60,6 +64,8 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
     {
         super.reAddActiveWidgets();
 
+        this.addWidget(this.allOffButton);
+        this.addWidget(this.allOnButton);
         this.addWidget(this.iconsTextToggleButton);
         this.addWidget(this.loadedSchematicsListScreenButton);
         this.addWidget(this.loadSchematicsScreenButton);
@@ -78,6 +84,12 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
 
         this.sortModeButton.setRight(this.iconsTextToggleButton.getX() - 2);
         this.sortModeButton.setBottom(this.getListY() - 1);
+
+        this.allOffButton.setRight(this.sortModeButton.getX() - 2);
+        this.allOffButton.setBottom(this.getListY() - 1);
+
+        this.allOnButton.setRight(this.allOffButton.getX() - 2);
+        this.allOnButton.setBottom(this.getListY() - 1);
 
         int y = this.getBottom() - 24;
         this.loadSchematicsScreenButton.setPosition(this.x + 10, y);
@@ -137,19 +149,33 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
         listWidget.refreshEntries();
     }
 
+    protected void toggleAllPlacementsOff()
+    {
+        SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
+        manager.getAllSchematicPlacements().forEach(p -> manager.setPlacementEnabledState(p, false));
+        this.getListWidget().refreshEntries();
+    }
+
+    protected void toggleAllPlacementsOn()
+    {
+        SchematicPlacementManager manager = DataManager.getSchematicPlacementManager();
+        manager.getAllSchematicPlacements().forEach(p -> manager.setPlacementEnabledState(p, true));
+        this.getListWidget().refreshEntries();
+    }
+
     public void clearModifiedSinceSavedCache()
     {
-        this.modifiedCache.clear();
+        this.modifiedSinceSavedCache.clear();
     }
 
     public boolean getCachedWasModifiedSinceSaved(SchematicPlacement placement)
     {
-        Boolean modified = this.modifiedCache.get(placement);
+        Boolean modified = this.modifiedSinceSavedCache.get(placement);
 
         if (modified == null)
         {
             modified = placement.wasModifiedSinceSaved();
-            this.modifiedCache.put(placement, modified);
+            this.modifiedSinceSavedCache.put(placement, modified);
         }
 
         return modified.booleanValue();

@@ -674,7 +674,8 @@ public class SchematicPlacementManager
 
     public void toggleEnabled(SchematicPlacement placement)
     {
-        if (placement.isSchematicLoaded() == false &&
+        if (placement.isEnabled() == false &&
+            placement.isSchematicLoaded() == false &&
             placement.fullyLoadPlacement() == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_placement.load_failed",
@@ -684,6 +685,27 @@ public class SchematicPlacementManager
 
         this.onPrePlacementChange(placement);
         placement.toggleEnabled();
+        this.onPlacementModified(placement);
+    }
+
+    public void setPlacementEnabledState(SchematicPlacement placement, boolean isEnabled)
+    {
+        if (placement.isEnabled() == isEnabled)
+        {
+            return;
+        }
+
+        if (placement.isEnabled() == false &&
+            placement.isSchematicLoaded() == false &&
+            placement.fullyLoadPlacement() == false)
+        {
+            MessageDispatcher.error("litematica.message.error.schematic_placement.load_failed",
+                                    placement.getName(), placement.getSchematicFile());
+            return;
+        }
+
+        this.onPrePlacementChange(placement);
+        placement.setEnabled(isEnabled);
         this.onPlacementModified(placement);
     }
 
