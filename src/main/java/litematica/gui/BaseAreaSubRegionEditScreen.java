@@ -35,8 +35,8 @@ public abstract class BaseAreaSubRegionEditScreen extends BaseScreen
         this.corner1Checkbox = new CheckBoxWidget("litematica.checkmark.area_editor.corner1", hover, this::isCorner1Selected, this::setCorner1Selected);
         this.corner2Checkbox = new CheckBoxWidget("litematica.checkmark.area_editor.corner2", hover, this::isCorner2Selected, this::setCorner2Selected);
 
-        this.corner1EditWidget = new BlockPosEditWidget(90, 80, 2, true, selectionBox.getCorner1(), selectionBox::setCorner1);
-        this.corner2EditWidget = new BlockPosEditWidget(90, 80, 2, true, selectionBox.getCorner2(), selectionBox::setCorner2);
+        this.corner1EditWidget = new BlockPosEditWidget(90, 80, 2, true, selectionBox.getCorner1(), pos -> this.areaSelection.setBoxCornerPos(this.selectionBox, BoxCorner.CORNER_1, pos));
+        this.corner2EditWidget = new BlockPosEditWidget(90, 80, 2, true, selectionBox.getCorner2(), pos -> this.areaSelection.setBoxCornerPos(this.selectionBox, BoxCorner.CORNER_2, pos));
     }
 
     @Override
