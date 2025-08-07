@@ -1,5 +1,6 @@
 package litematica.schematic;
 
+import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
 import malilib.util.data.tag.CompoundData;
@@ -37,10 +38,10 @@ public interface Schematic
     boolean read(DataView dataIn);
 
     /**
-     * Write the schematic out to compound data
-     * @return the compound data representing the schematic
+     * Write the schematic out to compound data. If an error occurs, returns an empty Optional.
+     * @return an optional of the compound data representing the schematic
      */
-    CompoundData write();
+    Optional<CompoundData> write();
 
     /**
      * @return the name of the root tag in the schematic file

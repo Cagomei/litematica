@@ -74,7 +74,7 @@ public class LitematicaSchematic extends BaseSchematic
     }
 
     @Override
-    public CompoundData write()
+    public Optional<CompoundData> write()
     {
         CompoundData data = new CompoundData();
 
@@ -84,9 +84,13 @@ public class LitematicaSchematic extends BaseSchematic
         data.putInt("Version", CURRENT_SCHEMATIC_VERSION);
         data.putInt("MinecraftDataVersion", this.minecraftDataVersion);
         data.put("Metadata", this.metadata.write(new CompoundData()));
-        data.put("Regions", this.writeRegions());
 
-        return data;
+        if (this.writeRegions(data) == false)
+        {
+            return Optional.empty();
+        }
+
+        return Optional.of(data);
     }
 
     protected ImmutableMap<String, SchematicRegion> readRegions(DataView data, int version, int mainDataVersion)
@@ -115,19 +119,22 @@ public class LitematicaSchematic extends BaseSchematic
 
             ListData beList = regionTag.getList("TileEntities", Constants.NBT.TAG_COMPOUND);
             ListData entityListData = regionTag.getList("Entities", Constants.NBT.TAG_COMPOUND);
-            Map<BlockPos, CompoundData> blockEntityMap = null;
-            Map<BlockPos, ScheduledBlockTickData> blockTickMap = null;
-            List<EntityData> entityList = null;
+            Map<BlockPos, CompoundData> blockEntityMap = new HashMap<>();
+            Map<BlockPos, ScheduledBlockTickData> blockTickMap = new HashMap<>();
+            List<EntityData> entityList = new ArrayList<>();
+            int beErrorCount = 0;
+            int tickErrorCount = 0;
+            int entityErrorCount = 0;
 
             if (version >= 2)
             {
-                blockEntityMap = this.readBlockEntities_v2(beList);
-                entityList = this.readEntities_v2(entityListData);
+                beErrorCount = this.readBlockEntities_v2(beList, blockEntityMap);
+                entityErrorCount = this.readEntities_v2(entityListData, entityList);
             }
             else if (version == 1)
             {
-                blockEntityMap = this.readBlockEntities_v1(beList);
-                entityList = this.readEntities_v1(entityListData);
+                beErrorCount = this.readBlockEntities_v1(beList, blockEntityMap);
+                entityErrorCount = this.readEntities_v1(entityListData, entityList);
             }
             else
             {
@@ -136,10 +143,31 @@ public class LitematicaSchematic extends BaseSchematic
 
             if (version >= 3)
             {
-                ListData tickData = regionTag.getList("PendingBlockTicks", Constants.NBT.TAG_COMPOUND);
-                blockTickMap = this.readBlockTicks_v3(tickData);
+                ListData tickListData = regionTag.getList("PendingBlockTicks", Constants.NBT.TAG_COMPOUND);
+                tickErrorCount = this.readBlockTicks_v3(tickListData, blockTickMap);
             }
 
+            if (entityErrorCount > 0)
+            {
+                MessageDispatcher.warning("litematica.message.warn.schematic_read.litematica.entity_errors",
+                                          entityErrorCount, entityList.size(), regionName);
+            }
+
+            if (beErrorCount > 0)
+            {
+                MessageDispatcher.warning("litematica.message.warn.schematic_read.litematica.block_entity_errors",
+                                          beErrorCount, blockEntityMap.size(), regionName);
+            }
+
+            if (tickErrorCount > 0)
+            {
+                MessageDispatcher.warning("litematica.message.warn.schematic_read.litematica.block_tick_errors",
+                                          tickErrorCount, blockTickMap.size(), regionName);
+            }
+
+            Vec3i size = PositionUtils.getAbsoluteSize(regionSize);
+            ListData paletteTag = regionTag.getList("BlockStatePalette", Constants.NBT.TAG_COMPOUND);
+            int paletteSize = paletteTag.size();
             long[] blockDataArray = regionTag.getLongArray("BlockStates");
 
             if (blockDataArray == null || blockDataArray.length == 0)
@@ -148,36 +176,20 @@ public class LitematicaSchematic extends BaseSchematic
                 continue;
             }
 
-            ListData paletteTag = regionTag.getList("BlockStatePalette", Constants.NBT.TAG_COMPOUND);
-            int paletteSize = paletteTag.size();
-            Vec3i size = PositionUtils.getAbsoluteSize(regionSize);
             ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockDataArray, size);
 
+            /*
             if (container == null)
             {
                 MessageDispatcher.error("litematica.error.schematic_read.litematica.region_container", regionName);
                 continue;
             }
+            */
 
             if (readPaletteFromLitematicaFormatTag(paletteTag, container.getPalette()) == false)
             {
                 MessageDispatcher.error("litematica.error.schematic_read.litematica.palette_read_failed", regionName);
                 continue;
-            }
-
-            if (blockEntityMap == null)
-            {
-                blockEntityMap = new HashMap<>();
-            }
-
-            if (blockTickMap == null)
-            {
-                blockTickMap = new HashMap<>();
-            }
-
-            if (entityList == null)
-            {
-                entityList = new ArrayList<>();
             }
 
             int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
@@ -190,30 +202,15 @@ public class LitematicaSchematic extends BaseSchematic
         return builder.build();
     }
 
-    protected Map<BlockPos, CompoundData> readBlockEntities_v2(ListData listData)
+    protected int readBlockEntities_v2(ListData listDataIn, Map<BlockPos, CompoundData> blockEntityMapOut)
     {
-        Map<BlockPos, CompoundData> map = new HashMap<>();
-        final int size = listData.size();
-
-        for (int i = 0; i < size; ++i)
-        {
-            CompoundData beData = listData.getCompoundAt(i).copy();
-            BlockPos pos = DataTypeUtils.readBlockPos(beData);
-            DataTypeUtils.removeBlockPosFromTag(beData);
-
-            if (pos != null && beData.isEmpty() == false)
-            {
-                map.put(pos, beData);
-            }
-        }
-
-        return map;
+        return this.readBlockEntities(listDataIn, blockEntityMapOut);
     }
 
-    protected Map<BlockPos, CompoundData> readBlockEntities_v1(ListData list)
+    protected int readBlockEntities_v1(ListData list, Map<BlockPos, CompoundData> blockEntityMapOut)
     {
-        Map<BlockPos, CompoundData> tileMap = new HashMap<>();
         final int size = list.size();
+        int errorCount = 0;
 
         for (int i = 0; i < size; ++i)
         {
@@ -225,18 +222,22 @@ public class LitematicaSchematic extends BaseSchematic
 
             if (pos != null && beData.isEmpty() == false)
             {
-                tileMap.put(pos, beData);
+                blockEntityMapOut.put(pos, beData);
+            }
+            else
+            {
+                errorCount++;
             }
         }
 
-        return tileMap;
+        return errorCount;
     }
 
-    protected Map<BlockPos, ScheduledBlockTickData> readBlockTicks_v3(ListData list)
+    protected int readBlockTicks_v3(ListData list, Map<BlockPos, ScheduledBlockTickData> tickMapOut)
     {
-        Map<BlockPos, ScheduledBlockTickData> tickMap = new HashMap<>();
         final int size = list.size();
         long tickIdCounter = 0;
+        int errorCount = 0;
 
         for (int i = 0; i < size; ++i)
         {
@@ -254,36 +255,26 @@ public class LitematicaSchematic extends BaseSchematic
                 // Note: the time is a relative delay at this point
                 ScheduledBlockTickData entry = new ScheduledBlockTickData(pos, block, blockName, priority, delay, tickId);
 
-                tickMap.put(pos, entry);
+                tickMapOut.put(pos, entry);
             }
-        }
-
-        return tickMap;
-    }
-
-    protected List<EntityData> readEntities_v2(ListData listData)
-    {
-        final int size = listData.size();
-        List<EntityData> entityList = new ArrayList<>(size);
-
-        for (int i = 0; i < size; ++i)
-        {
-            CompoundData entityData = listData.getCompoundAt(i).copy();
-            Vec3d pos = DataTypeUtils.readVec3dFromListTag(entityData);
-
-            if (pos != null && entityData.isEmpty() == false)
+            else
             {
-                entityList.add(new EntityData(pos, entityData));
+                errorCount++;
             }
         }
 
-        return entityList;
+        return errorCount;
     }
 
-    protected List<EntityData> readEntities_v1(ListData list)
+    protected int readEntities_v2(ListData listDataIn, List<EntityData> entityListOut)
     {
-        List<EntityData> entityList = new ArrayList<>();
+        return this.readEntities(listDataIn, entityListOut);
+    }
+
+    protected int readEntities_v1(ListData list, List<EntityData> entityListOut)
+    {
         final int size = list.size();
+        int errorCount = 0;
 
         for (int i = 0; i < size; ++i)
         {
@@ -295,21 +286,26 @@ public class LitematicaSchematic extends BaseSchematic
             {
                 // Update the correct position to the Entity NBT, where it is stored in version 2 - not needed in memory yet
                 //DataTypeUtils.writeVec3dToListTag(entityData, pos);
-                entityList.add(new EntityData(pos, entityData));
+                entityListOut.add(new EntityData(pos, entityData));
+            }
+            else
+            {
+                errorCount++;
             }
         }
 
-        return entityList;
+        return errorCount;
     }
 
-    protected CompoundData writeRegions()
+    protected boolean writeRegions(CompoundData data)
     {
-        CompoundData regionsTag = new CompoundData();
-
         if (this.getRegions().isEmpty())
         {
-            return regionsTag;
+            MessageDispatcher.error("litematica.message.error.schematic_save.no_regions");
+            return false;
         }
+
+        CompoundData regionsTag = new CompoundData();
 
         for (Map.Entry<String, SchematicRegion> entry : this.getRegions().entrySet())
         {
@@ -326,12 +322,12 @@ public class LitematicaSchematic extends BaseSchematic
             {
                 // TODO convert the container
                 MessageDispatcher.error("TODO: Convert the BlockContainer into an ArrayBlockContainer for serialization");
-                continue;
+                return false;
             }
 
             Map<BlockPos, CompoundData> blockEntityMap = region.getBlockEntityMap();
-            List<EntityData> entityList = region.getEntityList();
             Map<BlockPos, ScheduledBlockTickData> blockTicksMap = region.getBlockTickMap();
+            List<EntityData> entityList = region.getEntityList();
 
             CompoundData regionTag = new CompoundData();
 
@@ -341,7 +337,7 @@ public class LitematicaSchematic extends BaseSchematic
 
             if (blockEntityMap.isEmpty() == false)
             {
-                regionTag.put("TileEntities", this.writeBlockEntitiesToListData(blockEntityMap));
+                regionTag.put("TileEntities", this.getBlockEntitiesAsListData(blockEntityMap));
             }
 
             if (blockTicksMap.isEmpty() == false)
@@ -352,7 +348,7 @@ public class LitematicaSchematic extends BaseSchematic
             // The entity list will not exist, if saveEntities is false when creating the schematic
             if (entityList.isEmpty() == false)
             {
-                regionTag.put("Entities", this.writeEntitiesToListData(entityList));
+                regionTag.put("Entities", this.getEntitiesAsListData(entityList));
             }
 
             regionTag.put("Position", DataTypeUtils.createVec3iTag(region.getRelativePosition()));
@@ -361,21 +357,9 @@ public class LitematicaSchematic extends BaseSchematic
             regionsTag.put(regionName, regionTag);
         }
 
-        return regionsTag;
-    }
+        data.put("Regions", regionsTag);
 
-    protected ListData writeBlockEntitiesToListData(Map<BlockPos, CompoundData> blockEntityMap)
-    {
-        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
-
-        for (Map.Entry<BlockPos, CompoundData> entry : blockEntityMap.entrySet())
-        {
-            CompoundData tag = entry.getValue().copy();
-            DataTypeUtils.putVec3i(tag, entry.getKey());
-            list.add(tag);
-        }
-
-        return list;
+        return true;
     }
 
     protected ListData writeBlockTicksToListData(Map<BlockPos, ScheduledBlockTickData> blockTicksMap)
@@ -397,20 +381,6 @@ public class LitematicaSchematic extends BaseSchematic
             tag.putLong("TickId", entry.tickId);
             DataTypeUtils.putVec3i(tag, entry.pos);
 
-            list.add(tag);
-        }
-
-        return list;
-    }
-
-    protected ListData writeEntitiesToListData(List<EntityData> entityList)
-    {
-        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
-
-        for (EntityData entityData : entityList)
-        {
-            CompoundData tag = entityData.data.copy();
-            DataTypeUtils.writeVec3dToListTag(tag, entityData.pos);
             list.add(tag);
         }
 

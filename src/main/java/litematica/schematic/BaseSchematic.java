@@ -17,6 +17,7 @@ import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
+import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
 import litematica.schematic.container.BlockContainer;
@@ -119,30 +120,79 @@ public abstract class BaseSchematic implements Schematic
         return listData;
     }
 
-    public static ListData writeEntitiesToList(List<EntityData> entityList)
+    protected ListData getBlockEntitiesAsListData(Map<BlockPos, CompoundData> blockEntityMap)
     {
-        ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
+        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
 
-        for (EntityData info : entityList)
+        for (Map.Entry<BlockPos, CompoundData> entry : blockEntityMap.entrySet())
         {
-            listData.add(info.data);
+            CompoundData compound = entry.getValue().copy();
+            DataTypeUtils.putVec3i(compound, entry.getKey());
+            list.add(compound);
         }
 
-        return listData;
+        return list;
     }
 
-    public static ListData writeBlockEntitiesToList(Map<BlockPos, CompoundData> blockEntities)
+    protected ListData getEntitiesAsListData(List<EntityData> entityList)
     {
-        ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
+        ListData list = new ListData(Constants.NBT.TAG_COMPOUND);
 
-        for (Map.Entry<BlockPos, CompoundData> entry : blockEntities.entrySet())
+        for (EntityData entityData : entityList)
         {
-            CompoundData compound = entry.getValue();
-            DataTypeUtils.putVec3i(compound, entry.getKey());
-            listData.add(compound);
+            CompoundData tag = entityData.data.copy();
+            DataTypeUtils.writeVec3dToListTag(tag, entityData.pos);
+            list.add(tag);
         }
 
-        return listData;
+        return list;
+    }
+
+    protected int readBlockEntities(ListData listDataIn, Map<BlockPos, CompoundData> blockEntityMapOut)
+    {
+        final int size = listDataIn.size();
+        int errorCount = 0;
+
+        for (int i = 0; i < size; ++i)
+        {
+            CompoundData beData = listDataIn.getCompoundAt(i).copy();
+            BlockPos pos = DataTypeUtils.readBlockPos(beData);
+            DataTypeUtils.removeBlockPosFromTag(beData);
+
+            if (pos != null && beData.isEmpty() == false)
+            {
+                blockEntityMapOut.put(pos, beData);
+            }
+            else
+            {
+                errorCount++;
+            }
+        }
+
+        return errorCount;
+    }
+
+    protected int readEntities(ListData listDataIn, List<EntityData> entityListOut)
+    {
+        final int size = listDataIn.size();
+        int errorCount = 0;
+
+        for (int i = 0; i < size; ++i)
+        {
+            CompoundData entityData = listDataIn.getCompoundAt(i).copy();
+            Vec3d pos = DataTypeUtils.readVec3dFromListTag(entityData);
+
+            if (pos != null && entityData.isEmpty() == false)
+            {
+                entityListOut.add(new EntityData(pos, entityData));
+            }
+            else
+            {
+                errorCount++;
+            }
+        }
+
+        return errorCount;
     }
 
     public static Optional<SchematicRegion> getOrConvertToSingleRegion(ImmutableMap<String, SchematicRegion> regions,

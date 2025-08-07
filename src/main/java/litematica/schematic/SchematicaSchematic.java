@@ -21,16 +21,16 @@ public class SchematicaSchematic extends BaseSchematic
     }
 
     @Override
-    public boolean read(DataView dataIn)
+    public boolean read(DataView data)
     {
         return false;
     }
 
     @Override
-    public CompoundData write()
+    public Optional<CompoundData> write()
     {
         CompoundData data = new CompoundData();
-        return data;
+        return Optional.of(data);
     }
 
     @Override

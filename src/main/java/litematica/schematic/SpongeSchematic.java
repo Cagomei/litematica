@@ -63,7 +63,7 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     @Override
-    public CompoundData write()
+    public Optional<CompoundData> write()
     {
         CompoundData data = new CompoundData();
         int regionCount = this.regions.size();
@@ -71,7 +71,7 @@ public class SpongeSchematic extends BaseSchematic
         if (regionCount != 1)
         {
             MessageDispatcher.error("litematica.message.error.schematic_save.wrong_region_count", regionCount, 1);
-            return data;
+            return Optional.empty();
         }
 
         int version = CURRENT_SCHEMATIC_VERSION;    // TODO add a way to specify this
@@ -79,17 +79,18 @@ public class SpongeSchematic extends BaseSchematic
 
         SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
         ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();
+        boolean success = false;
 
         if (version == 3)
         {
-            this.write_v3(data, region, container, version);
+            success = this.write_v3(data, region, container, version);
         }
         else if (version == 1 || version == 2)
         {
-            this.write_v1_2(data, region, container, version);
+            success = this.write_v1_2(data, region, container, version);
         }
 
-        return data;
+        return success ? Optional.of(data) : Optional.empty();
     }
 
     public static boolean isValidData(DataView data)
@@ -151,7 +152,7 @@ public class SpongeSchematic extends BaseSchematic
         return -1;
     }
 
-    public static Vec3i readSizeFromTag(DataView tag)
+    protected static Vec3i readSizeFromTag(DataView tag)
     {
         return new Vec3i(tag.getShort("Width"),
                          tag.getShort("Height"),
@@ -221,14 +222,15 @@ public class SpongeSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", -1);
+        this.enclosingSize = size;
+        this.originalMetadataTag = data.getCompound("Metadata").copy();
+        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
+
+        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
         SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
                                                      new HashMap<>(), entityList, this.minecraftDataVersion);
 
-        this.enclosingSize = size;
-        this.originalMetadataTag = data.getCompound("Metadata").copy();
         this.regions = ImmutableMap.of("Schematic", region);
-        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
     }

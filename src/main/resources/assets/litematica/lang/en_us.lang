@@ -463,15 +463,17 @@ litematica.message.error.schematic_placement_paste_schematic_not_loaded=Error: T
 litematica.message.error.schematic_placement.locked=The placement is locked and can't be modified
 litematica.message.error.schematic_preview_set_failed=Exception while trying to set the schematic preview image for schematic §e%s§r
 litematica.message.error.schematic_save.failed_to_create_empty_file=Failed to create the initial empty schematic file §e%s§r
+litematica.message.error.schematic_save.no_regions=No regions in the schematic data
 litematica.message.error.schematic_save.server_side.failed_reading_data=Failed to read schematic data from the received packet
 litematica.message.error.schematic_save.server_side.failed_to_create_block_container=Failed to create the block container for the received schematic save packet
 litematica.message.error.schematic_save.server_side.invalid_data=Invalid or missing data in the received schematic save packet
 litematica.message.error.schematic_save.server_side.invalid_region_size=Invalid region size §e%s§r in the received schematic save packet
 litematica.message.error.schematic_save.server_side.missing_tags_in_block_data=Missing tags for block data in the received schematic save packet
-litematica.message.error.schematic_save.wrong_region_count=Invalid region count §e%s§r, expected §e%s§r
+litematica.message.error.schematic_save.wrong_region_count=Can't save: Invalid region count §e%s§r, expected §e%s§r
 litematica.message.error.schematic_vcs.failed_to_load_project=Failed to load Schematic VCS Project §e%s§r
 litematica.message.error.schematic_vcs.project_already_exists=Schematic VCS Project §e%s§r already exists
 litematica.message.error.schematic_verifier.no_placement_selected=No selected Verifier, and no Schematic Placement selected to create a verifier for
+
 litematica.message.info.material_cache_cleared=Material List Cache cleared
 litematica.message.info.material_list.written_to_file=Material List written to file §e%s§r
 litematica.message.info.schematic_changed_in_placement=Schematic §e%s§r loaded and changed to the placement 
@@ -487,12 +489,16 @@ litematica.message.info.settings_loaded_from_clipboard=Settings loaded from clip
 litematica.message.info.settings_loaded_from_string=Settings loaded from string
 litematica.message.info.schematic_vcs.project_created=Schematic VCS Project §e%s§r created
 litematica.message.info.schematic_vcs.project_loaded=Schematic VCS Project §e%s§r loaded
+
 litematica.message.warn.area_selection_browser.in_simple_mode=Note: You are currently in the §6Simple§r Area Selection mode. These area selection save files are only used in the §6Multi-Region§r selection mode.
 litematica.message.warn.pick_block.no_suitable_slot_found=Couldn't find a suitable hotbar slot for pick block!\n\n<c=bbb>Check that the config §fGeneric<c=bbb> -> §ePick Block Hotbar Slots<c=bbb> has all the slots that you want the pick block feature to be able to use.\n\nAlso depending on the §fGeneric<c=bbb> -> §ePick Block Avoid *<c=bbb> configs, the pick block feature may refuse to replace any tools or other damageable items in the hotbar. So check that you don't have all the allowed slots occupied by tools, or turn off those avoid options to allow the pick block feature to move away tools from those slots.
 litematica.message.warn.pick_block.no_valid_slots_configured=The pick block feature doesn't have any allowed hotbar slots to use!\n\n<c=bbb>This is set by the §fGeneric<c=bbb> -> §ePick Block Hotbar Slots<c=bbb> config. Go and add at least one slot to that config, if you want pick block to work.
-litematica.message.warn.schematic_read.failed_to_read_block_entities=Failed to read §f%s§r block entities, successfully read §f%s§r
-litematica.message.warn.schematic_read.failed_to_read_entities=Failed to read §f%s§r entities, successfully read §f%s§r
-litematica.message.warn.schematic_read.failed_to_read_blocks=Failed to read §f%s§r blocks, successfully read §f%s§r
+litematica.message.warn.schematic_read.failed_to_read_block_entities=Failed to read §b%s§r block entities, successfully read §b%s§r
+litematica.message.warn.schematic_read.failed_to_read_entities=Failed to read §b%s§r entities, successfully read §b%s§r
+litematica.message.warn.schematic_read.failed_to_read_blocks=Failed to read §b%s§r blocks, successfully read §b%s§r
+litematica.message.warn.schematic_read.litematica.block_entity_errors=Failed to read §b%s§r block entities from file (successfully read §b%s§r) in region §e%s§r 
+litematica.message.warn.schematic_read.litematica.block_tick_errors=Failed to read §b%s§r scheduled block ticks from file (successfully read §b%s§r) in region §e%s§r 
+litematica.message.warn.schematic_read.litematica.entity_errors=Failed to read §b%s§r entities from file (successfully read §b%s§r) in region §e%s§r 
 
 litematica.error.area_selection.copy_failed=Failed to copy the selection
 litematica.error.area_selection.create_failed=Failed to create a new selection by the name §e'%s'§r, file already exists

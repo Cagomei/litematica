@@ -2,6 +2,7 @@ package litematica.schematic.util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.tag.CompoundData;
@@ -54,7 +55,7 @@ public class SchematicFileUtils
             return false;
         }
 
-        CompoundData data;
+        Optional<CompoundData> data;
 
         try
         {
@@ -67,12 +68,12 @@ public class SchematicFileUtils
             return false;
         }
 
-        if (data == null || data.size() == 0)
+        if (data.isPresent() == false || data.get().size() == 0)
         {
             MessageDispatcher.error("litematica.message.error.schematic_save.serializing_failed.empty");
             return false;
         }
 
-        return DataFileUtils.writeCompoundDataToCompressedNbtFile(file, data, schematic.getRootTagName());
+        return DataFileUtils.writeCompoundDataToCompressedNbtFile(file, data.get(), schematic.getRootTagName());
     }
 }

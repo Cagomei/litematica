@@ -64,19 +64,19 @@ public class VanillaSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", -1);
+        this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
+        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
         SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
                                                      new HashMap<>(), entityList, this.minecraftDataVersion);
 
         this.enclosingSize = size;
-        this.regions = ImmutableMap.of("Schematic", region);
-        this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
+        this.regions = ImmutableMap.of(this.metadata.getSchematicName(), region);
 
         return true;
     }
 
     @Override
-    public CompoundData write()
+    public Optional<CompoundData> write()
     {
         CompoundData data = new CompoundData();
         int regionCount = this.getRegions().size();
@@ -84,7 +84,7 @@ public class VanillaSchematic extends BaseSchematic
         if (regionCount != 1)
         {
             MessageDispatcher.error("litematica.message.error.schematic_save.wrong_region_count", regionCount, 1);
-            return data;
+            return Optional.empty();
         }
 
         data.put("Metadata", this.metadata.write(new CompoundData()));
@@ -96,7 +96,7 @@ public class VanillaSchematic extends BaseSchematic
         this.writeBlocks(data, region.getBlockContainer(), region.getBlockEntityMap());
         this.writeEntities(data, region.getEntityList());
 
-        return data;
+        return Optional.of(data);
     }
 
     protected int readBlocks(DataView data, BlockContainer container, Map<BlockPos, CompoundData> blockEntityMapOut)
