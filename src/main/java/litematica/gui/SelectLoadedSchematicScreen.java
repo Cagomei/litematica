@@ -80,7 +80,7 @@ public class SelectLoadedSchematicScreen extends BaseListScreen<DataListWidget<L
 
     public void onSelectionChange(@Nullable LoadedSchematic entry)
     {
-        this.schematicInfoWidget.onSelectionChange(entry);
+        this.schematicInfoWidget.setActiveEntry(entry);
     }
 
     protected void clearSchematicInfoCache()

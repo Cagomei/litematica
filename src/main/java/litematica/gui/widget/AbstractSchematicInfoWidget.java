@@ -121,7 +121,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         this.infoCache.clearCache();
     }
 
-    public void onSelectionChange(@Nullable T entry)
+    public void setActiveEntry(@Nullable T entry)
     {
         if (entry != null)
         {
@@ -132,10 +132,10 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
             this.currentInfo = null;
         }
 
-        this.onPostSelectionChange();
+        this.onActiveEntryChanged();
     }
 
-    protected void onPostSelectionChange()
+    protected void onActiveEntryChanged()
     {
         this.updateWidgetState();
         this.updateSubWidgetPositions();
