@@ -64,14 +64,18 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
     {
         super.reAddActiveWidgets();
 
-        this.addWidget(this.allOffButton);
-        this.addWidget(this.allOnButton);
         this.addWidget(this.iconsTextToggleButton);
         this.addWidget(this.loadedSchematicsListScreenButton);
         this.addWidget(this.loadSchematicsScreenButton);
         this.addWidget(this.mainMenuButton);
         this.addWidget(this.schematicPlacementFileBrowserButton);
         this.addWidget(this.sortModeButton);
+
+        if (this.sortMode == false)
+        {
+            this.addWidget(this.allOffButton);
+            this.addWidget(this.allOnButton);
+        }
     }
 
     @Override
@@ -146,6 +150,7 @@ public class SchematicPlacementsListScreen extends BaseListScreen<DataListWidget
             listWidget.setDataListEntryWidgetFactory((d, cd) -> new SchematicPlacementEntryWidget(d, cd, this));
         }
 
+        this.reAddActiveWidgets();
         listWidget.refreshEntries();
     }
 
