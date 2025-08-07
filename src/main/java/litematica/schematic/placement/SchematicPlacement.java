@@ -873,7 +873,7 @@ public class SchematicPlacement extends BasePlacement
     }
 
     @Nullable
-    protected Path getAvailableFileName()
+    protected Path getAvailableFileName(Path dir)
     {
         if (this.schematicFileOpt.isPresent() == false)
         {
@@ -883,7 +883,7 @@ public class SchematicPlacement extends BasePlacement
         String schName = FileNameUtils.getFileNameWithoutExtension(this.schematicFileOpt.get().getFileName().toString());
         String nameBase = FileNameUtils.generateSafeFileName(schName);
 
-        return FileUtils.getUnusedFileName(getSaveDirectory(), nameBase + "_%03d.json", 1);
+        return FileUtils.getUnusedFileName(dir, nameBase + "_%03d.json", 1);
     }
 
     public boolean saveToFileIfChanged()
@@ -894,15 +894,16 @@ public class SchematicPlacement extends BasePlacement
             return false;
         }
 
+        Path dir = getSaveDirectory();
         Path file;
 
         if (this.placementSaveFile != null)
         {
-            file = getSaveDirectory().resolve(this.placementSaveFile);
+            file = dir.resolve(this.placementSaveFile);
         }
         else
         {
-            file = this.getAvailableFileName();
+            file = this.getAvailableFileName(dir);
         }
 
         if (file == null)
@@ -918,7 +919,7 @@ public class SchematicPlacement extends BasePlacement
         }
         else
         {
-            MessageDispatcher.warning().translate("litematica.message.error.schematic_placement.save.no_changes");
+            MessageDispatcher.warning("litematica.message.error.schematic_placement.save.no_changes");
         }
 
         return true;
