@@ -9,6 +9,7 @@ import malilib.config.option.ConfigOption;
 import malilib.gui.BaseScreen;
 import malilib.gui.widget.LabelWidget;
 import malilib.gui.widget.button.BooleanConfigButton;
+import malilib.listener.EventListener;
 import malilib.util.StringUtils;
 import litematica.config.Configs;
 
@@ -79,7 +80,16 @@ public class SchematicInfoConfigScreen extends BaseScreen
         label.getPadding().setTop(3);
         config.getComment().ifPresent(label::addHoverStrings);
 
+        BooleanConfigButton button = new BooleanConfigButton(-1, 16, config);
+        EventListener clickListener = () -> {
+                config.toggleBooleanValue();
+                int newColor = config.isModified() ? 0xFFFFFF55 : 0xFFAAAAAA;
+                label.setNormalTextColor(newColor);
+                label.setHoverTextColor(newColor);
+        };
+        button.setActionListener(clickListener);
+
         this.labels.add(label);
-        this.buttons.add(new BooleanConfigButton(-1, 16, config));
+        this.buttons.add(button);
     }
 }
