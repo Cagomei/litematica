@@ -122,15 +122,22 @@ public abstract class BaseBlockContainer implements BlockContainer
 
     protected abstract void calculateBlockCountsIfNeeded();
 
-    public static Palette<BlockState> createPalette(int bits, PaletteResizeHandler<BlockState> resizeHandler)
+    public static Palette<BlockState> createPalette(int entryWidthBits, PaletteResizeHandler<BlockState> resizeHandler)
     {
-        if (bits <= MAX_BITS_LINEAR)
+        Palette<BlockState> palette;
+
+        if (entryWidthBits <= MAX_BITS_LINEAR)
         {
-            return new LinearPalette<>(bits, resizeHandler);
+            palette = new LinearPalette<>(entryWidthBits, resizeHandler);
         }
         else
         {
-            return new HashMapPalette<>(bits, resizeHandler);
+            palette =  new HashMapPalette<>(entryWidthBits, resizeHandler);
         }
+
+        // Always reserve ID 0 for air, so that the container doesn't need to be filled with air separately
+        palette.idFor(AIR_BLOCK_STATE);
+
+        return palette;
     }
 }

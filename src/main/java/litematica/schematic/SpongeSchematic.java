@@ -290,7 +290,7 @@ public class SpongeSchematic extends BaseSchematic
         byte[] blockData = data.getByteArray("BlockData");
         int paletteSize = paletteTag.size();
 
-        ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockData, size);
+        ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
 
         if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
         {
@@ -308,7 +308,7 @@ public class SpongeSchematic extends BaseSchematic
         byte[] blockData = data.getByteArray("Data");
         int paletteSize = paletteTag.size();
 
-        ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockData, size);
+        ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
 
         if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
         {

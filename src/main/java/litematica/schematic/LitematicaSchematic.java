@@ -176,7 +176,7 @@ public class LitematicaSchematic extends BaseSchematic
                 continue;
             }
 
-            ArrayBlockContainer container = ArrayBlockContainer.createContainer(paletteSize, blockDataArray, size);
+            ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockDataArray);
 
             /*
             if (container == null)

@@ -5,8 +5,7 @@ import io.netty.buffer.Unpooled;
 
 import net.minecraft.network.PacketBuffer;
 
-import malilib.util.data.palette.HashMapPalette;
-import malilib.util.data.palette.LinearPalette;
+import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.palette.PaletteResizeHandler;
 import malilib.util.position.Vec3i;
@@ -29,9 +28,9 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         this.checkForFreedIds = checkForFreedIds;
     }
 
-    public ArrayBlockContainer(Vec3i size, int bits, @Nullable long[] backingLongArray)
+    protected ArrayBlockContainer(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
     {
-        super(size, bits);
+        super(size, entryWidthBits);
 
         this.setBackingArray(backingLongArray);
     }
@@ -44,26 +43,11 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         if (entryWidthBits != this.entryWidthBits)
         {
             this.entryWidthBits = entryWidthBits;
-            this.createPalette(entryWidthBits);
+            this.palette = createPalette(entryWidthBits, this);
         }
     }
 
-    protected void createPalette(int entryWidthBits)
-    {
-        if (this.entryWidthBits <= MAX_BITS_LINEAR)
-        {
-            this.palette = new LinearPalette<>(entryWidthBits, this);
-        }
-        else
-        {
-            this.palette = new HashMapPalette<>(entryWidthBits, this);
-        }
-
-        // Always reserve ID 0 for air, so that the container doesn't need to be filled with air separately
-        this.palette.idFor(AIR_BLOCK_STATE);
-    }
-
-    protected void setBackingArray(@Nullable long[] backingLongArray)
+    protected void setBackingArray(@Nullable long[] backingLongArray) throws IndexOutOfBoundsException
     {
         if (backingLongArray != null)
         {
@@ -163,18 +147,20 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
     @Override
     public BlockContainer copy()
     {
-        ArrayBlockContainer newContainer = new ArrayBlockContainer(this.size, this.entryWidthBits, this.storage.getBackingLongArray().clone());
+        ArrayBlockContainer newContainer = ArrayBlockContainer.of(this.size, this.entryWidthBits, this.storage.getBackingLongArray().clone());
         newContainer.palette = this.palette.copy(newContainer);
 
         return newContainer;
     }
 
-    public static SpongeBlockStateConverterResults convertVarIntByteArrayToPackedLongArray(Vec3i size, int bits, byte[] blockStates)
+    public static SpongeBlockStateConverterResults convertVarIntByteArrayToPackedLongArray(Vec3i size,
+                                                                                           int entryWidthBits,
+                                                                                           byte[] blockStates)
     {
         int volume = size.getX() * size.getY() * size.getZ();
-        TightLongBackedBitArray bitArray = new TightLongBackedBitArray(bits, volume);
+        TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
         PacketBuffer buf = new PacketBuffer(Unpooled.wrappedBuffer(blockStates));
-        long[] blockCounts = new long[1 << bits];
+        long[] blockCounts = new long[1 << entryWidthBits];
 
         for (int i = 0; i < volume; ++i)
         {
@@ -186,20 +172,48 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         return new SpongeBlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
     }
 
-    public static ArrayBlockContainer createContainer(int paletteSize, long[] blockStates, Vec3i size)
+    public static ArrayBlockContainer of(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
     {
-        int bits = Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
-        ArrayBlockContainer container = new ArrayBlockContainer(size, bits, blockStates);
-        container.palette = createPalette(bits, container);
+        try
+        {
+            return new ArrayBlockContainer(size, entryWidthBits, backingLongArray);
+        }
+        catch (Exception e)
+        {
+            MessageDispatcher.error("litematica.message.error.schematic_container.invalid_array_length",
+                                    backingLongArray != null ? backingLongArray.length : "<null>");
+        }
+
+        return new ArrayBlockContainer(size, entryWidthBits, null);
+    }
+
+    public static int getRequiredBitWidth(int paletteSize)
+    {
+        return Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
+    }
+
+    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize)
+    {
+        int entryWidthBits = getRequiredBitWidth(paletteSize);
+        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, null);
+        //container.palette = createPalette(bits, container);
         return container;
     }
 
-    public static ArrayBlockContainer createContainer(int paletteSize, byte[] blockData, Vec3i size)
+    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize, @Nullable long[] blockStates)
     {
-        int bits = Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
-        SpongeBlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(size, bits, blockData);
-        ArrayBlockContainer container = new ArrayBlockContainer(size, bits, results.backingArray);
-        container.palette = createPalette(bits, container);
+        int entryWidthBits = getRequiredBitWidth(paletteSize);
+        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, blockStates);
+        //container.palette = createPalette(bits, container);
+        return container;
+    }
+
+    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize, byte[] blockData)
+    {
+        int entryWidthBits = getRequiredBitWidth(paletteSize);
+        SpongeBlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(size, entryWidthBits, blockData);
+        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
+        //container.palette = createPalette(bits, container);
         container.setBlockCounts(results.blockCounts);
         return container;
     }

@@ -1,43 +1,50 @@
 package litematica.schematic.container;
 
 import javax.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
 
 import malilib.util.MathUtils;
 
 public class TightLongBackedBitArray
 {
     /** The long array that is used to store the data for this BitArray. */
-    private final long[] longArray;
+    protected final long[] longArray;
     /** Number of bits a single entry takes up */
-    private final int bitsPerEntry;
+    protected final int bitsPerEntry;
     /**
      * The maximum value for a single entry. This also works as a bitmask for a single entry.
      * For instance, if bitsPerEntry were 5, this value would be 31 (ie, {@code 0b00011111}).
      */
-    private final long maxEntryValue;
+    protected final long maxEntryValue;
     /** Number of entries in this bit array (<b>not</b> the length of the long array that backs the bit array) */
-    private final long arraySize;
+    protected final long arraySize;
 
-    public TightLongBackedBitArray(int bitsPerEntryIn, long arraySizeIn)
+    public TightLongBackedBitArray(int bitsPerEntry, long arraySize)
     {
-        this(bitsPerEntryIn, arraySizeIn, null);
+        this(bitsPerEntry, arraySize, null);
     }
 
-    public TightLongBackedBitArray(int bitsPerEntry, long arraySize, @Nullable long[] array)
+    public TightLongBackedBitArray(int bitsPerEntry, long arraySize, @Nullable long[] array) throws IndexOutOfBoundsException
     {
-        Validate.inclusiveBetween(1L, 32L, bitsPerEntry);
+        bitsPerEntry = Math.max(1, Math.min(64, bitsPerEntry));
+
         this.arraySize = arraySize;
         this.bitsPerEntry = bitsPerEntry;
         this.maxEntryValue = (1L << bitsPerEntry) - 1L;
+        int requiredArrayLength = (int) (MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L);
 
         if (array != null)
         {
+            if (array.length < requiredArrayLength)
+            {
+                throw new IndexOutOfBoundsException("Provided array length (" + array.length +
+                                                    ") is less than the required length" + requiredArrayLength);
+            }
+
             this.longArray = array;
         }
         else
         {
-            this.longArray = new long[(int) (MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L)];
+            this.longArray = new long[requiredArrayLength];
         }
     }
 
