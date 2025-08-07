@@ -1,7 +1,9 @@
 package litematica.gui;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -31,12 +33,12 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Coordinate;
 import litematica.Reference;
 import litematica.data.DataManager;
-import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.LitematicaIcons;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.list.entry.SchematicPlacementSubRegionEntryWidget;
 import litematica.materials.MaterialListPlacement;
 import litematica.render.OverlayRenderer;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.placement.SchematicPlacement;
 import litematica.schematic.placement.SchematicPlacementManager;
 import litematica.schematic.placement.SubRegionPlacement;
@@ -77,20 +79,19 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
 
     public SchematicPlacementSettingsScreen(SchematicPlacement placement)
     {
-        super(10, 82, 150, 104);
+        super(10, 85, 136, 107);
 
         this.placement = placement;
         this.manager = DataManager.getSchematicPlacementManager();
 
-        this.nameTextField = new BaseTextFieldWidget(300, 14, placement.getName());
+        this.nameTextField = new BaseTextFieldWidget(300, 15, placement.getName());
         this.nameTextField.setListener(this::setName);
         this.nameTextField.setUpdateListenerAlways(false);
         this.originLabel = new LabelWidget("litematica.label.schematic_placement_settings.placement_origin");
+        this.schematicNameLabel = new LabelWidget();
         this.subRegionsLabel = new LabelWidget();
 
-        this.schematicNameLabel = new LabelWidget();
-
-        this.changeSchematicButton     = GenericButton.create(14, "litematica.button.schematic_placement_settings.change_schematic", this::changeSchematicButtonClicked);
+        this.changeSchematicButton     = GenericButton.create(16, "litematica.button.schematic_placement_settings.change_schematic", this::changeSchematicButtonClicked);
         this.copyPasteSettingsButton   = GenericButton.create(18, "litematica.button.schematic_placement_settings.export_import_settings", this::clickCopyPasteSettings);
         this.mirrorButton              = GenericButton.create(18, this::getMirrorButtonLabel, this::mirror);
         this.nameResetButton           = GenericButton.create(DefaultIcons.RESET_12, this::resetName);
@@ -121,7 +122,22 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         Icon icon = SchematicTypeIcons.INSTANCE.getIcon(placement.getLoadedSchematic()).orElse(DefaultIcons.EXCLAMATION_11);
         this.schematicTypeIcon = new IconWidget(icon);
 
-        this.copyPasteSettingsButton.setRenderButtonBackgroundTexture(true);
+        Optional<Path> fileOpt = placement.getLoadedSchematic().file;
+        String fileName;
+        String directory;
+
+        if (fileOpt.isPresent())
+        {
+            fileName = fileOpt.get().getFileName().toString();
+            directory = fileOpt.get().getParent().toString();
+        }
+        else
+        {
+            fileName = StringUtils.translate("litematica.hover.schematic_list.in_memory_only");
+            directory = "-";
+        }
+
+        this.schematicNameLabel.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.schematic_name", fileName, directory);
         this.changeSchematicButton.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.change_schematic");
         this.copyPasteSettingsButton.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.copy_paste_settings");
         this.gridSettingsButton.translateAndAddHoverString("litematica.hover.button.schematic_placement_settings.grid_settings");
@@ -142,6 +158,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         this.lockYCoordCheckbox.setBooleanStorage(() -> this.isCoordinateLocked(Coordinate.Y), (val) -> this.setCoordinateLocked(val, Coordinate.Y));
         this.lockZCoordCheckbox.setBooleanStorage(() -> this.isCoordinateLocked(Coordinate.Z), (val) -> this.setCoordinateLocked(val, Coordinate.Z));
 
+        this.schematicNameLabel.setClickListener(this::openInfoPopup);
         this.setTitle("litematica.title.screen.schematic_placement_settings", Reference.MOD_VERSION);
     }
 
@@ -187,6 +204,9 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
 
         int x = this.x + 12;
         int y = this.y + 17;
+        int listY = this.getListY();
+        int toggleButtonY = this.y + 16;
+
         this.schematicTypeIcon.setPosition(x, y + 2);
 
         this.nameTextField.setPosition(x + 16, y + 1);
@@ -195,21 +215,22 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         this.nameResetButton.centerVerticallyInside(this.nameTextField);
         this.schematicNameLabel.setPosition(x + 2, this.nameTextField.getBottom() + 3);
 
-        this.subRegionsLabel.setPosition(x + 1, this.getListY() - 9);
+        this.subRegionsLabel.setPosition(x + 1, listY - 9);
 
-        this.changeSchematicButton.setPosition(x, this.schematicNameLabel.getBottom());
+        this.changeSchematicButton.setPosition(x, this.schematicNameLabel.getBottom() + 1);
 
-        this.copyPasteSettingsButton.setRight(this.getRight() - 140);
-        this.copyPasteSettingsButton.setY(this.y + 6);
+        x = this.getRight() - 114;
+        this.togglePlacementEnabledButton.setPosition(x, toggleButtonY);
+
+        this.copyPasteSettingsButton.setRight(this.togglePlacementEnabledButton.getX() - 4);
+        this.copyPasteSettingsButton.setY(toggleButtonY);
         this.gridSettingsButton.setRight(this.copyPasteSettingsButton.getRight());
         this.gridSettingsButton.setY(this.copyPasteSettingsButton.getBottom() + 1);
-        this.toggleAllRegionsOffButton.setRight(this.gridSettingsButton.getRight());
-        this.toggleAllRegionsOffButton.setY(this.gridSettingsButton.getBottom() + 1);
+
+        this.toggleAllRegionsOffButton.setRight(this.getListRight());
+        this.toggleAllRegionsOffButton.setY(listY - this.toggleAllRegionsOffButton.getHeight() - 1);
         this.toggleAllRegionsOnButton.setRight(this.toggleAllRegionsOffButton.getX() - 4);
         this.toggleAllRegionsOnButton.setY(this.toggleAllRegionsOffButton.getY());
-
-        x = this.getRight() - 134;
-        this.togglePlacementEnabledButton.setPosition(x, this.y + 6);
 
         this.toggleLockedButton.setPosition(x, this.togglePlacementEnabledButton.getBottom() + 1);
         this.toggleEnclosingBoxButton.setPosition(this.toggleLockedButton.getRight() + 2,
@@ -218,8 +239,8 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
 
         this.toggleEntitiesButton.setPosition(x, this.toggleLockedButton.getBottom() + 1);
 
-        this.originLabel.setPosition(x + 2, this.toggleEntitiesButton.getBottom() + 4);
-        this.originEditWidget.setPosition(x + 2, this.originLabel.getBottom() + 1);
+        this.originLabel.setPosition(x, this.toggleEntitiesButton.getBottom() + 4);
+        this.originEditWidget.setPosition(x, this.originLabel.getBottom() + 1);
 
         this.rotateButton.setPosition(x, this.originEditWidget.getBottom() + 1);
         this.mirrorButton.setPosition(x, this.rotateButton.getBottom() + 1);
@@ -234,7 +255,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         y = this.getBottom() - 20;
         this.openMaterialListButton.setPosition(this.x + 10, y);
         this.openVerifierButton.setPosition(this.openMaterialListButton.getRight() + 2, y);
-        this.openPlacementListButton.setRight(this.getRight() - 10);
+        this.openPlacementListButton.setRight(this.getRight() - 4);
         this.openPlacementListButton.setY(y);
     }
 
@@ -543,6 +564,14 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
         String val = this.placement.getRotation().getDisplayName();
         String key = "litematica.button.schematic_placement_settings.rotation_value";
         return StringUtils.translate(key, val);
+    }
+
+    protected void openInfoPopup()
+    {
+        int height = Math.min(310, this.getTotalHeight() - 20);
+        LoadedSchematic loadedSchematic = this.placement.getLoadedSchematic();
+        SchematicInfoPopupScreen screen = new SchematicInfoPopupScreen(loadedSchematic, height);
+        BaseScreen.openPopupScreenWithCurrentScreenAsParent(screen);
     }
 
     protected enum ChangeSchematicType

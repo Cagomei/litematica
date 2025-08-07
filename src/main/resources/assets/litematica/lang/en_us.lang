@@ -66,7 +66,7 @@ litematica.button.schematic_placement_settings.grid_settings=Grid/Repeat: %s
 litematica.button.schematic_placement_settings.ignore_entities=Ignore Entities: %s
 litematica.button.schematic_placement_settings.locked=Locked: %s
 litematica.button.schematic_placement_settings.mirror_value=Mirror: %s
-litematica.button.schematic_placement_settings.reset_sub_regions=<c=fa3>Reset All Sub-Regions
+litematica.button.schematic_placement_settings.reset_sub_regions=<c=fa3>Reset All Regions
 litematica.button.schematic_placement_settings.rotation_value=Rotation: %s
 litematica.button.schematic_placement_settings.entry_name.enabled=<c=5f5>%s
 litematica.button.schematic_placement_settings.entry_name.disabled=<c=888>%s
@@ -163,6 +163,7 @@ litematica.hover.button.schematic_placement_settings.enclosing_box.off=Enclosing
 litematica.hover.button.schematic_placement_settings.enclosing_box.on=Enclosing box rendering: §aON
 litematica.hover.button.schematic_placement_settings.grid_settings=Hold §eShift§r to just toggle the Grid Repeat §aON§r/§cOFF
 litematica.hover.button.schematic_placement_settings.lock=Locking a placement prevents (accidentally) moving or otherwise changing it
+litematica.hover.button.schematic_placement_settings.schematic_name=File: §3%s§r\nDirectory: §3%s§r\n\nClick for Schematic Info
 litematica.hover.button.schematic_placement_settings.reset_name=Reset the name back to the schematic name
 litematica.hover.button.schematic_placement_sub_region_settings.reset_display_name=Reset the name back to the original region name
 litematica.hover.button.schematic_save.save_side.info=Where/how to save the schematic.\n\n- Auto: Use server-side saving, if the server reports the capability to save schematics\n- Client: Force saving on the client side, even if the server would also support server-side saving\n- Server: Force trying to save on the server side, even if the server may not support it and didn't report the capability. If it doesn't support it, then nothing will happen.
@@ -413,6 +414,7 @@ litematica.title.screen.saved_placements=Litematica %s - Saved Schematic Placeme
 litematica.title.screen.save_or_convert_schematic=Save or Convert Schematic §e%s§r
 litematica.title.screen.schematic_browser=Litematica %s - Schematic Browser
 litematica.title.screen.schematic_info_options=Schematic Info Options
+litematica.title.screen.schematic_info_popup=Schematic Info
 litematica.title.screen.schematic_manager=Litematica %s - Schematic Manager
 litematica.title.screen.schematic_manager.confirm_file_deletion=Confirm File Deletion
 litematica.title.screen.schematic_manager.confirm_preview_removal=Confirm Preview Image Removal
@@ -1023,6 +1025,7 @@ litematica.config.name.schematicinfoshowname=Name
 litematica.config.name.schematicinfoshowregioncount=Region Count
 litematica.config.name.schematicinfoshowschematicversion=Schematic Version
 litematica.config.name.schematicinfoshowthumbnail=Thumbnail / Preview
+litematica.config.name.schematicinfoshowschematictype=Schematic Type
 litematica.config.name.schematicinfoshowtotalblocks=Total Blocks
 litematica.config.name.schematicinfoshowtotalvolume=Total Volume
 
