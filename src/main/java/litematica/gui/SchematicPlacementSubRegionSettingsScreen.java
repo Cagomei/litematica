@@ -135,6 +135,7 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
 
         int x = this.x + 12;
         int y = this.y + 25;
+        int toggleButtonY = this.y + 16;
 
         this.displayNameLabel.setPosition(x + 2, y + 4);
         this.nameTextField.setPosition(this.displayNameLabel.getRight() + 4, y);
@@ -146,8 +147,8 @@ public class SchematicPlacementSubRegionSettingsScreen extends BaseScreen
         this.placementNameLabel.setPosition(x + 2, this.regionNameLabel.getBottom() + 2);
         this.schematicNameLabel.setPosition(x + 2, this.placementNameLabel.getBottom() + 2);
 
-        x = this.getRight() - 134;
-        this.toggleRegionEnabledButton.setPosition(x, this.y + 6);
+        x = this.getRight() - 114;
+        this.toggleRegionEnabledButton.setPosition(x, toggleButtonY);
         this.toggleEntitiesButton.setPosition(x, this.toggleRegionEnabledButton.getBottom() + 1);
 
         this.originLabel.setPosition(x + 2, this.toggleEntitiesButton.getBottom() + 4);
