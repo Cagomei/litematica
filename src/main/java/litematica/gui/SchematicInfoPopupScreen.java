@@ -7,19 +7,23 @@ import litematica.schematic.LoadedSchematic;
 public class SchematicInfoPopupScreen extends BaseScreen
 {
     protected final SchematicInfoWidgetBySchematic schematicInfoWidget;
+    protected final LoadedSchematic loadedSchematic;
 
     public SchematicInfoPopupScreen(LoadedSchematic loadedSchematic, int height)
     {
+        this.loadedSchematic = loadedSchematic;
         this.backgroundColor = 0xFF000000;
         this.renderBorder = true;
         this.useTitleHierarchy = false;
 
         this.schematicInfoWidget = new SchematicInfoWidgetBySchematic(190, height - 30);
-        this.schematicInfoWidget.setActiveEntry(loadedSchematic);
 
-        Runnable clearTask = this.schematicInfoWidget::clearCache;
+        Runnable clearTask = this::clearCache;
         this.addPreInitListener(clearTask);
         this.addPreScreenCloseListener(clearTask);
+
+        // This needs to be set after the screen has been opened and initialized and the cache won't be cleared after
+        this.addPostInitListener(() -> this.schematicInfoWidget.setActiveEntry(this.loadedSchematic));
 
         this.setTitle("litematica.title.screen.schematic_info_popup");
         this.setScreenWidthAndHeight(200, height);
@@ -39,5 +43,11 @@ public class SchematicInfoPopupScreen extends BaseScreen
         super.updateWidgetPositions();
 
         this.schematicInfoWidget.setPosition(this.x + 5, this.y + 20);
+    }
+
+    protected void clearCache()
+    {
+        this.schematicInfoWidget.setActiveEntry(null);
+        this.schematicInfoWidget.clearCache();
     }
 }

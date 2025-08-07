@@ -568,7 +568,7 @@ public class SchematicPlacementSettingsScreen extends BaseListScreen<DataListWid
 
     protected void openInfoPopup()
     {
-        int height = Math.min(310, this.getTotalHeight() - 20);
+        int height = Math.min(340, this.getTotalHeight() - 20);
         LoadedSchematic loadedSchematic = this.placement.getLoadedSchematic();
         SchematicInfoPopupScreen screen = new SchematicInfoPopupScreen(loadedSchematic, height);
         BaseScreen.openPopupScreenWithCurrentScreenAsParent(screen);
