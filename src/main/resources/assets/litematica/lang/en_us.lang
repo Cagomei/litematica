@@ -671,6 +671,7 @@ litematica.message.error.only_works_in_single_player=§cThis operation only work
 litematica.message.error.move.pending_tasks=§cCan not start a move operation while there are pending tasks§r
 litematica.message.error.placement_grid_settings.open_gui_selected_is_grid=The selected placement is a repeated/grid placement.\nRepeated placements can't be repeated again.\nSelect a normal placement to configure the grid settings for it.
 litematica.message.error.placement_paste_outside_world=The placement can't be pasted in the current position, because it goes outside the world bounds
+litematica.message.error.schematic_container.invalid_array_length=Invalid data array length §b%s§r
 litematica.message.error.schematic_paste_failed=§cSchematic Paste to world failed§r
 litematica.message.error.schematic_paste_failed_region=§cFailed to paste the region '%s'§r
 litematica.message.error.schematic_placement.load_failed=Failed to load the placement '%s' from schematic file '%s'
@@ -682,17 +683,18 @@ litematica.message.error.schematic_read.failed_to_read_from_file=Failed to read 
 litematica.message.error.schematic_read.invalid_or_missing_size=Invalid or missing schematic size
 litematica.message.error.schematic_read.invalid_or_missing_size_value=Invalid schematic size: %s x %s x %s
 litematica.message.error.schematic_read.mcedit2.missing_block_data=SchematicaSchematic: Missing/non-existing block '%s' in MCEdit2 palette
-litematica.message.error.schematic_read.mcedit2.palette.id_not_number=SchematicaSchematic: Invalid ID '%s' (not a number) in MCEdit2 palette for block '%s'
-litematica.message.error.schematic_read.mcedit2.palette.invalid_id=SchematicaSchematic: Invalid ID %s in MCEdit2 palette for block '%s', max = %s
+litematica.message.error.schematic_read.mcedit2.palette.id_not_number=Invalid block ID '§e%s§r' (not an int) in MCEdit2 palette for block '§e%s§r'
 litematica.message.error.schematic_read.missing_or_invalid_data=Failed to read schematic, missing or invalid data in the schematic '%s'
-litematica.message.error.schematic_read.registry_palette.missing_block_data=SchematicaSchematic: Invalid ID %s for block '%s' from the block registry
+litematica.message.error.schematic_read.registry_palette.missing_block_data=Invalid block ID '§e%s§r' for block '§e%s§r' from the block registry
+litematica.message.error.schematic_read.schematica.block_errors=Got §6%s§r errors while reading §6%s§r total blocks
 litematica.message.error.schematic_read.schematica.old_schematica_format_not_supported=SchematicaSchematic: Old Schematica format detected, not currently implemented...
-litematica.message.error.schematic_read.schematica.palette.failed_to_read=SchematicaSchematic: Failed to read the block palette
-litematica.message.error.schematic_read.schematica.palette.invalid_block=SchematicaSchematic: Missing/non-existing block '%s' in SchematicaMapping
-litematica.message.error.schematic_read.schematica.palette.invalid_id=SchematicaSchematic: Invalid ID %s in SchematicaMapping for block '%s', max = %s
-litematica.message.error.schematic_read.schematica.schematic.invalid_block_add_array_size=SchematicaSchematic: Add array size mismatch, blocks: %s, add: %s, expected add: %s
-litematica.message.error.schematic_read.schematica.schematic.invalid_block_array_size=SchematicaSchematic: Mismatched block array length compared to the reported schematic size: array length: %s, W x H x L: %s x %s x %s
-litematica.message.error.schematic_read.schematica.schematic.invalid_metadata_array_size=SchematicaSchematic: Mismatched block ID and metadata array sizes, blocks: %s, meta: %s
+litematica.message.error.schematic_read.schematica.mapping_errors=Failed to read §6%s§r block mapping entries, successfully read §6%s§r entries
+litematica.message.error.schematic_read.schematica.palette.invalid_block=Missing/non-existing block '§e%s§r' in SchematicaMapping
+litematica.message.error.schematic_read.schematica.palette.invalid_id=Invalid ID '§e%s§r' in SchematicaMapping for block '§e%s§r' (max ID = §b%s§r)
+litematica.message.error.schematic_read.schematica.palette.invalid_tag=Invalid tag for block '§e%s§r' in SchematicaMapping (got §e%s§r with value §e%s§r)
+litematica.message.error.schematic_read.schematica.schematic.invalid_block_add_array_size=Unexpected Add array size §6%s§r, expected §6%s§r (for total size of §6%s§r blocks)
+litematica.message.error.schematic_read.schematica.schematic.invalid_block_array_size=Mismatched block data array length (§6%s§r) compared to the expected length §6%s§r for schematic size §6%s x %s x %s§r
+litematica.message.error.schematic_read.schematica.schematic.invalid_metadata_array_size=Mismatched metadata array length §6%s§r, expected §6%s§r
 litematica.message.error.schematic_read.sponge.palette.invalid_id=Invalid ID '%s' in the Sponge format schematic block palette
 litematica.message.error.schematic_read.sponge.palette.unknown_block=Unknown block '%s' in the Sponge format schematic block palette
 litematica.message.error.schematic_read.sponge.failed_to_read_blocks=Failed to read the blocks for a Sponge format schematic
