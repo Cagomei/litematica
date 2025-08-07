@@ -40,9 +40,9 @@ public class PlacementGridSettingsScreen extends BaseScreen
                                                          this.placement.getGridSettings()::isEnabled,
                                                          this::toggleGridEnabled);
 
-        this.sizeEditWidget = new Vec3iEditWidget(90, 60, 2, false, settings.getSize(), this::setGridSize);
-        this.negRepeatEditWidget = new Vec3iEditWidget(90, 60, 2, false, settings.getRepeatNegative(), this::setRepeatNegative);
-        this.posRepeatEditWidget = new Vec3iEditWidget(90, 60, 2, false, settings.getRepeatPositive(), this::setRepeatPositive);
+        this.sizeEditWidget = new Vec3iEditWidget(90, 54, 2, false, settings.getSize(), this::setGridSize);
+        this.negRepeatEditWidget = new Vec3iEditWidget(90, 54, 2, false, settings.getRepeatNegative(), this::setRepeatNegative);
+        this.posRepeatEditWidget = new Vec3iEditWidget(90, 54, 2, false, settings.getRepeatPositive(), this::setRepeatPositive);
 
         Vec3i s = settings.getDefaultSize();
         this.sizeEditWidget.setValidRange(s.getX(), s.getY(), s.getZ(), 1000000, 1000000, 1000000);
