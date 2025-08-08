@@ -40,6 +40,7 @@ import malilib.util.position.IntBoundingBox;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
+import malilib.util.world.ScheduledBlockTickData;
 import litematica.Litematica;
 import litematica.mixin.access.NextTickListEntryMixin;
 import litematica.render.infohud.InfoHud;
@@ -51,7 +52,6 @@ import litematica.schematic.SchematicRegion;
 import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
-import litematica.schematic.data.ScheduledBlockTickData;
 import litematica.selection.AreaSelection;
 import litematica.selection.SelectionBox;
 import litematica.util.PositionUtils;
@@ -298,7 +298,6 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             long tickId = ((NextTickListEntryMixin) entry).litematica$getTickId();
 
             ScheduledBlockTickData tickData = new ScheduledBlockTickData(relPos,
-                                                                         entry.getBlock(),
                                                                          RegistryUtils.getBlockIdStr(entry.getBlock()),
                                                                          entry.priority,
                                                                          delay,

@@ -6,9 +6,9 @@ import java.util.Map;
 import malilib.util.data.tag.CompoundData;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
+import malilib.util.world.ScheduledBlockTickData;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
-import litematica.schematic.data.ScheduledBlockTickData;
 
 public class SchematicRegion
 {

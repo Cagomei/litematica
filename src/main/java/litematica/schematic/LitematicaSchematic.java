@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.block.Block;
-
 import malilib.overlay.message.MessageDispatcher;
 import malilib.util.data.Constants;
 import malilib.util.data.tag.CompoundData;
@@ -17,14 +15,13 @@ import malilib.util.data.tag.ListData;
 import malilib.util.data.tag.LongArrayData;
 import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.MinecraftVersion;
-import malilib.util.game.wrap.RegistryUtils;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
+import malilib.util.world.ScheduledBlockTickData;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.data.EntityData;
-import litematica.schematic.data.ScheduledBlockTickData;
 import litematica.util.PositionUtils;
 
 public class LitematicaSchematic extends BaseSchematic
@@ -247,13 +244,12 @@ public class LitematicaSchematic extends BaseSchematic
                 tag.contains("Time", Constants.NBT.TAG_ANY_NUMERIC)) // XXX these were accidentally saved as longs in version 3
             {
                 String blockName = tag.getString("Block");
-                Block block = RegistryUtils.getBlockByIdStr(blockName);
                 BlockPos pos = DataTypeUtils.readBlockPos(tag);
                 int priority = tag.getInt("Priority");
                 long delay = tag.getInt("Time");
                 long tickId = tag.getLongOrDefault("TickId", tickIdCounter++);
                 // Note: the time is a relative delay at this point
-                ScheduledBlockTickData entry = new ScheduledBlockTickData(pos, block, blockName, priority, delay, tickId);
+                ScheduledBlockTickData entry = new ScheduledBlockTickData(pos, blockName, priority, delay, tickId);
 
                 tickMapOut.put(pos, entry);
             }
