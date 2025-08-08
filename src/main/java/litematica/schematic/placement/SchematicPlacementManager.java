@@ -19,10 +19,6 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-
 import malilib.config.value.LayerMode;
 import malilib.listener.EventListener;
 import malilib.overlay.message.MessageDispatcher;
@@ -43,11 +39,11 @@ import malilib.util.position.IntBoundingBox;
 import litematica.config.Configs;
 import litematica.config.Hotkeys;
 import litematica.data.DataManager;
-import litematica.schematic.LoadedSchematic;
 import litematica.data.SchematicHolder;
 import litematica.render.LitematicaRenderer;
 import litematica.render.OverlayRenderer;
 import litematica.render.infohud.StatusInfoRenderer;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.util.SchematicPlacingUtils;
 import litematica.schematic.verifier.SchematicVerifierManager;
 import litematica.util.Nags;
@@ -141,9 +137,7 @@ public class SchematicPlacementManager
         //System.out.printf("processQueuedChunks, size: %d\n", this.chunksToRebuild.size());
         if (this.chunksToRebuild.isEmpty() == false)
         {
-            WorldClient clientWorld = GameWrap.getClientWorld();
-
-            if (clientWorld == null)
+            if (GameWrap.getClientWorld() == null)
             {
                 this.chunksToRebuild.clear();
                 return true;
@@ -171,7 +165,7 @@ public class SchematicPlacementManager
                 int chunkZ = malilib.util.position.PositionUtils.getChunkPosZ(chunkPosLong);
 
                 if (Configs.Generic.LOAD_ENTIRE_SCHEMATICS.getBooleanValue() ||
-                    WorldWrap.isClientChunkLoaded(chunkX, chunkZ, clientWorld))
+                    WorldWrap.isClientChunkLoaded(chunkX, chunkZ, GameWrap.getClientWorld()))
                 {
                     // Wipe the old chunk if it exists
                     if (WorldWrap.isClientChunkLoaded(chunkX, chunkZ, schematicWorld))
@@ -1017,12 +1011,11 @@ public class SchematicPlacementManager
         this.chunksToRebuild.add(chunkPosLong);
     }
 
-    public boolean changeSelection(World world, Entity cameraEntity, int maxDistance)
+    public boolean changeSelection(int maxDistance)
     {
         if (this.schematicPlacements.isEmpty() == false)
         {
-            RayTraceWrapper trace = RayTraceUtils.getWrappedRayTraceFromEntity(world, cameraEntity, maxDistance);
-
+            RayTraceWrapper trace = RayTraceUtils.getWrappedRayTraceFromEntity(GameWrap.getClientWorld(), GameWrap.getCameraEntity(), maxDistance);
             SchematicPlacement placement = this.getSelectedSchematicPlacement();
 
             if (placement != null)
@@ -1056,8 +1049,9 @@ public class SchematicPlacementManager
 
         if (schematicPlacement != null)
         {
-            Entity entity = GameWrap.getCameraEntity();
-            HitResult trace = malilib.util.game.RayTraceUtils.getRayTraceFromEntity(GameWrap.getClientWorld(), entity, RayTraceFluidHandling.NONE, false, maxDistance);
+            HitResult trace = malilib.util.game.RayTraceUtils.getRayTraceFromEntity(GameWrap.getClientWorld(),
+                                                                                    GameWrap.getCameraEntity(),
+                                                                                    RayTraceFluidHandling.NONE, false, maxDistance);
 
             if (trace.type != HitResult.Type.BLOCK)
             {

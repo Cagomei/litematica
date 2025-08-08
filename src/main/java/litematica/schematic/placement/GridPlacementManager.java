@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-import net.minecraft.entity.player.EntityPlayer;
-
 import malilib.util.game.wrap.EntityWrap;
 import malilib.util.game.wrap.GameWrap;
 import malilib.util.position.BlockPos;
@@ -377,17 +375,16 @@ public class GridPlacementManager
     @Nullable
     private IntBoundingBox getCurrentLoadedArea(int expandChunks)
     {
-        EntityPlayer player = GameWrap.getClientPlayer();
-
-        if (player == null)
+        if (GameWrap.getClientPlayer() == null)
         {
             return null;
         }
 
-        int centerChunkX = EntityWrap.getChunkX(player);
-        int centerChunkZ = EntityWrap.getChunkZ(player);
+        BlockPos pos = EntityWrap.getPlayerBlockPos();
+        int centerChunkX = pos.getX() >> 4;
+        int centerChunkZ = pos.getZ() >> 4;
         int chunkRadius = GameWrap.getRenderDistanceChunks() + expandChunks;
-        int playerY = (int) EntityWrap.getY(player);
+        int playerY = pos.getY();
 
         return IntBoundingBox.createProper( (centerChunkX - chunkRadius) << 4      , playerY - 512,  (centerChunkZ - chunkRadius) << 4,
                                            ((centerChunkX + chunkRadius) << 4) + 15, playerY + 512, ((centerChunkZ + chunkRadius) << 4) + 15);

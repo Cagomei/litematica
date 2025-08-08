@@ -236,7 +236,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         }
     }
 
-    protected boolean shouldSaveBlock(IBlockState state, MutBlockPos mutPos)
+    protected boolean shouldSaveBlock(BlockState state, MutBlockPos mutPos)
     {
         if (state.getBlock() == Blocks.AIR)
         {

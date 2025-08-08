@@ -2,8 +2,6 @@ package litematica.schematic.container;
 
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
-import net.minecraft.block.material.Material;
-
 import malilib.util.data.palette.HashMapPalette;
 import malilib.util.data.palette.LinearPalette;
 import malilib.util.data.palette.Palette;
@@ -69,9 +67,7 @@ public abstract class BaseBlockContainer implements BlockContainer
         {
             BlockState state = palette.getValue(id);
 
-            if (state != null &&
-                state != AIR_BLOCK_STATE &&
-                state.vanillaState().getMaterial() != Material.AIR)
+            if (state != null && state.isAirMaterial() == false)
             {
                 count += this.blockCounts[id];
             }

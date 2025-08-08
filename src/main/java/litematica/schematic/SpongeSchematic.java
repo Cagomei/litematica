@@ -8,11 +8,11 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import net.minecraft.network.PacketBuffer;
-
 import malilib.overlay.message.MessageDispatcher;
+import malilib.util.ByteBufUtils;
 import malilib.util.ListUtils;
 import malilib.util.data.Constants;
 import malilib.util.data.palette.Palette;
@@ -516,7 +516,7 @@ public class SpongeSchematic extends BaseSchematic
     public static byte[] convertBitArrayToVarIntByteArray(ArrayBlockContainer container)
     {
         TightLongBackedBitArray bitArray = container.getBitArray();
-        final int entrySize = PacketBuffer.getVarIntSize(container.getPalette().getSize() - 1);
+        final int entrySize = ByteBufUtils.getVarIntSize(container.getPalette().getSize() - 1);
         final long volume = bitArray.size();
         final long length = entrySize * volume;
 
@@ -527,12 +527,12 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         byte[] arr = new byte[(int) length];
-        PacketBuffer buf = new PacketBuffer(Unpooled.wrappedBuffer(arr));
+        ByteBuf buf = Unpooled.wrappedBuffer(arr);
         buf.writerIndex(0);
 
         for (int i = 0; i < volume; ++i)
         {
-            buf.writeVarInt(bitArray.getAt(i));
+            ByteBufUtils.writeVarInt(buf, bitArray.getAt(i));
         }
 
         return arr;

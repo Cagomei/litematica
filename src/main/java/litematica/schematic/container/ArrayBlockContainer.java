@@ -1,11 +1,11 @@
 package litematica.schematic.container;
 
 import javax.annotation.Nullable;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import net.minecraft.network.PacketBuffer;
-
 import malilib.overlay.message.MessageDispatcher;
+import malilib.util.ByteBufUtils;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.palette.PaletteResizeHandler;
 import malilib.util.position.Vec3i;
@@ -159,12 +159,12 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
     {
         int volume = size.getX() * size.getY() * size.getZ();
         TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
-        PacketBuffer buf = new PacketBuffer(Unpooled.wrappedBuffer(blockStates));
+        ByteBuf buf = Unpooled.wrappedBuffer(blockStates);
         long[] blockCounts = new long[1 << entryWidthBits];
 
         for (int i = 0; i < volume; ++i)
         {
-            int id = buf.readVarInt();
+            int id = ByteBufUtils.readVarInt(buf);
             bitArray.setAt(i, id);
             ++blockCounts[id];
         }

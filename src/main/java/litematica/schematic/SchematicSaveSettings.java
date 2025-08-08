@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 
 import malilib.util.data.SimpleBooleanStorageWithDefault;
+import malilib.util.world.BlockState;
 
 public class SchematicSaveSettings
 {
@@ -19,6 +19,6 @@ public class SchematicSaveSettings
     public final SimpleBooleanStorageWithDefault clientWorldFirst        = new SimpleBooleanStorageWithDefault(true);
     public final SimpleBooleanStorageWithDefault exposedBlocksOnly       = new SimpleBooleanStorageWithDefault(false);
     public final Set<Block> ignoreBlocks = new HashSet<>();
-    public final Set<IBlockState> ignoreBlockStates = new HashSet<>();
+    public final Set<BlockState> ignoreBlockStates = new HashSet<>();
     public SchematicType schematicType = SchematicType.LITEMATICA;
 }

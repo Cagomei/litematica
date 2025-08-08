@@ -101,7 +101,7 @@ public class HotkeyCallbackToolActions implements HotkeyCallback
                 }
                 else if (mode.getUsesSchematic())
                 {
-                    DataManager.getSchematicPlacementManager().changeSelection(world, entity, maxDistance);
+                    DataManager.getSchematicPlacementManager().changeSelection(maxDistance);
                 }
 
                 return ActionResult.SUCCESS;
