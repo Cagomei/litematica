@@ -173,6 +173,7 @@ public class LitematicaSchematic extends BaseSchematic
                 continue;
             }
 
+            int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
             ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockDataArray);
 
             /*
@@ -183,13 +184,12 @@ public class LitematicaSchematic extends BaseSchematic
             }
             */
 
-            if (readPaletteFromLitematicaFormatTag(paletteTag, container.getPalette()) == false)
+            if (readPaletteFromLitematicaFormatTag(paletteTag, container.getPalette(), dataVersion) == false)
             {
                 MessageDispatcher.error("litematica.error.schematic_read.litematica.palette_read_failed", regionName);
                 continue;
             }
 
-            int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
             SchematicRegion region = new SchematicRegion(regionPos, regionSize, container, blockEntityMap,
                                                          blockTickMap, entityList, dataVersion);
 

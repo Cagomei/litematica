@@ -20,7 +20,6 @@ import malilib.util.data.tag.CompoundData;
 import malilib.util.data.tag.DataView;
 import malilib.util.data.tag.ListData;
 import malilib.util.data.tag.util.DataTypeUtils;
-import malilib.util.game.BlockUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
@@ -159,13 +158,14 @@ public class SpongeSchematic extends BaseSchematic
                          tag.getShort("Length"));
     }
 
-    public static SchematicMetadata createAndReadMetadata(DataView metaTag, Vec3i size, int version)
+    public static SchematicMetadata createAndReadMetadata(DataView metaTag, Vec3i size, int version, int dataVersion)
     {
         SchematicMetadata metadata = new SchematicMetadata();
         metadata.read(metaTag);
         metadata.setSchematicVersion(version);
         metadata.setEnclosingSize(size);
         metadata.setTotalVolume((long) size.getX() * size.getY() * size.getZ());
+        metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(dataVersion));
 
         if (metaTag.contains("Date", Constants.NBT.TAG_LONG) &&
             metadata.getTimeCreated() <= 0)
@@ -197,7 +197,11 @@ public class SpongeSchematic extends BaseSchematic
             return false;
         }
 
-        BlockContainer container = this.readBlocksFromTag_v1_2(data, size);
+        this.enclosingSize = size;
+        this.originalMetadataTag = data.getCompound("Metadata").copy();
+        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
+        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version, this.minecraftDataVersion);
+        BlockContainer container = this.readBlocksFromTag_v1_2(data, size, this.minecraftDataVersion);
 
         if (container == null)
         {
@@ -222,11 +226,6 @@ public class SpongeSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        this.enclosingSize = size;
-        this.originalMetadataTag = data.getCompound("Metadata").copy();
-        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
-
-        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
         SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
                                                      new HashMap<>(), entityList, this.minecraftDataVersion);
 
@@ -245,8 +244,13 @@ public class SpongeSchematic extends BaseSchematic
             return false;
         }
 
+        this.enclosingSize = size;
+        this.originalMetadataTag = schTag.getCompound("Metadata").copy();
+        this.minecraftDataVersion = schTag.getIntOrDefault("DataVersion", -1);
+        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version, this.minecraftDataVersion);
+
         CompoundData blockTag = schTag.getCompound("Blocks");
-        BlockContainer container = this.readBlocksFromTag_v3(blockTag, size);
+        BlockContainer container = this.readBlocksFromTag_v3(blockTag, size, this.minecraftDataVersion);
 
         if (container == null)
         {
@@ -271,20 +275,16 @@ public class SpongeSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        this.minecraftDataVersion = schTag.getIntOrDefault("DataVersion", -1);
         SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
                                                      new HashMap<>(), entityList, this.minecraftDataVersion);
 
-        this.enclosingSize = size;
-        this.originalMetadataTag = schTag.getCompound("Metadata").copy();
         this.regions = ImmutableMap.of("Schematic", region);
-        this.metadata = createAndReadMetadata(this.originalMetadataTag, this.enclosingSize, version);
 
         return true;
     }
 
     @Nullable
-    protected BlockContainer readBlocksFromTag_v1_2(DataView data, Vec3i size)
+    protected BlockContainer readBlocksFromTag_v1_2(DataView data, Vec3i size, int dataVersion)
     {
         CompoundData paletteTag = data.getCompound("Palette");
         byte[] blockData = data.getByteArray("BlockData");
@@ -292,7 +292,7 @@ public class SpongeSchematic extends BaseSchematic
 
         ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
 
-        if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
+        if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.sponge.failed_to_read_blocks");
             return null;
@@ -302,7 +302,7 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     @Nullable
-    protected BlockContainer readBlocksFromTag_v3(DataView data, Vec3i size)
+    protected BlockContainer readBlocksFromTag_v3(DataView data, Vec3i size, int dataVersion)
     {
         CompoundData paletteTag = data.getCompound("Palette");
         byte[] blockData = data.getByteArray("Data");
@@ -310,7 +310,7 @@ public class SpongeSchematic extends BaseSchematic
 
         ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
 
-        if (this.readPaletteFromCompound(paletteTag, container.getPalette()) == false)
+        if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.sponge.failed_to_read_blocks");
             return null;
@@ -319,7 +319,7 @@ public class SpongeSchematic extends BaseSchematic
         return container;
     }
 
-    protected boolean readPaletteFromCompound(DataView data, Palette<BlockState> palette)
+    protected boolean readPaletteFromCompound(DataView data, Palette<BlockState> palette, int dataVersion)
     {
         final int size = data.size();
         List<BlockState> list = new ArrayList<>(size);
@@ -333,23 +333,20 @@ public class SpongeSchematic extends BaseSchematic
 
         for (String key : keys)
         {
-            Optional<BlockState> stateOptional = BlockUtils.getBlockStateFromString(key);
+            BlockState state = BlockState.of(key, dataVersion);
             int id = data.getInt(key);
-            BlockState state;
 
-            if (stateOptional.isPresent())
-            {
-                state = stateOptional.get();
-            }
+            /*
             else
             {
-                MessageDispatcher.warning().translate("litematica.message.error.schematic_read.sponge.palette.unknown_block", key);
+                MessageDispatcher.warning("litematica.message.error.schematic_read.sponge.palette.unknown_block", key);
                 state = BlockState.AIR;
             }
+            */
 
             if (id < 0 || id >= size)
             {
-                MessageDispatcher.error().translate("litematica.message.error.schematic_read.sponge.palette.invalid_id", id);
+                MessageDispatcher.error("litematica.message.error.schematic_read.sponge.palette.invalid_id", id);
                 return false;
             }
 
@@ -713,9 +710,9 @@ public class SpongeSchematic extends BaseSchematic
 
         Vec3i size = readSizeFromTag(wrapperTag); // The validity was already checked in getSpongeVersion()
         DataView metaTag = wrapperTag.getCompound("Metadata");
-        SchematicMetadata metadata = createAndReadMetadata(metaTag, size, spongeVersion);
+        int dataVersion = wrapperTag.getInt("DataVersion");
+        SchematicMetadata metadata = createAndReadMetadata(metaTag, size, spongeVersion, dataVersion);
 
-        metadata.setMinecraftVersion(MinecraftVersion.getOrCreateVersionFromDataVersion(wrapperTag.getInt("DataVersion")));
         metadata.setEntityCount(wrapperTag.getList("Entities", Constants.NBT.TAG_COMPOUND).size());
 
         if (spongeVersion == 1 || spongeVersion == 2)

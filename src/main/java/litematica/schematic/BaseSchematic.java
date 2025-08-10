@@ -89,15 +89,17 @@ public abstract class BaseSchematic implements Schematic
         }
     }
 
-    public static boolean readPaletteFromLitematicaFormatTag(ListData listData, Palette<BlockState> palette)
+    public static boolean readPaletteFromLitematicaFormatTag(ListData listData,
+                                                             Palette<BlockState> palette,
+                                                             int dataVersion)
     {
         final int size = listData.size();
         List<BlockState> list = new ArrayList<>(size);
 
         for (int id = 0; id < size; ++id)
         {
-            CompoundData compound = listData.getCompoundAt(id);
-            BlockState state = BlockUtils.readBlockState(compound);
+            CompoundData blockData = listData.getCompoundAt(id);
+            BlockState state = BlockState.ofData(blockData, dataVersion);
             list.add(state);
         }
 

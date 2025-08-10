@@ -45,9 +45,12 @@ public class VanillaSchematic extends BaseSchematic
         }
 
         Vec3i size = readSizeFromTag(data);
+        this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
+        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
+
         BlockContainer container = new SparseBlockContainer(size);
         Map<BlockPos, CompoundData> blockEntityMap = new HashMap<>();
-        int errorCount = this.readBlocks(data, container, blockEntityMap);
+        int errorCount = this.readBlocks(data, container, blockEntityMap, this.minecraftDataVersion);
 
         if (errorCount > 0)
         {
@@ -64,8 +67,6 @@ public class VanillaSchematic extends BaseSchematic
                                       errorCount, entityList.size());
         }
 
-        this.metadata = createAndReadMetadata(data).orElse(new SchematicMetadata());
-        this.minecraftDataVersion = data.getIntOrDefault("DataVersion", this.metadata.getMinecraftVersion().dataVersion);
         SchematicRegion region = new SchematicRegion(BlockPos.ORIGIN, size, container, blockEntityMap,
                                                      new HashMap<>(), entityList, this.minecraftDataVersion);
 
@@ -99,14 +100,17 @@ public class VanillaSchematic extends BaseSchematic
         return Optional.of(data);
     }
 
-    protected int readBlocks(DataView data, BlockContainer container, Map<BlockPos, CompoundData> blockEntityMapOut)
+    protected int readBlocks(DataView data,
+                             BlockContainer container,
+                             Map<BlockPos, CompoundData> blockEntityMapOut,
+                             int dataVersion)
     {
         int errorCount = 0;
 
         ListData paletteData = data.getList("palette", Constants.NBT.TAG_COMPOUND);
         Palette<BlockState> palette = container.getPalette();
 
-        if (readPaletteFromLitematicaFormatTag(paletteData, palette) == false)
+        if (readPaletteFromLitematicaFormatTag(paletteData, palette, dataVersion) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.vanilla.failed_to_read_palette");
             return -1;
