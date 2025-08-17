@@ -80,7 +80,7 @@ litematica.button.schematic_placements_list.duplicate=Duplicate
 litematica.button.schematic_placements_list.remove=§c-
 litematica.button.schematic_placements_list.save=Save
 litematica.button.schematic_save.save_side=Save Side: %s
-litematica.button.schematic_save.custom_settings=Custom Settings %s
+litematica.button.schematic_save.custom_settings=Custom Save Settings %s
 litematica.button.schematic_save.exposed_blocks_only=Exposed Blocks Only
 litematica.button.schematic_save.from_normal_world=From Normal World
 litematica.button.schematic_save.from_schematic_world=From Schematic World
@@ -631,6 +631,12 @@ litematica.gui.label.schematic_placement.hover.placement_file=§7Placement file:
 
 litematica.gui.label.schematic_projects.currently_open_project=Currently open project: %s
 litematica.gui.label.schematic_projects.version_name=Version name:
+
+litematica.gui.label.schematic_save.from_world=From:
+litematica.gui.label.schematic_save_world.vanilla_only=Vanilla World
+litematica.gui.label.schematic_save_world.schematic_only=Schematic World
+litematica.gui.label.schematic_save_world.vanilla_or_schematic=Vanilla or else Schematic World
+litematica.gui.label.schematic_save_world.schematic_or_vanilla=Schematic or else Vanilla World
 
 litematica.gui.label.schematic_verifier.count=Count
 litematica.gui.label.schematic_verifier.expected=Expected

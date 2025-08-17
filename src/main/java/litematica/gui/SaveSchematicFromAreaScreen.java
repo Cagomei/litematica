@@ -7,6 +7,8 @@ import malilib.config.option.BooleanConfig;
 import malilib.config.option.OptionListConfig;
 import malilib.config.value.BaseOptionListConfigValue;
 import malilib.gui.widget.BooleanEditWidget;
+import malilib.gui.widget.DropDownListWidget;
+import malilib.gui.widget.LabelWidget;
 import malilib.gui.widget.button.BooleanConfigButton;
 import malilib.gui.widget.button.OnOffButton;
 import malilib.gui.widget.button.OptionListConfigButton;
@@ -22,6 +24,7 @@ import litematica.schematic.SchematicSaveSettings;
 import litematica.schematic.SchematicType;
 import litematica.schematic.util.SchematicFileUtils;
 import litematica.selection.AreaSelection;
+import litematica.util.value.SchematicSaveWorldSelection;
 
 public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 {
@@ -31,12 +34,12 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     protected final BooleanConfig customSettingsEnabled = new BooleanConfig("customSettings", false);
     protected final BooleanConfigButton customSettingsButton;
     protected final OptionListConfigButton saveSideButton;
+    protected final LabelWidget worldSelectionLabel;
+    protected final DropDownListWidget<SchematicSaveWorldSelection> worldSelectionDropdown;
     protected final BooleanEditWidget saveBlocksWidget;
     protected final BooleanEditWidget saveBlockEntitiesWidget;
     protected final BooleanEditWidget saveBlockTicksWidget;
     protected final BooleanEditWidget saveEntitiesWidget;
-    protected final BooleanEditWidget fromVanillaWorldWidget;
-    protected final BooleanEditWidget fromSchematicWorldWidget;
     protected final BooleanEditWidget exposedBlocksOnlyWidget;
 
     public SaveSchematicFromAreaScreen(AreaSelection selection)
@@ -59,9 +62,12 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         this.saveBlockEntitiesWidget  = new BooleanEditWidget(14, this.settings.saveBlockEntities,       "litematica.button.schematic_save.save_block_entities");
         this.saveBlockTicksWidget     = new BooleanEditWidget(14, this.settings.saveScheduledBlockTicks, "litematica.button.schematic_save.save_block_ticks");
         this.saveEntitiesWidget       = new BooleanEditWidget(14, this.settings.saveEntities,            "litematica.button.schematic_save.save_entities");
-        this.fromVanillaWorldWidget   = new BooleanEditWidget(14, this.settings.saveFromVanillaWorld,    "litematica.button.schematic_save.from_normal_world");
-        this.fromSchematicWorldWidget = new BooleanEditWidget(14, this.settings.saveFromSchematicWorld,  "litematica.button.schematic_save.from_schematic_world");
         this.exposedBlocksOnlyWidget  = new BooleanEditWidget(14, this.settings.exposedBlocksOnly,       "litematica.button.schematic_save.exposed_blocks_only");
+
+        this.worldSelectionLabel = new LabelWidget("litematica.gui.label.schematic_save.from_world");
+        this.worldSelectionDropdown = new DropDownListWidget<>(14, 10, SchematicSaveWorldSelection.VALUES, SchematicSaveWorldSelection::getDisplayName);
+        this.worldSelectionDropdown.setSelectedEntry(SchematicSaveWorldSelection.VANILLA_ONLY);
+        this.worldSelectionDropdown.setMaxWidth(180); // TODO the dropdown widget hover overflow render does not account for going over the screen edge
 
         this.customSettingsEnabled.setValueChangeCallback((n, o) -> this.onCustomSettingsToggled());
 
@@ -78,6 +84,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
             hoverKey = "litematica.hover.button.schematic_save.save_side.info";
         }
 
+        this.saveSideButton.setHoverInfoRequiresShift(true);
         this.saveSideButton.translateAndAddHoverString(hoverKey);
 
         this.addPreScreenCloseListener(this::saveSettings);
@@ -102,8 +109,8 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
             this.addWidget(this.saveBlockTicksWidget);
             this.addWidget(this.saveEntitiesWidget);
             this.addWidget(this.exposedBlocksOnlyWidget);
-            this.addWidget(this.fromVanillaWorldWidget);
-            this.addWidget(this.fromSchematicWorldWidget);
+            this.addWidget(this.worldSelectionLabel);
+            this.addWidget(this.worldSelectionDropdown);
         }
     }
 
@@ -128,9 +135,9 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
             this.saveBlockTicksWidget.setPosition(x, this.saveBlockEntitiesWidget.getBottom() + gap);
             this.saveEntitiesWidget.setPosition(x, this.saveBlockTicksWidget.getBottom() + gap);
             this.exposedBlocksOnlyWidget.setPosition(x, this.saveEntitiesWidget.getBottom() + gap);
-            this.fromVanillaWorldWidget.setPosition(x, this.exposedBlocksOnlyWidget.getBottom() + gap);
-            this.fromSchematicWorldWidget.setPosition(x, this.fromVanillaWorldWidget.getBottom() + gap);
-            this.schematicInfoWidget.setY(this.fromSchematicWorldWidget.getBottom() + 4);
+            this.worldSelectionLabel.setPosition(x, this.exposedBlocksOnlyWidget.getBottom() + 3);
+            this.worldSelectionDropdown.setPosition(x, this.worldSelectionLabel.getBottom());
+            this.schematicInfoWidget.setY(this.worldSelectionDropdown.getBottom() + 4);
             this.schematicInfoWidget.setHeight(this.getListHeight() - (this.schematicInfoWidget.getY() - this.getListY()));
         }
         else
@@ -145,19 +152,26 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     {
         boolean overwrite = isShiftDown();
         Path file = this.getSchematicFileIfCanSave(overwrite);
+        SchematicType schematicType = this.schematicTypeDropdown.getSelectedEntry();
 
-        if (file == null)
+        if (file == null || schematicType == null)
         {
             return;
         }
 
-        SchematicType schematicType = this.schematicTypeDropdown.getSelectedEntry();
-        SchematicSaveSettings settings = this.customSettingsEnabled.getBooleanValue() ? this.settings : new SchematicSaveSettings();
+        SchematicSaveSettings effectiveSettings;
 
-        if (schematicType != null)
+        if (this.customSettingsEnabled.getBooleanValue())
         {
-            settings.schematicType = schematicType;
+            effectiveSettings = this.settings.copy();
+            effectiveSettings.worldSelection.setValue(this.worldSelectionDropdown.getSelectedEntry());
         }
+        else
+        {
+            effectiveSettings = new SchematicSaveSettings();
+        }
+
+        effectiveSettings.schematicType = schematicType;
 
         SaveSide side = this.saveSide.getValue();
         boolean supportsServerSideSaving = false; // TODO
@@ -165,11 +179,11 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         if (GameWrap.isSinglePlayer() == false &&
             (side == SaveSide.SERVER || (side == SaveSide.AUTO && supportsServerSideSaving)))
         {
-            this.saveSchematicOnServer(settings, file, overwrite);
+            this.saveSchematicOnServer(effectiveSettings, file, overwrite);
         }
         else
         {
-            this.saveSchematicOnClient(settings, file, overwrite);
+            this.saveSchematicOnClient(effectiveSettings, file, overwrite);
         }
     }
 
