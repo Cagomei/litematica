@@ -58,6 +58,8 @@ public class SpongeSchematic extends BaseSchematic
             return this.readFromTag_v3(data, version);
         }
 
+        MessageDispatcher.error("litematica.message.error.schematic_read.unknown_schematic_version", version, 3);
+
         return false;
     }
 

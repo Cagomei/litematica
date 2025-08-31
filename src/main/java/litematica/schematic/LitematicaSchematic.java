@@ -54,7 +54,8 @@ public class LitematicaSchematic extends BaseSchematic
 
         if (version == 0 || version > CURRENT_SCHEMATIC_VERSION)
         {
-            MessageDispatcher.warning("litematica.error.schematic_read.unknown_schematic_version", version);
+            MessageDispatcher.warning("litematica.error.schematic_read.unknown_schematic_version",
+                                      version, CURRENT_SCHEMATIC_VERSION);
         }
 
         if (this.minecraftDataVersion > CURRENT_MINECRAFT_DATA_VERSION)
