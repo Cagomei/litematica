@@ -153,23 +153,23 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         return newContainer;
     }
 
-    public static SpongeBlockStateConverterResults convertVarIntByteArrayToPackedLongArray(Vec3i size,
-                                                                                           int entryWidthBits,
-                                                                                           byte[] blockStates)
+    public static BlockStateConverterResults convertVarIntByteArrayToPackedLongArray(Vec3i size,
+                                                                                     int entryWidthBits,
+                                                                                     byte[] blockStates)
     {
-        int volume = size.getX() * size.getY() * size.getZ();
+        long volume = (long) size.getX() * size.getY() * size.getZ();
         TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
         ByteBuf buf = Unpooled.wrappedBuffer(blockStates);
         long[] blockCounts = new long[1 << entryWidthBits];
 
-        for (int i = 0; i < volume; ++i)
+        for (long i = 0; i < volume; ++i)
         {
             int id = ByteBufUtils.readVarInt(buf);
             bitArray.setAt(i, id);
             ++blockCounts[id];
         }
 
-        return new SpongeBlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
+        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
     }
 
     public static ArrayBlockContainer of(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
@@ -197,6 +197,7 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         int entryWidthBits = getRequiredBitWidth(paletteSize);
         ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, null);
         //container.palette = createPalette(bits, container);
+
         return container;
     }
 
@@ -205,25 +206,26 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         int entryWidthBits = getRequiredBitWidth(paletteSize);
         ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, blockStates);
         //container.palette = createPalette(bits, container);
+
         return container;
     }
 
     public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize, byte[] blockData)
     {
         int entryWidthBits = getRequiredBitWidth(paletteSize);
-        SpongeBlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(size, entryWidthBits, blockData);
+        BlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(size, entryWidthBits, blockData);
         ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
         //container.palette = createPalette(bits, container);
         container.setBlockCounts(results.blockCounts);
         return container;
     }
 
-    public static class SpongeBlockStateConverterResults
+    public static class BlockStateConverterResults
     {
         public final long[] backingArray;
         public final long[] blockCounts;
 
-        protected SpongeBlockStateConverterResults(long[] backingArray, long[] blockCounts)
+        protected BlockStateConverterResults(long[] backingArray, long[] blockCounts)
         {
             this.backingArray = backingArray;
             this.blockCounts = blockCounts;
