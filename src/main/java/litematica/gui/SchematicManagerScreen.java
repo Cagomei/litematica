@@ -309,11 +309,13 @@ public class SchematicManagerScreen extends BaseSchematicBrowserScreen
         {
             LoadedSchematic loadedSchematic = opt.get();
 
+            /*
             if (loadedSchematic.schematic.getType().getHasName() == false)
             {
                 MessageDispatcher.error("litematica.message.error.schematic_manager.schematic_type_has_no_name");
                 return;
             }
+            */
 
             String oldName = loadedSchematic.schematic.getMetadata().getSchematicName();
             String title = "litematica.title.screen.schematic_manager.rename_schematic";

@@ -197,8 +197,6 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         SimpleDateFormat dateFormat = createDateFormat();
         List<StyledTextLine> lines = new ArrayList<>();
 
-        // TODO Add a line for the SchematicType
-
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_NAME.getBooleanValue() && meta.getSchematicName().length() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.name");
@@ -226,6 +224,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue() &&
+            this.currentInfo.schematicType.getSupportsMultipleRegions() &&
             meta.getRegionCount() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.region_count", meta.getRegionCount());
@@ -233,13 +232,13 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_ENTITY_COUNT.getBooleanValue())
         {
-            String str = meta.getEntityCount() >= 0 ? String.valueOf(meta.getEntityCount()) : "???";
+            String str = meta.getEntityCount() >= 0 ? getDisplayStringForPossiblyEmptyLongValue(meta.getEntityCount()) : "???";
             StyledTextLine.translate(lines, "litematica.label.schematic_info.entity_count", str);
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_BLOCK_ENTITY_COUNT.getBooleanValue())
         {
-            String str = meta.getBlockEntityCount() >= 0 ? String.valueOf(meta.getBlockEntityCount()) : "???";
+            String str = meta.getBlockEntityCount() >= 0 ? getDisplayStringForPossiblyEmptyLongValue(meta.getBlockEntityCount()) : "???";
             StyledTextLine.translate(lines, "litematica.label.schematic_info.block_entity_count", str);
         }
 
@@ -255,12 +254,14 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         {
             if (showTotalBlocks)
             {
-                StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks", meta.getTotalBlocks());
+                StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks",
+                                         getDisplayStringForPossiblyEmptyLongValue(meta.getTotalBlocks()));
             }
 
             if (showVolume)
             {
-                StyledTextLine.translate(lines, "litematica.label.schematic_info.total_volume", meta.getTotalVolume());
+                StyledTextLine.translate(lines, "litematica.label.schematic_info.total_volume",
+                                         getDisplayStringForPossiblyEmptyLongValue(meta.getTotalVolume()));
             }
 
             if (showEnclosingSize)
@@ -274,7 +275,8 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
             if (showVolume || showTotalBlocks)
             {
                 StyledTextLine.translate(lines, "litematica.label.schematic_info.total_blocks_and_volume",
-                                         meta.getTotalBlocks(), meta.getTotalVolume());
+                                         getDisplayStringForPossiblyEmptyLongValue(meta.getTotalBlocks()),
+                                         getDisplayStringForPossiblyEmptyLongValue(meta.getTotalVolume()));
             }
 
             if (showEnclosingSize)
@@ -362,6 +364,16 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
 
         this.infoTextLabel.setLines(lines);
+    }
+
+    public static String getDisplayStringForPossiblyEmptyLongValue(long value)
+    {
+        if (value == 0)
+        {
+            return "-";
+        }
+
+        return String.format("%,d", value);
     }
 
     public static SimpleDateFormat createDateFormat()

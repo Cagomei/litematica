@@ -29,6 +29,7 @@ public class SchematicType
         .setDataValidator(LitematicaSchematic::isValidData)
         .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setSupportsMultipleRegions(true)
         .setHasName(true)
         .build();
 
@@ -41,7 +42,6 @@ public class SchematicType
         .setDataValidator(SchematicaSchematic::isValidData)
         .setExtension(SchematicaSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(SchematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
-        .setHasName(true)
         .build();
 
     public static final SchematicType SPONGE = SchematicType.builder()
@@ -53,7 +53,6 @@ public class SchematicType
         .setDataValidator(SpongeSchematic::isValidData)
         .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext))
-        .setHasName(true)
         .build();
 
     public static final SchematicType VANILLA = SchematicType.builder()
@@ -82,6 +81,7 @@ public class SchematicType
     private final Function<String, Boolean> extensionValidator;
     private final Function<DataView, Boolean> dataValidator;
     private final String translationKey;
+    private final boolean supportsMultipleRegions;
     private final boolean hasName;
 
     private SchematicType(String translationKey,
@@ -92,6 +92,7 @@ public class SchematicType
                           Function<DataView, Boolean> dataValidator,
                           String extension,
                           Function<String, Boolean> extensionValidator,
+                          boolean supportsMultipleRegions,
                           boolean hasName)
     {
         this.translationKey = translationKey;
@@ -102,6 +103,7 @@ public class SchematicType
         this.metadataFromDataFactory = metadataFromDataFactory;
         this.extensionValidator = extensionValidator;
         this.dataValidator = dataValidator;
+        this.supportsMultipleRegions = supportsMultipleRegions;
         this.hasName = hasName;
     }
 
@@ -113,6 +115,11 @@ public class SchematicType
     public String getDisplayName()
     {
         return StringUtils.translate(this.translationKey);
+    }
+
+    public boolean getSupportsMultipleRegions()
+    {
+        return this.supportsMultipleRegions;
     }
 
     public boolean getHasName()
@@ -234,7 +241,8 @@ public class SchematicType
         private Function<String, Boolean> extensionValidator;
         private Function<DataView, Boolean> dataValidator;
         private String displayName = "?";
-        private boolean hasName = false;
+        private boolean supportsMultipleRegions;
+        private boolean hasName;
 
         public SchematicType.Builder setDataValidator(Function<DataView, Boolean> dataValidator)
         {
@@ -284,6 +292,12 @@ public class SchematicType
             return this;
         }
 
+        public SchematicType.Builder setSupportsMultipleRegions(boolean supportsMultipleRegions)
+        {
+            this.supportsMultipleRegions = supportsMultipleRegions;
+            return this;
+        }
+
         public SchematicType.Builder setHasName(boolean hasName)
         {
             this.hasName = hasName;
@@ -312,6 +326,7 @@ public class SchematicType
                                      this.dataValidator,
                                      this.extension,
                                      this.extensionValidator,
+                                     this.supportsMultipleRegions,
                                      this.hasName);
         }
     }
