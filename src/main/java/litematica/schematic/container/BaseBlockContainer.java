@@ -8,6 +8,7 @@ import malilib.util.data.palette.Palette;
 import malilib.util.data.palette.PaletteResizeHandler;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
+import litematica.util.PositionUtils;
 
 public abstract class BaseBlockContainer implements BlockContainer
 {
@@ -32,7 +33,7 @@ public abstract class BaseBlockContainer implements BlockContainer
 
     protected BaseBlockContainer(Vec3i size, int entryWidthBits)
     {
-        this.size = size;
+        this.size = PositionUtils.getAbsoluteSize(size);
         this.sizeX = size.getX();
         this.sizeY = size.getY();
         this.sizeZ = size.getZ();
