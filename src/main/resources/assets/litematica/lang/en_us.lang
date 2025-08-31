@@ -549,7 +549,10 @@ litematica.error.schematic_read.litematica.version_0=Apparent version 0 schemati
 litematica.error.schematic_read.load_failed=Failed to load the schematic from file §e'%s'§r
 litematica.error.schematic_read.no_file_set=Failed to load the schematic from file, no file known (in-memory-only schematic?)
 litematica.error.schematic_read.no_version=The schematic doesn't have version information. It may be loaded incorrectly!
+litematica.error.schematic_read.palette_read_failed=Failed to read the block state palette
+litematica.error.schematic_read.structurize.invalid_block_data_array=Invalid block data array (length: §6%s§r)
 litematica.error.schematic_read.unknown_schematic_version=Unknown (future?) schematic version §b%d§r. It may be loaded incorrectly!
+litematica.error.schematic_write.block_write_failed=Failed to write the block data
 #litematica.error.schematic_read.unsupported_type=Unknown or unsupported file type for §e'%s'§r
 
 litematica.error.schematic_write.file_exists=Failed to write the schematic to file '§e%s§r', file already exists
@@ -776,6 +779,7 @@ litematica.warning.area_editor.area_rendering_disabled=Note: The Area Selection 
 litematica.schematic.type.litematica=Litematica
 litematica.schematic.type.schematica=Schematica/MCEdit
 litematica.schematic.type.sponge=Sponge
+litematica.schematic.type.structurize=Structurize
 litematica.schematic.type.vanilla=Vanilla Structure
 
 litematica.config_group.comment.hotkey.open_screen=Open Screen Hotkeys

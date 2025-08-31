@@ -64,10 +64,21 @@ public class SchematicType
         .setDataValidator(VanillaSchematic::isValidData)
         .setExtension(VanillaSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(VanillaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .build();
+
+    public static final SchematicType STRUCTURIZE = SchematicType.builder()
+        .setTranslationKey("litematica.schematic.type.structurize")
+        .setBlockContainerFactory(StructurizeSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(StructurizeSchematic::fromData)
+        .setSchematicFromRegionsFactory(StructurizeSchematic::fromRegions)
+        .setMetadataFromDataFactory(StructurizeSchematic::createAndReadMetadata)
+        .setDataValidator(StructurizeSchematic::isValidData)
+        .setExtension(StructurizeSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator(StructurizeSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
         .setHasName(true)
         .build();
 
-    public static ImmutableList<SchematicType> KNOWN_TYPES = ImmutableList.of(LITEMATICA, SCHEMATICA, SPONGE, VANILLA);
+    public static ImmutableList<SchematicType> KNOWN_TYPES = ImmutableList.of(LITEMATICA, SPONGE, SCHEMATICA, VANILLA, STRUCTURIZE);
 
     public static final Predicate<Path> SCHEMATIC_FILE_FILTER = p -> Files.isRegularFile(p) &&
                                                                      Files.isReadable(p) &&

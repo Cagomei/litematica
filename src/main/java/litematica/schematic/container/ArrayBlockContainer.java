@@ -1,5 +1,6 @@
 package litematica.schematic.container;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -172,6 +173,64 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
     }
 
+    public static BlockStateConverterResults convertIntArrayOfShortsToPackedLongArray(Vec3i size,
+                                                                                     int entryWidthBits,
+                                                                                     int[] blockStates)
+    {
+        long volume = (long) size.getX() * size.getY() * size.getZ();
+        TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
+        long[] blockCounts = new long[1 << entryWidthBits];
+        long bitArrayIndex = 0;
+
+        for (int val : blockStates)
+        {
+            int id = (val >> 16) & 0xFFFF;
+            bitArray.setAt(bitArrayIndex, id);
+            ++blockCounts[id];
+
+            id = val & 0xFFFF;
+            bitArray.setAt(bitArrayIndex + 1, id);
+            ++blockCounts[id];
+
+            bitArrayIndex += 2;
+        }
+
+        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
+    }
+
+    public static Optional<int[]> convertToIntArrayOfShorts(ArrayBlockContainer container)
+    {
+        TightLongBackedBitArray storage = container.storage;
+        final long totalVolume = container.totalVolume;
+        long arrayLength = (long) Math.ceil(totalVolume / 2.0);
+
+        if (arrayLength > Integer.MAX_VALUE)
+        {
+            return Optional.empty();
+        }
+
+        int[] arr = new int[(int) arrayLength];
+        // Handle the higher and lower shorts for one array index at once, so only loop up to the last even entry
+        long totalVolumeModulo = totalVolume & ~0x1;
+        long index = 0;
+        int arrIndex = 0;
+
+        while (index < totalVolumeModulo)
+        {
+            arr[arrIndex] = (storage.getAt(index) << 16) | storage.getAt(index + 1);
+            index += 2;
+            arrIndex += 1;
+        }
+
+        // The last value, if the total volume is odd
+        if ((totalVolume & 0x1) != 0)
+        {
+            arr[arrIndex] = (storage.getAt(index) << 16);
+        }
+
+        return Optional.of(arr);
+    }
+
     public static ArrayBlockContainer of(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
     {
         try
@@ -217,6 +276,18 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
         //container.palette = createPalette(bits, container);
         container.setBlockCounts(results.blockCounts);
+
+        return container;
+    }
+
+    public static ArrayBlockContainer createContainerIntArrayShortData(Vec3i size, int paletteSize, int[] blockData)
+    {
+        int entryWidthBits = getRequiredBitWidth(paletteSize);
+        BlockStateConverterResults results = convertIntArrayOfShortsToPackedLongArray(size, entryWidthBits, blockData);
+        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
+        //container.palette = createPalette(bits, container);
+        container.setBlockCounts(results.blockCounts);
+
         return container;
     }
 
