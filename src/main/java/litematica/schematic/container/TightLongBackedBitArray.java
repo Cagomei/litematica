@@ -18,19 +18,26 @@ public class TightLongBackedBitArray
     /** Number of entries in this bit array (<b>not</b> the length of the long array that backs the bit array) */
     protected final long arraySize;
 
-    public TightLongBackedBitArray(int bitsPerEntry, long arraySize)
+    public TightLongBackedBitArray(int bitsPerEntry, long arraySize) throws IndexOutOfBoundsException
     {
         this(bitsPerEntry, arraySize, null);
     }
 
     public TightLongBackedBitArray(int bitsPerEntry, long arraySize, @Nullable long[] array) throws IndexOutOfBoundsException
     {
-        bitsPerEntry = Math.max(1, Math.min(64, bitsPerEntry));
+        bitsPerEntry = Math.max(1, Math.min(32, bitsPerEntry));
 
         this.arraySize = arraySize;
         this.bitsPerEntry = bitsPerEntry;
         this.maxEntryValue = (1L << bitsPerEntry) - 1L;
-        int requiredArrayLength = (int) (MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L);
+        long requiredArrayLengthLong = MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L;
+
+        if (requiredArrayLengthLong > Integer.MAX_VALUE)
+        {
+            throw new IndexOutOfBoundsException("Required array length (" + requiredArrayLengthLong + ") is larger than max int value");
+        }
+
+        int requiredArrayLength = (int) requiredArrayLengthLong;
 
         if (array != null)
         {
