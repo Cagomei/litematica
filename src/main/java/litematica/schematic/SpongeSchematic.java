@@ -66,7 +66,6 @@ public class SpongeSchematic extends BaseSchematic
     @Override
     public Optional<CompoundData> write()
     {
-        CompoundData data = new CompoundData();
         int regionCount = this.regions.size();
 
         if (regionCount != 1)
@@ -79,19 +78,20 @@ public class SpongeSchematic extends BaseSchematic
         this.metadata.setSchematicVersion(version);
 
         SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
-        ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();
+        ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();   // FIXME refactor to get rid of cast
+        CompoundData rootTag = new CompoundData();
         boolean success = false;
 
         if (version == 3)
         {
-            success = this.write_v3(data, region, container, version);
+            success = this.write_v3(rootTag, region, container, version);
         }
         else if (version == 1 || version == 2)
         {
-            success = this.write_v1_2(data, region, container, version);
+            success = this.write_v1_2(rootTag, region, container, version);
         }
 
-        return success ? Optional.of(data) : Optional.empty();
+        return success ? Optional.of(rootTag) : Optional.empty();
     }
 
     public static boolean isValidData(DataView data)
@@ -551,7 +551,7 @@ public class SpongeSchematic extends BaseSchematic
         return tag;
     }
 
-    protected static void writeBlockEntitiesToTag_v1_2(Map<BlockPos, CompoundData> blockEntityMap, CompoundData tag, int version)
+    protected static void writeBlockEntitiesToTag_v1_2(Map<BlockPos, CompoundData> blockEntityMap, CompoundData rootTag, int version)
     {
         String tagName = version == 1 ? "TileEntities" : "BlockEntities";
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
@@ -573,10 +573,10 @@ public class SpongeSchematic extends BaseSchematic
             listData.add(beTag);
         }
 
-        tag.put(tagName, listData);
+        rootTag.put(tagName, listData);
     }
 
-    protected static void writeBlockEntitiesToTag_v3(Map<BlockPos, CompoundData> blockEntityMap, CompoundData tag)
+    protected static void writeBlockEntitiesToTag_v3(Map<BlockPos, CompoundData> blockEntityMap, CompoundData dataTag)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -592,10 +592,10 @@ public class SpongeSchematic extends BaseSchematic
             listData.add(beTag);
         }
 
-        tag.put("BlockEntities", listData);
+        dataTag.put("BlockEntities", listData);
     }
 
-    protected static void writeEntitiesToTag_v1_2(List<EntityData> entityList, CompoundData tag, int version)
+    protected static void writeEntitiesToTag_v1_2(List<EntityData> entityList, CompoundData rootTag, int version)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -616,10 +616,10 @@ public class SpongeSchematic extends BaseSchematic
             listData.add(entityData);
         }
 
-        tag.put("Entities", listData);
+        rootTag.put("Entities", listData);
     }
 
-    protected static void writeEntitiesToTag_v3(List<EntityData> entityList, CompoundData tag)
+    protected static void writeEntitiesToTag_v3(List<EntityData> entityList, CompoundData dataTag)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -635,7 +635,7 @@ public class SpongeSchematic extends BaseSchematic
             listData.add(entityData);
         }
 
-        tag.put("Entities", listData);
+        dataTag.put("Entities", listData);
     }
 
     protected void writeSizeAndVersions(CompoundData dataTag, Vec3i size, int version)
@@ -648,29 +648,29 @@ public class SpongeSchematic extends BaseSchematic
         dataTag.putInt("DataVersion", this.minecraftDataVersion);
     }
 
-    public boolean write_v1_2(CompoundData dataTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v1_2(CompoundData rootTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
     {
         Vec3i size = PositionUtils.getAbsoluteSize(region.getSize());
-        writeMetadataToTag(dataTag, this.originalMetadataTag, this.metadata);
-        this.writeSizeAndVersions(dataTag, size, version);
+        writeMetadataToTag(rootTag, this.originalMetadataTag, this.metadata);
+        this.writeSizeAndVersions(rootTag, size, version);
 
-        dataTag.putInt("PaletteMax", blockContainer.getPalette().getSize() - 1);
+        rootTag.putInt("PaletteMax", blockContainer.getPalette().getSize() - 1);
 
-        if (writeBlockDataToTag(blockContainer, dataTag, version) == false)
+        if (writeBlockDataToTag(blockContainer, rootTag, version) == false)
         {
             return false;
         }
 
-        writeBlockEntitiesToTag_v1_2(region.getBlockEntityMap(), dataTag, version);
-        writeEntitiesToTag_v1_2(region.getEntityList(), dataTag, version);
+        writeBlockEntitiesToTag_v1_2(region.getBlockEntityMap(), rootTag, version);
+        writeEntitiesToTag_v1_2(region.getEntityList(), rootTag, version);
 
         return true;
     }
 
-    public boolean write_v3(CompoundData data, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v3(CompoundData rootTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
     {
         CompoundData dataTag = new CompoundData();
-        data.put("Schematic", dataTag);
+        rootTag.put("Schematic", dataTag);
 
         Vec3i size = region.getSize();
         writeMetadataToTag(dataTag, this.originalMetadataTag, this.metadata);
@@ -690,41 +690,41 @@ public class SpongeSchematic extends BaseSchematic
         return true;
     }
 
-    public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)
+    public static Optional<SchematicMetadata> createAndReadMetadata(DataView rootTag)
     {
-        int spongeVersion = getSpongeVersion(data);
+        int spongeVersion = getSpongeVersion(rootTag);
 
         if (spongeVersion <= 0)
         {
             return Optional.empty();
         }
 
-        DataView wrapperTag = data;
+        DataView dataTag = rootTag;
 
         if (spongeVersion == 3)
         {
-            wrapperTag = data.getCompound("Schematic");
+            dataTag = rootTag.getCompound("Schematic");
         }
-        else if (spongeVersion != 1 && spongeVersion != 2)
+        else if (spongeVersion < 1 || spongeVersion > 2)
         {
             return Optional.empty();
         }
 
-        Vec3i size = readSizeFromTag(wrapperTag); // The validity was already checked in getSpongeVersion()
-        DataView metaTag = wrapperTag.getCompound("Metadata");
-        int dataVersion = wrapperTag.getInt("DataVersion");
+        Vec3i size = readSizeFromTag(dataTag); // The validity was already checked in getSpongeVersion()
+        DataView metaTag = dataTag.getCompound("Metadata");
+        int dataVersion = dataTag.getInt("DataVersion");
         SchematicMetadata metadata = createAndReadMetadata(metaTag, size, spongeVersion, dataVersion);
 
-        metadata.setEntityCount(wrapperTag.getList("Entities", Constants.NBT.TAG_COMPOUND).size());
+        metadata.setEntityCount(dataTag.getList("Entities", Constants.NBT.TAG_COMPOUND).size());
 
         if (spongeVersion == 1 || spongeVersion == 2)
         {
             String beTagName = spongeVersion == 1 ? "TileEntities" : "BlockEntities";
-            metadata.setBlockEntityCount(wrapperTag.getList(beTagName, Constants.NBT.TAG_COMPOUND).size());
+            metadata.setBlockEntityCount(dataTag.getList(beTagName, Constants.NBT.TAG_COMPOUND).size());
         }
         else if (spongeVersion == 3)
         {
-            metadata.setBlockEntityCount(wrapperTag.getCompound("Blocks").getList("BlockEntities", Constants.NBT.TAG_COMPOUND).size());
+            metadata.setBlockEntityCount(dataTag.getCompound("Blocks").getList("BlockEntities", Constants.NBT.TAG_COMPOUND).size());
         }
 
         return Optional.of(metadata);
