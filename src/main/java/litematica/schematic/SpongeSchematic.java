@@ -78,17 +78,16 @@ public class SpongeSchematic extends BaseSchematic
         this.metadata.setSchematicVersion(version);
 
         SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
-        ArrayBlockContainer container = (ArrayBlockContainer) region.getBlockContainer();   // FIXME refactor to get rid of cast
         CompoundData rootTag = new CompoundData();
         boolean success = false;
 
         if (version == 3)
         {
-            success = this.write_v3(rootTag, region, container, version);
+            success = this.write_v3(rootTag, region, version);
         }
         else if (version == 1 || version == 2)
         {
-            success = this.write_v1_2(rootTag, region, container, version);
+            success = this.write_v1_2(rootTag, region, version);
         }
 
         return success ? Optional.of(rootTag) : Optional.empty();
@@ -487,9 +486,15 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     // Note that the tag passed in will be a nested tag in v3
-    protected static boolean writeBlockDataToTag(ArrayBlockContainer blockContainer, CompoundData tag, int version)
+    protected static boolean writeBlockDataToTag(BlockContainer blockContainer, CompoundData tag, int version)
     {
-        byte[] blockData = convertBitArrayToVarIntByteArray(blockContainer);
+        // FIXME refactor to get rid of cast
+        if ((blockContainer instanceof ArrayBlockContainer) == false)
+        {
+            return false;
+        }
+
+        byte[] blockData = convertBitArrayToVarIntByteArray((ArrayBlockContainer) blockContainer);
 
         if (blockData == null)
         {
@@ -648,8 +653,9 @@ public class SpongeSchematic extends BaseSchematic
         dataTag.putInt("DataVersion", this.minecraftDataVersion);
     }
 
-    public boolean write_v1_2(CompoundData rootTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v1_2(CompoundData rootTag, SchematicRegion region, int version)
     {
+        BlockContainer blockContainer = region.getBlockContainer();
         Vec3i size = PositionUtils.getAbsoluteSize(region.getSize());
         writeMetadataToTag(rootTag, this.originalMetadataTag, this.metadata);
         this.writeSizeAndVersions(rootTag, size, version);
@@ -667,7 +673,7 @@ public class SpongeSchematic extends BaseSchematic
         return true;
     }
 
-    public boolean write_v3(CompoundData rootTag, SchematicRegion region, ArrayBlockContainer blockContainer, int version)
+    public boolean write_v3(CompoundData rootTag, SchematicRegion region, int version)
     {
         CompoundData dataTag = new CompoundData();
         rootTag.put("Schematic", dataTag);
@@ -678,7 +684,7 @@ public class SpongeSchematic extends BaseSchematic
 
         CompoundData blockTag = new CompoundData();
 
-        if (writeBlockDataToTag(blockContainer, blockTag, version) == false)
+        if (writeBlockDataToTag(region.getBlockContainer(), blockTag, version) == false)
         {
             return false;
         }
