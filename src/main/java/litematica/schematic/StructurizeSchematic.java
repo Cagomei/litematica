@@ -18,8 +18,11 @@ import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
+import litematica.schematic.container.AlignedLongBackedIntArray;
 import litematica.schematic.container.ArrayBlockContainer;
+import litematica.schematic.container.ArrayBlockContainer.BlockStateConverterResults;
 import litematica.schematic.container.BlockContainer;
+import litematica.schematic.container.PackedIntArray;
 import litematica.schematic.data.EntityData;
 import litematica.util.PositionUtils;
 
@@ -240,7 +243,7 @@ public class StructurizeSchematic extends BaseSchematic
             return null;
         }
 
-        ArrayBlockContainer container = ArrayBlockContainer.createContainerIntArrayShortData(size, paletteSize, blockDataArray);
+        ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockDataArray);
 
         if (container == null)
         {
@@ -259,7 +262,7 @@ public class StructurizeSchematic extends BaseSchematic
 
     protected boolean write_v1(CompoundData data, SchematicRegion region, ArrayBlockContainer container, int version)
     {
-        Optional<int[]> blockDataOpt = ArrayBlockContainer.convertToIntArrayOfShorts(container);
+        Optional<int[]> blockDataOpt = convertToIntArrayOfShorts(container);
 
         if (blockDataOpt.isPresent() == false)
         {
@@ -342,6 +345,76 @@ public class StructurizeSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return new ArrayBlockContainer(containerSize);
+        return new ArrayBlockContainer(containerSize, 8);
+    }
+
+    public static Optional<int[]> convertToIntArrayOfShorts(ArrayBlockContainer container)
+    {
+        PackedIntArray storage = container.getIntStorage();
+        final long totalVolume = container.getTotalVolume();
+        long arrayLength = (long) Math.ceil(totalVolume / 2.0);
+
+        if (arrayLength > Integer.MAX_VALUE)
+        {
+            return Optional.empty();
+        }
+
+        int[] arr = new int[(int) arrayLength];
+        // Handle the higher and lower shorts for one array index at once, so only loop up to the last even entry
+        long totalVolumeModulo = totalVolume & ~0x1;
+        long index = 0;
+        int arrIndex = 0;
+
+        while (index < totalVolumeModulo)
+        {
+            arr[arrIndex] = (storage.getAt(index) << 16) | storage.getAt(index + 1);
+            index += 2;
+            arrIndex += 1;
+        }
+
+        // The last value, if the total volume is odd
+        if ((totalVolume & 0x1) != 0)
+        {
+            arr[arrIndex] = (storage.getAt(index) << 16);
+        }
+
+        return Optional.of(arr);
+    }
+
+    public static BlockStateConverterResults convertIntArrayOfShortsToPackedLongArray(long volume,
+                                                                                      int entryWidthBits,
+                                                                                      int[] blockStates)
+    {
+        AlignedLongBackedIntArray bitArray = new AlignedLongBackedIntArray(entryWidthBits, volume);
+        long[] blockCounts = new long[1 << entryWidthBits];
+        long bitArrayIndex = 0;
+
+        for (int val : blockStates)
+        {
+            int id = (val >> 16) & 0xFFFF;
+            bitArray.setAt(bitArrayIndex, id);
+            ++blockCounts[id];
+
+            id = val & 0xFFFF;
+            bitArray.setAt(bitArrayIndex + 1, id);
+            ++blockCounts[id];
+
+            bitArrayIndex += 2;
+        }
+
+        return new ArrayBlockContainer.BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
+    }
+
+    public static ArrayBlockContainer createContainerFromData(Vec3i size, int paletteSize, int[] blockData)
+    {
+        int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
+        long volume = PositionUtils.getAreaVolume(size);
+        BlockStateConverterResults results = convertIntArrayOfShortsToPackedLongArray(volume, entryWidthBits, blockData);
+        AlignedLongBackedIntArray storage = new AlignedLongBackedIntArray(entryWidthBits, volume, results.backingArray);
+        ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
+        //container.palette = createPalette(bits, container);
+        container.setBlockCounts(results.blockCounts);
+
+        return container;
     }
 }

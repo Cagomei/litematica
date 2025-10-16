@@ -214,7 +214,7 @@ public class PositionUtils
 
     public static long getAreaVolume(Vec3i size)
     {
-        return (long) size.getX() * (long) size.getY() * (long) size.getZ();
+        return (long) Math.abs(size.getX()) * Math.abs(size.getY()) * Math.abs(size.getZ());
     }
 
     public static Vec3i getEnclosingAreaSizeOfBoxes(Collection<? extends CornerDefinedBox> boxes)

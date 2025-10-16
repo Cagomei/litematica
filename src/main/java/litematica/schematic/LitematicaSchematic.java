@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 
 import malilib.overlay.message.MessageDispatcher;
@@ -21,6 +22,7 @@ import malilib.util.position.Vec3i;
 import malilib.util.world.ScheduledBlockTickData;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
+import litematica.schematic.container.TightLongBackedIntArray;
 import litematica.schematic.data.EntityData;
 import litematica.util.PositionUtils;
 
@@ -175,7 +177,7 @@ public class LitematicaSchematic extends BaseSchematic
             }
 
             int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
-            ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockDataArray);
+            ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockDataArray);
 
             /*
             if (container == null)
@@ -294,6 +296,27 @@ public class LitematicaSchematic extends BaseSchematic
         return errorCount;
     }
 
+    @Nullable
+    public static long[] getAsTightLongBackedArray(BlockContainer container)
+    {
+        if (container instanceof ArrayBlockContainer)
+        {
+            ArrayBlockContainer arrayContainer = (ArrayBlockContainer) container;
+
+            if (arrayContainer.getIntStorage() instanceof TightLongBackedIntArray)
+            {
+                return ((TightLongBackedIntArray) arrayContainer.getIntStorage()).getBackingLongArray();
+            }
+        }
+
+        int bits = ArrayBlockContainer.getRequiredBitWidth(container.getPalette().getSize());
+        TightLongBackedIntArray storage = new TightLongBackedIntArray(bits, container.getTotalVolume());
+        ArrayBlockContainer arrayContainer = new ArrayBlockContainer(container.getSize(), storage);
+        BaseSchematic.copyContainerContents(container, arrayContainer);
+
+        return storage.getBackingLongArray();
+    }
+
     protected boolean writeRegions(CompoundData data)
     {
         if (this.getRegions().isEmpty())
@@ -309,18 +332,6 @@ public class LitematicaSchematic extends BaseSchematic
             String regionName = entry.getKey();
             SchematicRegion region = entry.getValue();
             BlockContainer container = region.getBlockContainer();
-            ArrayBlockContainer arrayBlockContainer;
-
-            if (container instanceof ArrayBlockContainer)
-            {
-                arrayBlockContainer = (ArrayBlockContainer) container;
-            }
-            else
-            {
-                // TODO convert the container
-                MessageDispatcher.error("TODO: Convert the BlockContainer into an ArrayBlockContainer for serialization");
-                return false;
-            }
 
             Map<BlockPos, CompoundData> blockEntityMap = region.getBlockEntityMap();
             Map<BlockPos, ScheduledBlockTickData> blockTicksMap = region.getBlockTickMap();
@@ -330,7 +341,7 @@ public class LitematicaSchematic extends BaseSchematic
 
             regionTag.putInt("DataVersion", region.getMinecraftDataVersion());
             regionTag.put("BlockStatePalette", writePaletteToLitematicaFormatTag(container.getPalette()));
-            regionTag.put("BlockStates", new LongArrayData(arrayBlockContainer.getBackingLongArray()));
+            regionTag.put("BlockStates", new LongArrayData(getAsTightLongBackedArray(container)));
 
             if (blockEntityMap.isEmpty() == false)
             {
@@ -393,7 +404,8 @@ public class LitematicaSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return new ArrayBlockContainer(containerSize);
+        TightLongBackedIntArray storage = new TightLongBackedIntArray(2, PositionUtils.getAreaVolume(containerSize));
+        return new ArrayBlockContainer(containerSize, storage);
     }
 
     public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)
@@ -468,5 +480,16 @@ public class LitematicaSchematic extends BaseSchematic
         schematic.metadata.setSchematicVersion(CURRENT_SCHEMATIC_VERSION);
 
         return Optional.of(schematic);
+    }
+
+    public static ArrayBlockContainer createContainerFromData(Vec3i size, int paletteSize, @Nullable long[] blockStates)
+    {
+        int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
+        long volume = PositionUtils.getAreaVolume(size);
+        TightLongBackedIntArray storage = new TightLongBackedIntArray(entryWidthBits, volume, blockStates);
+        ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
+        //container.palette = createPalette(bits, container);
+
+        return container;
     }
 }

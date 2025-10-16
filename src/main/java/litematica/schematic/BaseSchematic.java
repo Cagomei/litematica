@@ -20,7 +20,9 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
+import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
+import litematica.schematic.container.SparseBlockContainer;
 import litematica.schematic.data.EntityData;
 
 public abstract class BaseSchematic implements Schematic
@@ -69,6 +71,64 @@ public abstract class BaseSchematic implements Schematic
     }
 
     public static void copyContainerContents(BlockContainer from, BlockContainer to)
+    {
+        if ((from instanceof ArrayBlockContainer) && (to instanceof ArrayBlockContainer))
+        {
+            copyContainerContentsArrayToArray((ArrayBlockContainer) from, (ArrayBlockContainer) to);
+        }
+        else if ((from instanceof ArrayBlockContainer) && (to instanceof SparseBlockContainer))
+        {
+            copyContainerContentsArrayToSparse((ArrayBlockContainer) from, (SparseBlockContainer) to);
+        }
+        else if ((from instanceof SparseBlockContainer) && (to instanceof ArrayBlockContainer))
+        {
+            copyContainerContentsSparseToArray((SparseBlockContainer) from, (ArrayBlockContainer) to);
+        }
+    }
+
+    public static void copyContainerContentsArrayToArray(ArrayBlockContainer from, ArrayBlockContainer to)
+    {
+        Vec3i sizeFrom = from.getSize();
+        Vec3i sizeTo = to.getSize();
+        final int sizeX = Math.min(sizeFrom.getX(), sizeTo.getX());
+        final int sizeY = Math.min(sizeFrom.getY(), sizeTo.getY());
+        final int sizeZ = Math.min(sizeFrom.getZ(), sizeTo.getZ());
+
+        for (int y = 0; y < sizeY; ++y)
+        {
+            for (int z = 0; z < sizeZ; ++z)
+            {
+                for (int x = 0; x < sizeX; ++x)
+                {
+                    BlockState state = from.getBlockState(x, y, z);
+                    to.setBlockState(x, y, z, state);
+                }
+            }
+        }
+    }
+
+    public static void copyContainerContentsSparseToArray(SparseBlockContainer from, ArrayBlockContainer to)
+    {
+        Vec3i sizeFrom = from.getSize();
+        Vec3i sizeTo = to.getSize();
+        final int sizeX = Math.min(sizeFrom.getX(), sizeTo.getX());
+        final int sizeY = Math.min(sizeFrom.getY(), sizeTo.getY());
+        final int sizeZ = Math.min(sizeFrom.getZ(), sizeTo.getZ());
+
+        for (int y = 0; y < sizeY; ++y)
+        {
+            for (int z = 0; z < sizeZ; ++z)
+            {
+                for (int x = 0; x < sizeX; ++x)
+                {
+                    BlockState state = from.getBlockState(x, y, z);
+                    to.setBlockState(x, y, z, state);
+                }
+            }
+        }
+    }
+
+    public static void copyContainerContentsArrayToSparse(ArrayBlockContainer from, SparseBlockContainer to)
     {
         Vec3i sizeFrom = from.getSize();
         Vec3i sizeTo = to.getSize();

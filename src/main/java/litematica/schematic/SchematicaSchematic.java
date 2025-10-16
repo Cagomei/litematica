@@ -122,7 +122,8 @@ public class SchematicaSchematic extends BaseSchematic
     {
         Int2ObjectOpenHashMap<BlockState> mapping = this.readInitialBlockMapping(data);
         int safePaletteSize = mapping.size() * 16;  // Max 16 metadata values per block
-        ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, safePaletteSize);
+        int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(safePaletteSize);
+        ArrayBlockContainer container = new ArrayBlockContainer(size, entryWidthBits);
 
         this.readBlocksFromTag(data, size, container, mapping);
 
@@ -548,7 +549,7 @@ public class SchematicaSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return new ArrayBlockContainer(containerSize);
+        return new ArrayBlockContainer(containerSize, 8);
     }
 
     public static Optional<SchematicMetadata> createAndReadMetadata(DataView data)

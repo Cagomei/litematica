@@ -14,7 +14,12 @@ public interface BlockContainer
     Vec3i getSize();
 
     /**
-     * @return the total number of non-air blocks
+     * @return the total volume of this container
+     */
+    long getTotalVolume();
+
+    /**
+     * @return the total number of non-air blocks currently stored in this container
      */
     long getTotalBlockCount();
 

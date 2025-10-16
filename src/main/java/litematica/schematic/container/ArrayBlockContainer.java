@@ -1,12 +1,5 @@
 package litematica.schematic.container;
 
-import java.util.Optional;
-import javax.annotation.Nullable;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
-import malilib.overlay.message.MessageDispatcher;
-import malilib.util.ByteBufUtils;
 import malilib.util.data.palette.Palette;
 import malilib.util.data.palette.PaletteResizeHandler;
 import malilib.util.position.Vec3i;
@@ -14,49 +7,32 @@ import malilib.util.world.BlockState;
 
 public class ArrayBlockContainer extends BaseBlockContainer implements PaletteResizeHandler<BlockState>
 {
-    protected TightLongBackedBitArray storage;
+    protected PackedIntArray storage;
     protected boolean checkForFreedIds = true;
 
-    public ArrayBlockContainer(Vec3i size)
-    {
-        this(size, true);
-    }
-
-    public ArrayBlockContainer(Vec3i size, boolean checkForFreedIds)
-    {
-        this(size, 2, null);
-
-        this.checkForFreedIds = checkForFreedIds;
-    }
-
-    protected ArrayBlockContainer(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
+    public ArrayBlockContainer(Vec3i size, int entryWidthBits)
     {
         super(size, entryWidthBits);
 
-        this.setBackingArray(backingLongArray);
+        this.storage = new AlignedLongBackedIntArray(entryWidthBits, this.totalVolume);
+    }
+
+    public ArrayBlockContainer(Vec3i size, PackedIntArray storage)
+    {
+        super(size, storage.getEntryBitWidth());
+
+        this.storage = storage;
     }
 
     @Override
     protected void setEntryWidthBits(int entryWidthBits)
     {
-        entryWidthBits = Math.max(2, entryWidthBits);
+        entryWidthBits = Math.max(MINIMUM_ENTRY_WIDTH, entryWidthBits);
 
         if (entryWidthBits != this.entryWidthBits)
         {
             this.entryWidthBits = entryWidthBits;
             this.palette = createPalette(entryWidthBits, this);
-        }
-    }
-
-    protected void setBackingArray(@Nullable long[] backingLongArray) throws IndexOutOfBoundsException
-    {
-        if (backingLongArray != null)
-        {
-            this.storage = new TightLongBackedBitArray(this.entryWidthBits, this.totalVolume, backingLongArray);
-        }
-        else
-        {
-            this.storage = new TightLongBackedBitArray(this.entryWidthBits, this.totalVolume);
         }
     }
 
@@ -100,8 +76,8 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
             }
         }
 
-        TightLongBackedBitArray oldArray = this.storage;
-        TightLongBackedBitArray newArray = new TightLongBackedBitArray(bits, this.totalVolume);
+        PackedIntArray oldArray = this.storage;
+        PackedIntArray newArray = this.storage.createNewArray(bits, this.totalVolume);
 
         // This creates the new palette with the increased size
         this.setEntryWidthBits(bits);
@@ -125,14 +101,9 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         return ((long) y * this.sizeLayer) + (long) z * (long) this.sizeX + (long) x;
     }
 
-    public TightLongBackedBitArray getBitArray()
+    public PackedIntArray getIntStorage()
     {
         return this.storage;
-    }
-
-    public long[] getBackingLongArray()
-    {
-        return this.storage.getBackingLongArray();
     }
 
     @Override
@@ -146,149 +117,17 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
     }
 
     @Override
-    public BlockContainer copy()
+    public ArrayBlockContainer copy()
     {
-        ArrayBlockContainer newContainer = ArrayBlockContainer.of(this.size, this.entryWidthBits, this.storage.getBackingLongArray().clone());
+        ArrayBlockContainer newContainer = new ArrayBlockContainer(this.size, this.storage.copy());
         newContainer.palette = this.palette.copy(newContainer);
 
         return newContainer;
     }
 
-    public static BlockStateConverterResults convertVarIntByteArrayToPackedLongArray(Vec3i size,
-                                                                                     int entryWidthBits,
-                                                                                     byte[] blockStates)
-    {
-        long volume = (long) size.getX() * size.getY() * size.getZ();
-        TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
-        ByteBuf buf = Unpooled.wrappedBuffer(blockStates);
-        long[] blockCounts = new long[1 << entryWidthBits];
-
-        for (long i = 0; i < volume; ++i)
-        {
-            int id = ByteBufUtils.readVarInt(buf);
-            bitArray.setAt(i, id);
-            ++blockCounts[id];
-        }
-
-        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
-    }
-
-    public static BlockStateConverterResults convertIntArrayOfShortsToPackedLongArray(Vec3i size,
-                                                                                     int entryWidthBits,
-                                                                                     int[] blockStates)
-    {
-        long volume = (long) size.getX() * size.getY() * size.getZ();
-        TightLongBackedBitArray bitArray = new TightLongBackedBitArray(entryWidthBits, volume);
-        long[] blockCounts = new long[1 << entryWidthBits];
-        long bitArrayIndex = 0;
-
-        for (int val : blockStates)
-        {
-            int id = (val >> 16) & 0xFFFF;
-            bitArray.setAt(bitArrayIndex, id);
-            ++blockCounts[id];
-
-            id = val & 0xFFFF;
-            bitArray.setAt(bitArrayIndex + 1, id);
-            ++blockCounts[id];
-
-            bitArrayIndex += 2;
-        }
-
-        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
-    }
-
-    public static Optional<int[]> convertToIntArrayOfShorts(ArrayBlockContainer container)
-    {
-        TightLongBackedBitArray storage = container.storage;
-        final long totalVolume = container.totalVolume;
-        long arrayLength = (long) Math.ceil(totalVolume / 2.0);
-
-        if (arrayLength > Integer.MAX_VALUE)
-        {
-            return Optional.empty();
-        }
-
-        int[] arr = new int[(int) arrayLength];
-        // Handle the higher and lower shorts for one array index at once, so only loop up to the last even entry
-        long totalVolumeModulo = totalVolume & ~0x1;
-        long index = 0;
-        int arrIndex = 0;
-
-        while (index < totalVolumeModulo)
-        {
-            arr[arrIndex] = (storage.getAt(index) << 16) | storage.getAt(index + 1);
-            index += 2;
-            arrIndex += 1;
-        }
-
-        // The last value, if the total volume is odd
-        if ((totalVolume & 0x1) != 0)
-        {
-            arr[arrIndex] = (storage.getAt(index) << 16);
-        }
-
-        return Optional.of(arr);
-    }
-
-    public static ArrayBlockContainer of(Vec3i size, int entryWidthBits, @Nullable long[] backingLongArray)
-    {
-        try
-        {
-            return new ArrayBlockContainer(size, entryWidthBits, backingLongArray);
-        }
-        catch (Exception e)
-        {
-            MessageDispatcher.error("litematica.message.error.schematic_container.invalid_array_length",
-                                    backingLongArray != null ? backingLongArray.length : "<null>");
-        }
-
-        return new ArrayBlockContainer(size, entryWidthBits, null);
-    }
-
     public static int getRequiredBitWidth(int paletteSize)
     {
-        return Math.max(2, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
-    }
-
-    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize)
-    {
-        int entryWidthBits = getRequiredBitWidth(paletteSize);
-        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, null);
-        //container.palette = createPalette(bits, container);
-
-        return container;
-    }
-
-    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize, @Nullable long[] blockStates)
-    {
-        int entryWidthBits = getRequiredBitWidth(paletteSize);
-        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, blockStates);
-        //container.palette = createPalette(bits, container);
-
-        return container;
-    }
-
-    public static ArrayBlockContainer createContainer(Vec3i size, int paletteSize, byte[] blockData)
-    {
-        int entryWidthBits = getRequiredBitWidth(paletteSize);
-        BlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(size, entryWidthBits, blockData);
-        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
-        //container.palette = createPalette(bits, container);
-        container.setBlockCounts(results.blockCounts);
-
-        return container;
-    }
-
-    public static ArrayBlockContainer createContainerIntArrayShortData(Vec3i size, int paletteSize, int[] blockData)
-    {
-        int entryWidthBits = getRequiredBitWidth(paletteSize);
-        BlockStateConverterResults results = convertIntArrayOfShortsToPackedLongArray(size, entryWidthBits, blockData);
-        ArrayBlockContainer container = ArrayBlockContainer.of(size, entryWidthBits, results.backingArray);
-        //container.palette = createPalette(bits, container);
-        container.setBlockCounts(results.blockCounts);
-
-        return container;
+        return Math.max(MINIMUM_ENTRY_WIDTH, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
     }
 
     public static class BlockStateConverterResults
@@ -296,7 +135,7 @@ public class ArrayBlockContainer extends BaseBlockContainer implements PaletteRe
         public final long[] backingArray;
         public final long[] blockCounts;
 
-        protected BlockStateConverterResults(long[] backingArray, long[] blockCounts)
+        public BlockStateConverterResults(long[] backingArray, long[] blockCounts)
         {
             this.backingArray = backingArray;
             this.blockCounts = blockCounts;

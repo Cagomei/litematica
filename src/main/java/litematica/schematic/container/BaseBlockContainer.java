@@ -13,6 +13,8 @@ import litematica.util.PositionUtils;
 public abstract class BaseBlockContainer implements BlockContainer
 {
     public static final BlockState AIR_BLOCK_STATE = BlockState.AIR;
+
+    public static final int MINIMUM_ENTRY_WIDTH = 2;
     protected static final int MAX_BITS_LINEAR = 4;
 
     protected Palette<BlockState> palette;
@@ -28,15 +30,15 @@ public abstract class BaseBlockContainer implements BlockContainer
 
     public BaseBlockContainer(Vec3i size)
     {
-        this(size, 2);
+        this(size, MINIMUM_ENTRY_WIDTH);
     }
 
     protected BaseBlockContainer(Vec3i size, int entryWidthBits)
     {
         this.size = PositionUtils.getAbsoluteSize(size);
-        this.sizeX = size.getX();
-        this.sizeY = size.getY();
-        this.sizeZ = size.getZ();
+        this.sizeX = this.size.getX();
+        this.sizeY = this.size.getY();
+        this.sizeZ = this.size.getZ();
         this.totalVolume = (long) this.sizeX * (long) this.sizeY * (long) this.sizeZ;
         this.sizeLayer = (long) this.sizeX * (long) this.sizeZ;
 
@@ -47,6 +49,12 @@ public abstract class BaseBlockContainer implements BlockContainer
     public Vec3i getSize()
     {
         return this.size;
+    }
+
+    @Override
+    public long getTotalVolume()
+    {
+        return this.totalVolume;
     }
 
     @Override
@@ -99,7 +107,7 @@ public abstract class BaseBlockContainer implements BlockContainer
         return map;
     }
 
-    protected void setBlockCounts(long[] blockCounts)
+    public void setBlockCounts(long[] blockCounts)
     {
         final int length = blockCounts.length;
 
@@ -116,8 +124,6 @@ public abstract class BaseBlockContainer implements BlockContainer
     {
         this.entryWidthBits = bitsIn;
     }
-
-    protected abstract void calculateBlockCountsIfNeeded();
 
     public static Palette<BlockState> createPalette(int entryWidthBits, PaletteResizeHandler<BlockState> resizeHandler)
     {
@@ -137,4 +143,6 @@ public abstract class BaseBlockContainer implements BlockContainer
 
         return palette;
     }
+
+    protected abstract void calculateBlockCountsIfNeeded();
 }

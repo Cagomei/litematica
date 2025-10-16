@@ -25,9 +25,12 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
+import litematica.schematic.container.AlignedLongBackedIntArray;
 import litematica.schematic.container.ArrayBlockContainer;
+import litematica.schematic.container.ArrayBlockContainer.BlockStateConverterResults;
 import litematica.schematic.container.BlockContainer;
-import litematica.schematic.container.TightLongBackedBitArray;
+import litematica.schematic.container.PackedIntArray;
+import litematica.schematic.container.TightLongBackedIntArray;
 import litematica.schematic.data.EntityData;
 import litematica.util.PositionUtils;
 
@@ -291,7 +294,7 @@ public class SpongeSchematic extends BaseSchematic
         byte[] blockData = data.getByteArray("BlockData");
         int paletteSize = paletteTag.size();
 
-        ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
+        ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockData);
 
         if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
@@ -309,7 +312,7 @@ public class SpongeSchematic extends BaseSchematic
         byte[] blockData = data.getByteArray("Data");
         int paletteSize = paletteTag.size();
 
-        ArrayBlockContainer container = ArrayBlockContainer.createContainer(size, paletteSize, blockData);
+        ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockData);
 
         if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
@@ -485,41 +488,10 @@ public class SpongeSchematic extends BaseSchematic
         tag.put("Metadata", metaTag);
     }
 
-    // Note that the tag passed in will be a nested tag in v3
-    protected static boolean writeBlockDataToTag(BlockContainer blockContainer, CompoundData tag, int version)
-    {
-        // FIXME refactor to get rid of cast
-        if ((blockContainer instanceof ArrayBlockContainer) == false)
-        {
-            return false;
-        }
-
-        byte[] blockData = convertBitArrayToVarIntByteArray((ArrayBlockContainer) blockContainer);
-
-        if (blockData == null)
-        {
-            return false;
-        }
-
-        CompoundData paletteTag = writePaletteToTag(blockContainer.getPalette().getMapping());
-        tag.put("Palette", paletteTag);
-
-        if (version < 3)
-        {
-            tag.putByteArray("BlockData", blockData);
-        }
-        else
-        {
-            tag.putByteArray("Data", blockData);
-        }
-
-        return true;
-    }
-
     @Nullable
-    public static byte[] convertBitArrayToVarIntByteArray(ArrayBlockContainer container)
+    public static byte[] convertPackedIntArrayToVarIntByteArray(ArrayBlockContainer container)
     {
-        TightLongBackedBitArray bitArray = container.getBitArray();
+        PackedIntArray bitArray = container.getIntStorage();
         final int entrySize = ByteBufUtils.getVarIntSize(container.getPalette().getSize() - 1);
         final long volume = bitArray.size();
         final long length = entrySize * volume;
@@ -540,6 +512,48 @@ public class SpongeSchematic extends BaseSchematic
         }
 
         return arr;
+    }
+
+    @Nullable
+    public static byte[] getAsSpongeVarIntByteArray(BlockContainer container)
+    {
+        if (container instanceof ArrayBlockContainer)
+        {
+            ArrayBlockContainer arrayContainer = (ArrayBlockContainer) container;
+            return convertPackedIntArrayToVarIntByteArray(arrayContainer);
+        }
+
+        int bits = ArrayBlockContainer.getRequiredBitWidth(container.getPalette().getSize());
+        AlignedLongBackedIntArray storage = new AlignedLongBackedIntArray(bits, container.getTotalVolume());
+        ArrayBlockContainer arrayContainer = new ArrayBlockContainer(container.getSize(), storage);
+        BaseSchematic.copyContainerContents(container, arrayContainer);
+
+        return convertPackedIntArrayToVarIntByteArray(arrayContainer);
+    }
+
+    // Note that the tag passed in will be a nested tag in v3
+    protected static boolean writeBlockDataToTag(BlockContainer blockContainer, CompoundData tag, int version)
+    {
+        byte[] blockData = getAsSpongeVarIntByteArray(blockContainer);
+
+        if (blockData == null)
+        {
+            return false;
+        }
+
+        CompoundData paletteTag = writePaletteToTag(blockContainer.getPalette().getMapping());
+        tag.put("Palette", paletteTag);
+
+        if (version < 3)
+        {
+            tag.putByteArray("BlockData", blockData);
+        }
+        else
+        {
+            tag.putByteArray("Data", blockData);
+        }
+
+        return true;
     }
 
     protected static CompoundData writePaletteToTag(List<BlockState> mapping)
@@ -770,6 +784,37 @@ public class SpongeSchematic extends BaseSchematic
 
     public static BlockContainer createDefaultBlockContainer(Vec3i containerSize)
     {
-        return new ArrayBlockContainer(containerSize);
+        return new ArrayBlockContainer(containerSize, 8);
+    }
+
+    public static BlockStateConverterResults convertVarIntByteArrayToPackedLongArray(long volume,
+                                                                                     int entryWidthBits,
+                                                                                     byte[] blockStates)
+    {
+        TightLongBackedIntArray bitArray = new TightLongBackedIntArray(entryWidthBits, volume);
+        ByteBuf buf = Unpooled.wrappedBuffer(blockStates);
+        long[] blockCounts = new long[1 << entryWidthBits];
+
+        for (long i = 0; i < volume; ++i)
+        {
+            int id = ByteBufUtils.readVarInt(buf);
+            bitArray.setAt(i, id);
+            ++blockCounts[id];
+        }
+
+        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
+    }
+
+    public static ArrayBlockContainer createContainerFromData(Vec3i size, int paletteSize, byte[] blockData)
+    {
+        int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
+        long volume = PositionUtils.getAreaVolume(size);
+        BlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(volume, entryWidthBits, blockData);
+        AlignedLongBackedIntArray storage = new AlignedLongBackedIntArray(entryWidthBits, volume, results.backingArray);
+        ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
+        //container.palette = createPalette(bits, container);
+        container.setBlockCounts(results.blockCounts);
+
+        return container;
     }
 }
