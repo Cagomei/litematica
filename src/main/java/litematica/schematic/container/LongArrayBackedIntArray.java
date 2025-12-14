@@ -45,9 +45,11 @@ public abstract class LongArrayBackedIntArray implements PackedIntArray
 
         if (array != null)
         {
-            if (array.length < requiredArrayLength)
+            if (array.length != requiredArrayLength)
             {
-                throw new IndexOutOfBoundsException("Provided array length (" + array.length + ") is less than the required length " + requiredArrayLength);
+                String str = String.format("Provided array length (%d) does not match the required length (%d)",
+                                           array.length, requiredArrayLength);
+                throw new IndexOutOfBoundsException(str);
             }
 
             this.longArray = array;

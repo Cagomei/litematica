@@ -20,6 +20,7 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.ScheduledBlockTickData;
+import litematica.Litematica;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.container.TightLongBackedIntArray;
@@ -179,13 +180,11 @@ public class LitematicaSchematic extends BaseSchematic
             int dataVersion = regionTag.getIntOrDefault("DataVersion", mainDataVersion);
             ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockDataArray);
 
-            /*
             if (container == null)
             {
                 MessageDispatcher.error("litematica.error.schematic_read.litematica.region_container", regionName);
                 continue;
             }
-            */
 
             if (readPaletteFromLitematicaFormatTag(paletteTag, container.getPalette(), dataVersion) == false)
             {
@@ -486,10 +485,18 @@ public class LitematicaSchematic extends BaseSchematic
     {
         int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
         long volume = PositionUtils.getAreaVolume(size);
-        TightLongBackedIntArray storage = new TightLongBackedIntArray(entryWidthBits, volume, blockStates);
-        ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
-        //container.palette = createPalette(bits, container);
 
-        return container;
+        try
+        {
+            TightLongBackedIntArray storage = new TightLongBackedIntArray(entryWidthBits, volume, blockStates);
+            return new ArrayBlockContainer(size, storage);
+            //container.palette = createPalette(bits, container);
+        }
+        catch (Exception e)
+        {
+            Litematica.LOGGER.error("LitematicaSchematic#createContainerFromData: volume: {}, entryWidthBits: {}, blockStates.length: {}",
+                                    volume, entryWidthBits, blockStates.length);
+            return null;
+        }
     }
 }
