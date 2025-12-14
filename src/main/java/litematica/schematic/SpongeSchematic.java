@@ -532,7 +532,7 @@ public class SpongeSchematic extends BaseSchematic
     }
 
     // Note that the tag passed in will be a nested tag in v3
-    protected static boolean writeBlockDataToTag(BlockContainer blockContainer, CompoundData tag, int version)
+    protected boolean writeBlockDataToTag(BlockContainer blockContainer, CompoundData tag, int version)
     {
         byte[] blockData = getAsSpongeVarIntByteArray(blockContainer);
 
@@ -541,7 +541,7 @@ public class SpongeSchematic extends BaseSchematic
             return false;
         }
 
-        CompoundData paletteTag = writePaletteToTag(blockContainer.getPalette().getMapping());
+        CompoundData paletteTag = writeSpongePaletteToTag(blockContainer.getPalette().getMapping());
         tag.put("Palette", paletteTag);
 
         if (version < 3)
@@ -556,7 +556,7 @@ public class SpongeSchematic extends BaseSchematic
         return true;
     }
 
-    protected static CompoundData writePaletteToTag(List<BlockState> mapping)
+    public static CompoundData writeSpongePaletteToTag(List<BlockState> mapping)
     {
         final int size = mapping.size();
         CompoundData tag = new CompoundData();
@@ -570,7 +570,7 @@ public class SpongeSchematic extends BaseSchematic
         return tag;
     }
 
-    protected static void writeBlockEntitiesToTag_v1_2(Map<BlockPos, CompoundData> blockEntityMap, CompoundData rootTag, int version)
+    protected void writeBlockEntitiesToTag_v1_2(Map<BlockPos, CompoundData> blockEntityMap, CompoundData rootTag, int version)
     {
         String tagName = version == 1 ? "TileEntities" : "BlockEntities";
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
@@ -595,7 +595,7 @@ public class SpongeSchematic extends BaseSchematic
         rootTag.put(tagName, listData);
     }
 
-    protected static void writeBlockEntitiesToTag_v3(Map<BlockPos, CompoundData> blockEntityMap, CompoundData dataTag)
+    protected void writeBlockEntitiesToTag_v3(Map<BlockPos, CompoundData> blockEntityMap, CompoundData dataTag)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -614,7 +614,7 @@ public class SpongeSchematic extends BaseSchematic
         dataTag.put("BlockEntities", listData);
     }
 
-    protected static void writeEntitiesToTag_v1_2(List<EntityData> entityList, CompoundData rootTag, int version)
+    protected void writeEntitiesToTag_v1_2(List<EntityData> entityList, CompoundData rootTag, int version)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -638,7 +638,7 @@ public class SpongeSchematic extends BaseSchematic
         rootTag.put("Entities", listData);
     }
 
-    protected static void writeEntitiesToTag_v3(List<EntityData> entityList, CompoundData dataTag)
+    protected void writeEntitiesToTag_v3(List<EntityData> entityList, CompoundData dataTag)
     {
         ListData listData = new ListData(Constants.NBT.TAG_COMPOUND);
 
@@ -676,13 +676,13 @@ public class SpongeSchematic extends BaseSchematic
 
         rootTag.putInt("PaletteMax", blockContainer.getPalette().getSize() - 1);
 
-        if (writeBlockDataToTag(blockContainer, rootTag, version) == false)
+        if (this.writeBlockDataToTag(blockContainer, rootTag, version) == false)
         {
             return false;
         }
 
-        writeBlockEntitiesToTag_v1_2(region.getBlockEntityMap(), rootTag, version);
-        writeEntitiesToTag_v1_2(region.getEntityList(), rootTag, version);
+        this.writeBlockEntitiesToTag_v1_2(region.getBlockEntityMap(), rootTag, version);
+        this.writeEntitiesToTag_v1_2(region.getEntityList(), rootTag, version);
 
         return true;
     }
@@ -698,14 +698,15 @@ public class SpongeSchematic extends BaseSchematic
 
         CompoundData blockTag = new CompoundData();
 
-        if (writeBlockDataToTag(region.getBlockContainer(), blockTag, version) == false)
+        if (this.writeBlockDataToTag(region.getBlockContainer(), blockTag, version) == false)
         {
             return false;
         }
 
+        this.writeBlockEntitiesToTag_v3(region.getBlockEntityMap(), blockTag);
+        this.writeEntitiesToTag_v3(region.getEntityList(), dataTag);
+
         dataTag.put("Blocks", blockTag);
-        writeBlockEntitiesToTag_v3(region.getBlockEntityMap(), blockTag);
-        writeEntitiesToTag_v3(region.getEntityList(), dataTag);
 
         return true;
     }
