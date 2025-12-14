@@ -50,10 +50,10 @@ public class SchematicTypeIcons
 
     protected void registerBuiltin()
     {
-        this.register(SchematicType.LITEMATICA, LitematicaIcons.SCHEMATIC_LITEMATIC, LitematicaIcons.SCHEMATIC_IN_MEMORY_LITEMATIC);
-        this.register(SchematicType.SPONGE, LitematicaIcons.SCHEMATIC_SPONGE, LitematicaIcons.SCHEMATIC_IN_MEMORY_SPONGE);
-        this.register(SchematicType.SCHEMATICA, LitematicaIcons.SCHEMATIC_SCHEMATICA, LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA);
+        this.register(SchematicType.LITEMATICA,  LitematicaIcons.SCHEMATIC_LITEMATIC,   LitematicaIcons.SCHEMATIC_IN_MEMORY_LITEMATIC);
+        this.register(SchematicType.SPONGE,      LitematicaIcons.SCHEMATIC_SPONGE,      LitematicaIcons.SCHEMATIC_IN_MEMORY_SPONGE);
+        this.register(SchematicType.SCHEMATICA,  LitematicaIcons.SCHEMATIC_SCHEMATICA,  LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA);
         this.register(SchematicType.STRUCTURIZE, LitematicaIcons.SCHEMATIC_STRUCTURIZE, LitematicaIcons.SCHEMATIC_IN_MEMORY_STRUCTURIZE);
-        this.register(SchematicType.VANILLA, LitematicaIcons.SCHEMATIC_VANILLA, LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA);
+        this.register(SchematicType.VANILLA,     LitematicaIcons.SCHEMATIC_VANILLA,     LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA);
     }
 }
