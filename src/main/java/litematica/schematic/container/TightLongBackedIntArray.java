@@ -2,6 +2,8 @@ package litematica.schematic.container;
 
 import javax.annotation.Nullable;
 
+import malilib.util.MathUtils;
+
 public class TightLongBackedIntArray extends LongArrayBackedIntArray
 {
     public TightLongBackedIntArray(int bitsPerEntry, long arraySize) throws IndexOutOfBoundsException
@@ -12,6 +14,12 @@ public class TightLongBackedIntArray extends LongArrayBackedIntArray
     public TightLongBackedIntArray(int bitsPerEntry, long arraySize, @Nullable long[] array) throws IndexOutOfBoundsException
     {
         super(bitsPerEntry, arraySize, array);
+    }
+
+    @Override
+    protected long getRequiredArrayLength(int bitsPerEntry, long arraySize)
+    {
+        return MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L;
     }
 
     @Override

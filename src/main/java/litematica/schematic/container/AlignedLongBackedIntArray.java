@@ -19,12 +19,19 @@ public class AlignedLongBackedIntArray extends LongArrayBackedIntArray
     }
 
     @Override
+    protected long getRequiredArrayLength(int bitsPerEntry, long arraySize)
+    {
+        int valuesPerArrayElement = 64 / bitsPerEntry;
+        return (long) Math.ceil((double) arraySize / (double) valuesPerArrayElement);
+    }
+
+    @Override
     public int getAt(long index)
     {
         int arrayIndex = (int) (index / this.valuesPerArrayElement);
-        int indexWithinLongValue = (int) (index - arrayIndex * this.valuesPerArrayElement);
 
         long arrayValue = this.longArray[arrayIndex];
+        int indexWithinLongValue = (int) (index - arrayIndex * this.valuesPerArrayElement);
         int value = (int) ((arrayValue >> (indexWithinLongValue * this.bitsPerEntry)) & this.maxEntryValue);
 
         return value;
@@ -34,9 +41,9 @@ public class AlignedLongBackedIntArray extends LongArrayBackedIntArray
     public void setAt(long index, int value)
     {
         int arrayIndex = (int) (index / this.valuesPerArrayElement);
-        int indexWithinLongValue = (int) (index - arrayIndex * this.valuesPerArrayElement);
 
         long arrayValue = this.longArray[arrayIndex];
+        int indexWithinLongValue = (int) (index - arrayIndex * this.valuesPerArrayElement);
         int shiftAmount = indexWithinLongValue * this.bitsPerEntry;
         arrayValue &= ~((long) this.maxEntryValue << shiftAmount);
         arrayValue |= ((long) (value & this.maxEntryValue) << shiftAmount);

@@ -2,8 +2,6 @@ package litematica.schematic.container;
 
 import javax.annotation.Nullable;
 
-import malilib.util.MathUtils;
-
 public abstract class LongArrayBackedIntArray implements PackedIntArray
 {
     /** The long array that is used to store the data for this BitArray. */
@@ -35,7 +33,8 @@ public abstract class LongArrayBackedIntArray implements PackedIntArray
         this.arraySize = arraySize;
         this.bitsPerEntry = bitsPerEntry;
         this.maxEntryValue = (1 << bitsPerEntry) - 1;
-        long requiredArrayLengthLong = MathUtils.roundUp(arraySize * bitsPerEntry, 64L) / 64L;
+
+        long requiredArrayLengthLong = this.getRequiredArrayLength(bitsPerEntry, arraySize);
 
         if (requiredArrayLengthLong > Integer.MAX_VALUE)
         {
@@ -48,7 +47,7 @@ public abstract class LongArrayBackedIntArray implements PackedIntArray
         {
             if (array.length < requiredArrayLength)
             {
-                throw new IndexOutOfBoundsException("Provided array length (" + array.length + ") is less than the required length" + requiredArrayLength);
+                throw new IndexOutOfBoundsException("Provided array length (" + array.length + ") is less than the required length " + requiredArrayLength);
             }
 
             this.longArray = array;
@@ -58,6 +57,8 @@ public abstract class LongArrayBackedIntArray implements PackedIntArray
             this.longArray = new long[requiredArrayLength];
         }
     }
+
+    protected abstract long getRequiredArrayLength(int bitsPerEntry, long arraySize);
 
     @Override
     public long size()
