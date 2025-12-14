@@ -52,7 +52,7 @@ public class SchematicType
         .setMetadataFromDataFactory(SpongeSchematic::createAndReadMetadata)
         .setDataValidator(SpongeSchematic::isValidData)
         .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
-        .setExtensionValidator((ext) -> SpongeSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext) || SchematicaSchematic.FILE_NAME_EXTENSION.equalsIgnoreCase(ext))
+        .setExtensionValidator(SpongeSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
         .build();
 
     public static final SchematicType VANILLA = SchematicType.builder()
