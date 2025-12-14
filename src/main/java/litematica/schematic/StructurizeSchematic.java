@@ -415,7 +415,7 @@ public class StructurizeSchematic extends BaseSchematic
         catch (Exception e)
         {
             MessageDispatcher.error().console(e).translate("litematica.message.error.schematic_convert.copy_block_data_failed");
-            Litematica.LOGGER.error("SructurizeSchematic#convertIntArrayOfShortsToPackedLongArray: volume: {}, entryWidthBits: {}, blockStates.length: {}, new backing array length: {}",
+            Litematica.LOGGER.error("StructurizeSchematic#convertIntArrayOfShortsToPackedLongArray: volume: {}, entryWidthBits: {}, blockStates.length: {}, new backing array length: {}",
                                     volume, entryWidthBits, blockStates.length, intArray.getBackingLongArray().length);
             return null;
         }

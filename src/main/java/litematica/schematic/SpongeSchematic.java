@@ -25,12 +25,12 @@ import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3d;
 import malilib.util.position.Vec3i;
 import malilib.util.world.BlockState;
+import litematica.Litematica;
 import litematica.schematic.container.AlignedLongBackedIntArray;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.ArrayBlockContainer.BlockStateConverterResults;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.container.PackedIntArray;
-import litematica.schematic.container.TightLongBackedIntArray;
 import litematica.schematic.data.EntityData;
 import litematica.util.PositionUtils;
 
@@ -296,6 +296,11 @@ public class SpongeSchematic extends BaseSchematic
 
         ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockData);
 
+        if (container == null)
+        {
+            return null;
+        }
+
         if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
             MessageDispatcher.error("litematica.message.error.schematic_read.sponge.failed_to_read_blocks");
@@ -313,6 +318,11 @@ public class SpongeSchematic extends BaseSchematic
         int paletteSize = paletteTag.size();
 
         ArrayBlockContainer container = createContainerFromData(size, paletteSize, blockData);
+
+        if (container == null)
+        {
+            return null;
+        }
 
         if (this.readPaletteFromCompound(paletteTag, container.getPalette(), dataVersion) == false)
         {
@@ -788,29 +798,46 @@ public class SpongeSchematic extends BaseSchematic
         return new ArrayBlockContainer(containerSize, 8);
     }
 
-    public static BlockStateConverterResults convertVarIntByteArrayToPackedLongArray(long volume,
-                                                                                     int entryWidthBits,
-                                                                                     byte[] blockStates)
+    @Nullable
+    public static BlockStateConverterResults
+    convertVarIntByteArrayToAlignedLongBackedIntArray(long volume, int entryWidthBits, byte[] blockStates)
     {
-        TightLongBackedIntArray bitArray = new TightLongBackedIntArray(entryWidthBits, volume);
+        AlignedLongBackedIntArray intArray = new AlignedLongBackedIntArray(entryWidthBits, volume);
         ByteBuf buf = Unpooled.wrappedBuffer(blockStates);
         long[] blockCounts = new long[1 << entryWidthBits];
 
-        for (long i = 0; i < volume; ++i)
+        try
         {
-            int id = ByteBufUtils.readVarInt(buf);
-            bitArray.setAt(i, id);
-            ++blockCounts[id];
+            for (long i = 0; i < volume; ++i)
+            {
+                int id = ByteBufUtils.readVarInt(buf);
+                intArray.setAt(i, id);
+                ++blockCounts[id];
+            }
+        }
+        catch (Exception e)
+        {
+            MessageDispatcher.error().console(e).translate("litematica.message.error.schematic_convert.copy_block_data_failed");
+            Litematica.LOGGER.error("SpongeSchematic#convertVarIntByteArrayToAlignedLongBackedIntArray: volume: {}, entryWidthBits: {}, blockStates.length: {}, new backing array length: {}",
+                                    volume, entryWidthBits, blockStates.length, intArray.getBackingLongArray().length);
+            return null;
         }
 
-        return new BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
+        return new BlockStateConverterResults(intArray.getBackingLongArray(), blockCounts);
     }
 
+    @Nullable
     public static ArrayBlockContainer createContainerFromData(Vec3i size, int paletteSize, byte[] blockData)
     {
         int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
         long volume = PositionUtils.getAreaVolume(size);
-        BlockStateConverterResults results = convertVarIntByteArrayToPackedLongArray(volume, entryWidthBits, blockData);
+        BlockStateConverterResults results = convertVarIntByteArrayToAlignedLongBackedIntArray(volume, entryWidthBits, blockData);
+
+        if (results == null)
+        {
+            return null;
+        }
+
         AlignedLongBackedIntArray storage = new AlignedLongBackedIntArray(entryWidthBits, volume, results.backingArray);
         ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
         //container.palette = createPalette(bits, container);
