@@ -452,6 +452,7 @@ litematica.message.error.save_schematic.failed_to_save_from_area=Failed to save 
 litematica.message.error.save_schematic.invalid_directory=Invalid directory §e'%s'§r
 litematica.message.error.save_schematic.no_file_name=Empty file name!
 litematica.message.error.save_schematic.no_type_selected=No schematic type selected!\n§7Select the schematic type/format using the dropdown widget.
+litematica.message.error.schematic_convert.copy_block_data_failed=Failed to copy the block data from one container to another
 litematica.message.error.schematic_load.failed_to_load=Failed to load schematic from file §e%s§r
 litematica.message.error.schematic_load.no_schematic_selected=No schematic file selected!
 litematica.message.error.schematic_manager.failed_to_save_schematic=Failed to save the schematic back to the file

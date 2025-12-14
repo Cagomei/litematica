@@ -18,6 +18,7 @@ import malilib.util.data.tag.util.DataTypeUtils;
 import malilib.util.game.MinecraftVersion;
 import malilib.util.position.BlockPos;
 import malilib.util.position.Vec3i;
+import litematica.Litematica;
 import litematica.schematic.container.AlignedLongBackedIntArray;
 import litematica.schematic.container.ArrayBlockContainer;
 import litematica.schematic.container.ArrayBlockContainer.BlockStateConverterResults;
@@ -381,35 +382,59 @@ public class StructurizeSchematic extends BaseSchematic
         return Optional.of(arr);
     }
 
-    public static BlockStateConverterResults convertIntArrayOfShortsToPackedLongArray(long volume,
-                                                                                      int entryWidthBits,
-                                                                                      int[] blockStates)
+    protected static void copyValuesToIntArray(int[] blockStates, long[] blockCountsOut, AlignedLongBackedIntArray intArray)
     {
-        AlignedLongBackedIntArray bitArray = new AlignedLongBackedIntArray(entryWidthBits, volume);
-        long[] blockCounts = new long[1 << entryWidthBits];
-        long bitArrayIndex = 0;
+        long intArrayIndex = 0;
 
         for (int val : blockStates)
         {
             int id = (val >> 16) & 0xFFFF;
-            bitArray.setAt(bitArrayIndex, id);
-            ++blockCounts[id];
+            intArray.setAt(intArrayIndex, id);
+            ++blockCountsOut[id];
 
             id = val & 0xFFFF;
-            bitArray.setAt(bitArrayIndex + 1, id);
-            ++blockCounts[id];
+            intArray.setAt(intArrayIndex + 1, id);
+            ++blockCountsOut[id];
 
-            bitArrayIndex += 2;
+            intArrayIndex += 2;
         }
-
-        return new ArrayBlockContainer.BlockStateConverterResults(bitArray.getBackingLongArray(), blockCounts);
     }
 
+    @Nullable
+    public static BlockStateConverterResults convertIntArrayOfShortsToPackedLongArray(long volume,
+                                                                                      int entryWidthBits,
+                                                                                      int[] blockStates)
+    {
+        AlignedLongBackedIntArray intArray = new AlignedLongBackedIntArray(entryWidthBits, volume);
+        long[] blockCounts = new long[1 << entryWidthBits];
+
+        try
+        {
+            copyValuesToIntArray(blockStates, blockCounts, intArray);
+        }
+        catch (Exception e)
+        {
+            MessageDispatcher.error().console(e).translate("litematica.message.error.schematic_convert.copy_block_data_failed");
+            Litematica.LOGGER.error("SructurizeSchematic#convertIntArrayOfShortsToPackedLongArray: volume: {}, entryWidthBits: {}, blockStates.length: {}, new backing array length: {}",
+                                    volume, entryWidthBits, blockStates.length, intArray.getBackingLongArray().length);
+            return null;
+        }
+
+        return new ArrayBlockContainer.BlockStateConverterResults(intArray.getBackingLongArray(), blockCounts);
+    }
+
+    @Nullable
     public static ArrayBlockContainer createContainerFromData(Vec3i size, int paletteSize, int[] blockData)
     {
         int entryWidthBits = ArrayBlockContainer.getRequiredBitWidth(paletteSize);
         long volume = PositionUtils.getAreaVolume(size);
         BlockStateConverterResults results = convertIntArrayOfShortsToPackedLongArray(volume, entryWidthBits, blockData);
+
+        if (results == null)
+        {
+            return null;
+        }
+
         AlignedLongBackedIntArray storage = new AlignedLongBackedIntArray(entryWidthBits, volume, results.backingArray);
         ArrayBlockContainer container = new ArrayBlockContainer(size, storage);
         //container.palette = createPalette(bits, container);
