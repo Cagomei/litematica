@@ -1,6 +1,7 @@
 package litematica.gui;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 
 import malilib.gui.widget.RadioButtonWidget;
@@ -8,7 +9,11 @@ import malilib.overlay.message.MessageDispatcher;
 import malilib.util.StringUtils;
 import litematica.data.DataManager;
 import litematica.schematic.LoadedSchematic;
+import litematica.schematic.Schematic;
+import litematica.schematic.SchematicMetadata;
+import litematica.schematic.SchematicType;
 import litematica.schematic.placement.SchematicPlacementManager;
+import litematica.schematic.util.SchematicFileUtils;
 
 public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 {
@@ -48,6 +53,7 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
         super.reAddActiveWidgets();
 
         this.addWidget(this.schematicTypeDropdown);
+        this.addWidget(this.saveButton);
 
         if (this.addUpdatePlacementsElement)
         {
@@ -79,7 +85,6 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
     @Override
     protected void saveSchematic()
     {
-        /*
         boolean overwrite = isShiftDown();
         Path file = this.getSchematicFileIfCanSave(overwrite);
 
@@ -93,15 +98,25 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
 
         if (outputType != this.loadedSchematic.schematic.getType())
         {
-            schematic = outputType.createSchematic();
-
             try
             {
-                schematic.read(this.loadedSchematic);
+                Optional<Schematic> schematicOpt = outputType.createSchematicFromRegions(schematic.getRegions());
+
+                if (schematicOpt.isPresent())
+                {
+                    schematic = schematicOpt.get();
+                    SchematicMetadata meta = schematic.getMetadata();
+                    meta.copyFrom(this.loadedSchematic.schematic.getMetadata());
+                    meta.setTimeModifiedToNow();
+                }
+                else
+                {
+                    MessageDispatcher.error("litematica.message.error.save_schematic.failed_to_convert");
+                }
             }
             catch (Exception e)
             {
-                MessageDispatcher.error(8000).translate("litematica.message.error.save_schematic.failed_to_convert");
+                MessageDispatcher.error("litematica.message.error.save_schematic.failed_to_convert");
                 MessageDispatcher.error(8000).translate(e.getMessage());
                 return;
             }
@@ -113,10 +128,9 @@ public class SaveConvertSchematicScreen extends BaseSaveSchematicScreen
         }
         else
         {
-            String key = "litematica.message.error.save_schematic.failed_to_save_converted";
-            MessageDispatcher.error(key, file.getFileName().toString());
+            MessageDispatcher.error("litematica.message.error.save_schematic.failed_to_save_converted",
+                                    file.getFileName().toString());
         }
-        */
     }
 
     protected void onSchematicSaved(Path newSchematicFile)
