@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import malilib.gui.icon.DefaultIcons;
 import malilib.gui.icon.Icon;
 import litematica.schematic.LoadedSchematic;
 import litematica.schematic.SchematicType;
@@ -55,5 +56,11 @@ public class SchematicTypeIcons
         this.register(SchematicType.SCHEMATICA,  LitematicaIcons.SCHEMATIC_SCHEMATICA,  LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA);
         this.register(SchematicType.STRUCTURIZE, LitematicaIcons.SCHEMATIC_STRUCTURIZE, LitematicaIcons.SCHEMATIC_IN_MEMORY_STRUCTURIZE);
         this.register(SchematicType.VANILLA,     LitematicaIcons.SCHEMATIC_VANILLA,     LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA);
+    }
+
+    public static Icon getIconForType(SchematicType type)
+    {
+        Optional<Icon> iconOpt = INSTANCE.getNormalIcon(type);
+        return iconOpt.orElse(DefaultIcons.EXCLAMATION_11);
     }
 }
