@@ -8,14 +8,12 @@ import malilib.input.KeyAction;
 import malilib.input.KeyBind;
 import malilib.input.callback.HotkeyCallback;
 import malilib.util.game.wrap.GameWrap;
-import malilib.util.position.BlockPos;
 import litematica.data.DataManager;
 import litematica.selection.AreaSelectionManager;
 import litematica.selection.BoxCorner;
 import litematica.selection.ToolSelectionMode;
 import litematica.tool.ToolMode;
 import litematica.util.EntityUtils;
-import litematica.util.RayTraceUtils;
 import litematica.util.ToolUtils;
 
 public class HotkeyCallbackToolActions implements HotkeyCallback
@@ -66,6 +64,7 @@ public class HotkeyCallbackToolActions implements HotkeyCallback
 
                     if (grabModifier && mode == ToolMode.MOVE)
                     {
+                        /*
                         Entity entity = GameWrap.getCameraEntity();
                         BlockPos pos = RayTraceUtils.getTargetedPosition(world, entity, maxDistance, false);
 
@@ -73,6 +72,7 @@ public class HotkeyCallbackToolActions implements HotkeyCallback
                         {
                             ToolUtils.moveCurrentlySelectedWorldRegionTo(pos);
                         }
+                        */
                     }
                     else if (Configs.Generic.TOOL_SELECTION_MODE.getValue() == ToolSelectionMode.CORNERS)
                     {
