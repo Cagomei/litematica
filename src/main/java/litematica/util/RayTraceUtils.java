@@ -47,10 +47,29 @@ public class RayTraceUtils
     @Nullable
     public static BlockPos getTargetedPosition(World world, Entity entity, double maxDistance, boolean sneakToOffset)
     {
-        HitResult trace = malilib.util.game.RayTraceUtils
-                .getRayTraceFromEntity(world, entity, RayTraceFluidHandling.NONE, false, maxDistance);
+        Vec3d eyesPos = EntityWrap.getEntityEyePos(entity);
+        World worldSchem = SchematicWorldHandler.getSchematicWorld();
+        HitResult traceVanilla = malilib.util.game.RayTraceUtils.getRayTraceFromEntity(world, entity, RayTraceFluidHandling.NONE, false, maxDistance);
+        HitResult traceSchematic = malilib.util.game.RayTraceUtils.getRayTraceFromEntity(worldSchem, entity, RayTraceFluidHandling.NONE, false, maxDistance);
+        HitResult trace;
 
-        if (trace.type != HitResult.Type.BLOCK)
+        if (traceVanilla.type == HitResult.Type.BLOCK &&
+            traceSchematic.type == HitResult.Type.BLOCK)
+        {
+            double distVanilla = traceVanilla.pos.getSquaredDistanceTo(eyesPos);
+            double distSchematic = traceSchematic.pos.getSquaredDistanceTo(eyesPos);
+
+            trace = distSchematic < distVanilla ? traceSchematic : traceVanilla;
+        }
+        else if (traceVanilla.type == HitResult.Type.BLOCK)
+        {
+            trace = traceVanilla;
+        }
+        else if (traceSchematic.type == HitResult.Type.BLOCK)
+        {
+            trace = traceSchematic;
+        }
+        else
         {
             return null;
         }
