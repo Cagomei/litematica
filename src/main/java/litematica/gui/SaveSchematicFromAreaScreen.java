@@ -1,6 +1,7 @@
 package litematica.gui;
 
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import malilib.config.option.BooleanConfig;
@@ -29,7 +30,7 @@ import litematica.util.value.SchematicSaveWorldSelection;
 public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 {
     protected final AreaSelection selection;
-    protected final SchematicSaveSettings settings = new SchematicSaveSettings();
+    protected final SchematicSaveSettings settings;
     protected final OptionListConfig<SaveSide> saveSide;
     protected final BooleanConfig customSettingsEnabled = new BooleanConfig("customSettings", false);
     protected final BooleanConfigButton customSettingsButton;
@@ -46,8 +47,11 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     {
         super(10, 74, 20 + 170 + 2, 80, "save_schematic_from_area");
 
-        String areaName = selection.getName();
         this.selection = selection;
+        this.settings = new SchematicSaveSettings();
+        this.settings.tryLoad(Configs.Internal.SCHEMATIC_SAVE_SETTINGS.getValue());
+
+        String areaName = selection.getName();
         this.originalName = getFileNameFromDisplayName(areaName);
         this.fileNameTextField.setText(this.originalName);
 
@@ -152,11 +156,43 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     {
         boolean overwrite = isShiftDown();
         Path file = this.getSchematicFileIfCanSave(overwrite);
-        SchematicType schematicType = this.schematicTypeDropdown.getSelectedEntry();
+        SchematicSaveSettings effectiveSettings = this.getSaveSettings();
 
-        if (file == null || schematicType == null)
+        if (file == null || effectiveSettings == null)
         {
             return;
+        }
+
+        if (shouldSaveOnDedicatedServerSide(this.saveSide.getValue()))
+        {
+            this.saveSchematicOnServer(effectiveSettings, file, overwrite);
+        }
+        else
+        {
+            this.saveSchematicOnClient(effectiveSettings, file, overwrite);
+        }
+    }
+
+    public static boolean shouldSaveOnDedicatedServerSide(SaveSide side)
+    {
+        if (GameWrap.isSinglePlayer())
+        {
+            return false;
+        }
+
+        boolean supportsServerSideSaving = false; // TODO
+
+        return side == SaveSide.SERVER || (side == SaveSide.AUTO && supportsServerSideSaving);
+    }
+
+    @Nullable
+    protected SchematicSaveSettings getSaveSettings()
+    {
+        SchematicType schematicType = this.schematicTypeDropdown.getSelectedEntry();
+
+        if (schematicType == null)
+        {
+            return null;
         }
 
         SchematicSaveSettings effectiveSettings;
@@ -173,18 +209,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
         effectiveSettings.schematicType = schematicType;
 
-        SaveSide side = this.saveSide.getValue();
-        boolean supportsServerSideSaving = false; // TODO
-
-        if (GameWrap.isSinglePlayer() == false &&
-            (side == SaveSide.SERVER || (side == SaveSide.AUTO && supportsServerSideSaving)))
-        {
-            this.saveSchematicOnServer(effectiveSettings, file, overwrite);
-        }
-        else
-        {
-            this.saveSchematicOnClient(effectiveSettings, file, overwrite);
-        }
+        return effectiveSettings;
     }
 
     protected void saveSchematicOnClient(SchematicSaveSettings settings, Path file, boolean overwrite)

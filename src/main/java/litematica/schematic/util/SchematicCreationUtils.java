@@ -6,6 +6,7 @@ import malilib.input.ActionResult;
 import malilib.overlay.message.MessageDispatcher;
 import litematica.data.DataManager;
 import litematica.data.SchematicHolder;
+import litematica.gui.CreateInMemorySchematicScreen;
 import litematica.gui.SaveSchematicFromAreaScreen;
 import litematica.scheduler.TaskScheduler;
 import litematica.scheduler.task.LocalCreateSchematicTask;
@@ -35,10 +36,7 @@ public class SchematicCreationUtils
             }
             else if (inMemoryOnly)
             {
-                String title = "litematica.title.screen.save_in_memory_schematic";
-                TextInputScreen screen = new TextInputScreen(title, area.getName(),
-                                                             (str) -> saveInMemorySchematic(str, area));
-                BaseScreen.openPopupScreenWithCurrentScreenAsParent(screen);
+                BaseScreen.openPopupScreenWithCurrentScreenAsParent(new CreateInMemorySchematicScreen(area));
             }
             else
             {

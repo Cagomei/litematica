@@ -344,6 +344,7 @@ public class Configs
         public static final BooleanConfig PLACEMENT_LIST_ICON_BUTTONS   = new BooleanConfig("placementListIconButtons", false);
         public static final BooleanConfig SAVE_WITH_CUSTOM_SETTINGS     = new BooleanConfig("saveWithCustomSettings", false);
         public static final BooleanConfig SCHEMATIC_LIST_ICON_BUTTONS   = new BooleanConfig("schematicListIconButtons", false);
+        public static final StringConfig  SCHEMATIC_SAVE_SETTINGS       = new StringConfig("schematicSaveSettings", "");
         public static final OptionListConfig<SaveSide> SAVE_SIDE        = new OptionListConfig<>("saveSide", SaveSide.AUTO, SaveSide.VALUES);
 
         public static final BooleanConfig SCHEMATIC_INFO_SHOW_AUTHOR             = new BooleanConfig("schematicInfoShowAuthor", true, null);
@@ -368,6 +369,7 @@ public class Configs
                 SAVE_WITH_CUSTOM_SETTINGS,
                 SAVE_SIDE,
                 SCHEMATIC_LIST_ICON_BUTTONS,
+                SCHEMATIC_SAVE_SETTINGS,
                 SCHEMATIC_INFO_SHOW_AUTHOR,
                 SCHEMATIC_INFO_SHOW_BLOCK_ENTITY_COUNT,
                 SCHEMATIC_INFO_SHOW_CREATION_TIME,

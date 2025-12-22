@@ -1,5 +1,6 @@
 package litematica.gui;
 
+import malilib.gui.BaseScreen;
 import malilib.gui.widget.BaseTextFieldWidget;
 import malilib.gui.widget.BlockPosEditWidget;
 import malilib.gui.widget.CheckBoxWidget;
@@ -21,6 +22,7 @@ public class SimpleModeAreaEditorScreen extends BaseAreaSubRegionEditScreen
     protected final GenericButton areaAnalyzerButton;
     protected final GenericButton mainMenuButton;
     protected final GenericButton manualOriginButton;
+    protected final GenericButton createInMemorySchematicButton;
     protected final GenericButton saveSchematicButton;
     protected final GenericButton selectionModeButton;
     protected final GenericButton setAreaNameButton;
@@ -44,6 +46,7 @@ public class SimpleModeAreaEditorScreen extends BaseAreaSubRegionEditScreen
         this.setAreaNameButton      = GenericButton.create(18, "litematica.button.misc.set", this::renameAreaSelection);
         this.areaAnalyzerButton     = GenericButton.create(18, "litematica.button.area_editor.area_analyzer", this::openAreaAnalyzer);
         this.saveSchematicButton    = GenericButton.create(18, "litematica.button.area_editor.save_schematic", this::openSaveSchematicScreen);
+        this.createInMemorySchematicButton = GenericButton.create(18, "litematica.button.schematic_save.create_in_memory_schematic", this::openCreateInMemorySchematicScreen);
         this.mainMenuButton         = GenericButton.create(18, "litematica.button.change_menu.main_menu", MainMenuScreen::openMainMenuScreen);
 
         this.manualOriginButton.translateAndAddHoverString("litematica.hover.button.area_editor.manual_origin");
@@ -79,6 +82,7 @@ public class SimpleModeAreaEditorScreen extends BaseAreaSubRegionEditScreen
         this.addWidget(this.setAreaNameButton);
 
         this.addWidget(this.saveSchematicButton);
+        this.addWidget(this.createInMemorySchematicButton);
         this.addWidget(this.areaAnalyzerButton);
         this.addWidget(this.mainMenuButton);
         
@@ -120,7 +124,8 @@ public class SimpleModeAreaEditorScreen extends BaseAreaSubRegionEditScreen
 
         x = this.setAreaNameButton.getRight() + 8;
         this.saveSchematicButton.setPosition(x, this.setAreaNameButton.getY());
-        this.areaAnalyzerButton.setPosition(x, this.setSelectionBoxNameButton.getY());
+        this.createInMemorySchematicButton.setPosition(x, this.saveSchematicButton.getBottom() + 1);
+        this.areaAnalyzerButton.setPosition(x, this.createInMemorySchematicButton.getBottom() + 1);
 
         this.mainMenuButton.setRight(this.getRight() - 10);
         this.mainMenuButton.setBottom(this.getBottom() - 3);
@@ -198,6 +203,11 @@ public class SimpleModeAreaEditorScreen extends BaseAreaSubRegionEditScreen
 
     protected void openSaveSchematicScreen()
     {
-        openScreen(new SaveSchematicFromAreaScreen(this.areaSelection));
+        BaseScreen.openScreen(new SaveSchematicFromAreaScreen(this.areaSelection));
+    }
+
+    protected void openCreateInMemorySchematicScreen()
+    {
+        BaseScreen.openPopupScreenWithCurrentScreenAsParent(new CreateInMemorySchematicScreen(this.areaSelection));
     }
 }

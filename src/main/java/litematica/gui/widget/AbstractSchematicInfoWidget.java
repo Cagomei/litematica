@@ -82,7 +82,7 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
     @Override
     public void updateSubWidgetPositions()
     {
-        super.updateSubWidgetPositions();;
+        super.updateSubWidgetPositions();
 
         this.configButton.setPosition(this.getRight() - 14, this.getY() + 3);
 
