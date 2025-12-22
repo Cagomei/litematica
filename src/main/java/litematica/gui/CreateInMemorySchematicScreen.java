@@ -13,7 +13,6 @@ import malilib.input.Keys;
 import malilib.overlay.message.MessageDispatcher;
 import litematica.config.Configs;
 import litematica.data.SchematicHolder;
-import litematica.gui.SaveSchematicFromAreaScreen.SaveSide;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.SchematicSaveSettingsWidget;
 import litematica.scheduler.TaskScheduler;
@@ -21,6 +20,7 @@ import litematica.scheduler.task.LocalCreateSchematicTask;
 import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
 import litematica.schematic.SchematicSaveSettings;
+import litematica.schematic.SchematicSaveSettings.SaveSide;
 import litematica.schematic.SchematicType;
 import litematica.selection.AreaSelection;
 

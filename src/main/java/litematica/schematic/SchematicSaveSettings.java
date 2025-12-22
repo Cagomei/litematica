@@ -3,6 +3,7 @@ package litematica.schematic;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,12 +11,12 @@ import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
 
 import malilib.config.option.OptionListConfig;
+import malilib.config.value.BaseOptionListConfigValue;
 import malilib.util.data.SimpleBooleanStorageWithDefault;
 import malilib.util.data.json.JsonUtils;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.RegistryUtils;
 import malilib.util.world.BlockState;
-import litematica.gui.SaveSchematicFromAreaScreen.SaveSide;
 import litematica.util.value.SchematicSaveWorldSelection;
 
 public class SchematicSaveSettings
@@ -136,6 +137,20 @@ public class SchematicSaveSettings
         if (stateOpt.isPresent())
         {
             this.ignoreBlockStates.add(stateOpt.get());
+        }
+    }
+
+    public static class SaveSide extends BaseOptionListConfigValue
+    {
+        public static final SaveSide AUTO   = new SaveSide("auto",   "litematica.name.save_side.auto");
+        public static final SaveSide CLIENT = new SaveSide("client", "litematica.name.save_side.client");
+        public static final SaveSide SERVER = new SaveSide("server", "litematica.name.save_side.server");
+
+        public static final ImmutableList<SaveSide> VALUES = ImmutableList.of(AUTO, CLIENT, SERVER);
+
+        public SaveSide(String name, String translationKey)
+        {
+            super(name, translationKey);
         }
     }
 }

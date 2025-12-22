@@ -22,7 +22,7 @@ import malilib.config.value.HudAlignment;
 import malilib.overlay.message.MessageOutput;
 import malilib.util.position.Vec2i;
 import litematica.Reference;
-import litematica.gui.SaveSchematicFromAreaScreen.SaveSide;
+import litematica.schematic.SchematicSaveSettings.SaveSide;
 import litematica.selection.AreaSelectionType;
 import litematica.selection.ToolSelectionMode;
 import litematica.util.LitematicaDirectories;
