@@ -194,7 +194,6 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
 
         SchematicMetadata meta = this.currentInfo.schematicMetadata;
-        SimpleDateFormat dateFormat = createDateFormat();
         List<StyledTextLine> lines = new ArrayList<>();
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_NAME.getBooleanValue() && meta.getSchematicName().length() > 0)
@@ -213,14 +212,14 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
             meta.getTimeCreated() > 0)
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.time_created",
-                                     dateFormat.format(new Date(meta.getTimeCreated())));
+                                     getFormattedDateTime(meta.getTimeCreated()));
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_MODIFICATION_TIME.getBooleanValue() &&
             meta.getTimeModified() > 0 && meta.getTimeModified() != meta.getTimeCreated())
         {
             StyledTextLine.translate(lines, "litematica.label.schematic_info.time_modified",
-                                     dateFormat.format(new Date(meta.getTimeModified())));
+                                     getFormattedDateTime(meta.getTimeModified()));
         }
 
         if (Configs.Internal.SCHEMATIC_INFO_SHOW_REGION_COUNT.getBooleanValue() &&
@@ -390,5 +389,11 @@ public abstract class AbstractSchematicInfoWidget<T> extends ContainerWidget
         }
 
         return fmt;
+    }
+
+    public static String getFormattedDateTime(long timeMillis)
+    {
+        SimpleDateFormat dateFormat = createDateFormat();
+        return dateFormat.format(new Date(timeMillis));
     }
 }

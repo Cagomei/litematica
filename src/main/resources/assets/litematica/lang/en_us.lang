@@ -201,10 +201,12 @@ litematica.hover.placement_list.sub_region_size=Region size: <c=77f>%s§r x <c=7
 litematica.hover.save_schematic.update_dependent_placements=Select whether to update any of the placements created of this schematic, so that when the placement is next loaded from file, it would use the newly saved schematic file.\n\nThis can be useful especially when using the Edit Schematic feature to for example change block types in the schematic, and you would want that edited schematic to be used for your placements from now on.
 litematica.hover.schematic_browser.create_placement=Automatically create a new placement of the loaded schematic, and select that newly created placement
 litematica.hover.schematic_list.in_memory_only=§dIN-MEMORY ONLY
-litematica.hover.schematic_list.modified_on=Modified @ §6%s§r
-litematica.hover.schematic_list.schematic_file=Schematic file: §3%s
-litematica.hover.schematic_list.schematic_name=Schematic name: §a%s
+litematica.hover.schematic_list.schematic_file=File: §3%s
+litematica.hover.schematic_list.schematic_name=Name: §a%s
 litematica.hover.schematic_list.schematic_type=Type: §b%s
+litematica.hover.schematic_list.time_created=Created: §a%s§r
+litematica.hover.schematic_list.time_modified=Modified: §a%s§r
+litematica.hover.schematic_list.modified_since_saved=Modified @ §6%s§r
 litematica.hover.schematic_placement_settings.rename_placement=Rename the §eplacement§r.\nThis does not affect the schematic itself.
 litematica.hover.schematic_verifier.color_config.overlay_color=Schematic Verifier §fOverlay§r color
 litematica.hover.schematic_verifier.color_config.text_color=Schematic Verifier §fScreen/HUD Text§r color

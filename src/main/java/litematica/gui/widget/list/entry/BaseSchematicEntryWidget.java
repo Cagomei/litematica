@@ -1,9 +1,7 @@
 package litematica.gui.widget.list.entry;
 
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -16,28 +14,26 @@ import malilib.gui.widget.list.entry.DataListEntryWidgetData;
 import malilib.render.text.StyledTextLine;
 import malilib.util.FileNameUtils;
 import malilib.util.StringUtils;
-import litematica.schematic.LoadedSchematic;
 import litematica.gui.util.SchematicTypeIcons;
 import litematica.gui.widget.AbstractSchematicInfoWidget;
+import litematica.schematic.LoadedSchematic;
 import litematica.schematic.Schematic;
+import litematica.schematic.SchematicMetadata;
 
 public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<LoadedSchematic>
 {
     protected final IconWidget modificationNoticeIcon;
-    protected SimpleDateFormat dateFormat;
 
     public BaseSchematicEntryWidget(LoadedSchematic loadedSchematic, DataListEntryWidgetData constructData)
     {
         super(loadedSchematic, constructData);
 
-        this.dateFormat = AbstractSchematicInfoWidget.createDateFormat();
-
-        Schematic schematic = loadedSchematic.schematic;
-        String timeStr = this.dateFormat.format(new Date(schematic.getMetadata().getTimeModified()));
-        Icon icon = SchematicTypeIcons.INSTANCE.getIcon(loadedSchematic).orElse(DefaultIcons.EXCLAMATION_11);
-
+        SchematicMetadata meta = loadedSchematic.schematic.getMetadata();
+        String timeStr = AbstractSchematicInfoWidget.getFormattedDateTime(meta.getTimeModified());
         this.modificationNoticeIcon = new IconWidget(DefaultIcons.EXCLAMATION_11);
-        this.modificationNoticeIcon.translateAndAddHoverString("litematica.hover.schematic_list.modified_on", timeStr);
+        this.modificationNoticeIcon.translateAndAddHoverString("litematica.hover.schematic_list.modified_since_saved", timeStr);
+
+        Icon icon = SchematicTypeIcons.INSTANCE.getIcon(loadedSchematic).orElse(DefaultIcons.EXCLAMATION_11);
         this.iconOffset.setXOffset(3);
         this.textOffset.setXOffset(icon.getWidth() + 6);
         this.textSettings.setTextColor(loadedSchematic.wasModifiedSinceSaved() ? 0xFFFF9010 : 0xFFFFFFFF);
@@ -45,7 +41,7 @@ public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<LoadedSche
         this.setIcon(icon);
         this.getBackgroundRenderer().getNormalSettings().setEnabledAndColor(true, this.isOdd ? 0xA0101010 : 0xA0303030);
         this.getBackgroundRenderer().getHoverSettings().setEnabledAndColor(true, 0xA0707070);
-        this.setText(StyledTextLine.parseFirstLine(schematic.getMetadata().getSchematicName()));
+        this.setText(StyledTextLine.parseFirstLine(meta.getSchematicName()));
         this.addHoverInfo(loadedSchematic);
     }
 
@@ -74,17 +70,25 @@ public class BaseSchematicEntryWidget extends BaseDataListEntryWidget<LoadedSche
         List<String> lines = new ArrayList<>();
         Optional<Path> schematicFileOpt = loadedSchematic.file;
         Schematic schematic = loadedSchematic.schematic;
+        SchematicMetadata meta = schematic.getMetadata();
         String fileName = schematicFileOpt.isPresent() ? schematicFileOpt.get().getFileName().toString() :
                                   StringUtils.translate("litematica.hover.schematic_list.in_memory_only");
 
-        lines.add(StringUtils.translate("litematica.hover.schematic_list.schematic_name", schematic.getMetadata().getSchematicName()));
+        lines.add(StringUtils.translate("litematica.hover.schematic_list.schematic_name", meta.getSchematicName()));
         lines.add(StringUtils.translate("litematica.hover.schematic_list.schematic_file", fileName));
         lines.add(StringUtils.translate("litematica.hover.schematic_list.schematic_type", schematic.getType().getDisplayName()));
+        lines.add(StringUtils.translate("litematica.hover.schematic_list.time_created",
+                                        AbstractSchematicInfoWidget.getFormattedDateTime(meta.getTimeCreated())));
 
         if (loadedSchematic.wasModifiedSinceSaved())
         {
-            String timeStr = this.dateFormat.format(new Date(schematic.getMetadata().getTimeModified()));
-            lines.add(StringUtils.translate("litematica.hover.schematic_list.modified_on", timeStr));
+            lines.add(StringUtils.translate("litematica.hover.schematic_list.modified_since_saved",
+                                            AbstractSchematicInfoWidget.getFormattedDateTime(meta.getTimeModified())));
+        }
+        else if (meta.getTimeCreated() != meta.getTimeModified() && meta.getTimeModified() > 0)
+        {
+            lines.add(StringUtils.translate("litematica.hover.schematic_list.time_modified",
+                                            AbstractSchematicInfoWidget.getFormattedDateTime(meta.getTimeModified())));
         }
 
         this.getHoverInfoFactory().addStrings(lines);
