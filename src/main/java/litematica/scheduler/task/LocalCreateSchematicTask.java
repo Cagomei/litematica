@@ -46,8 +46,11 @@ import litematica.schematic.data.EntityData;
 import litematica.selection.AreaSelection;
 import litematica.selection.SelectionBox;
 import litematica.util.PositionUtils;
+import litematica.util.value.SchematicSaveWorldSelection;
 import litematica.util.world.BlockView;
 import litematica.util.world.VanillaChunkBlockView;
+import litematica.util.world.VanillaChunkFallbackBlockView;
+import litematica.world.SchematicWorldHandler;
 
 public class LocalCreateSchematicTask extends TaskProcessChunkBase
 {
@@ -117,8 +120,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         BlockContainer container = this.blockContainers.computeIfAbsent(regionName, key -> this.createBlockContainer(selectionBox));
         Map<BlockPos, CompoundData> blockEntityMap = this.blockEntityMaps.computeIfAbsent(regionName, key -> new HashMap<>());
 
-        // TODO Swap this to a different SchematicWorldBlockView if/when saving from the schematic world
-        BlockView blockView = new VanillaChunkBlockView(this.world, this.world.getChunk(cPos.x, cPos.z));
+        BlockView blockView = this.getBlockView(cPos);
 
         this.readBlockData(container, blockEntityMap, box, minCorner, this.settings, blockView);
 
@@ -135,6 +137,33 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             List<EntityData> entityList = this.entityLists.computeIfAbsent(regionName, key -> new ArrayList<>());
             this.totalEntities += this.readEntityData(entityList, this.existingEntities, box, selectionBox.getCorner1(), this.world);
         }
+    }
+
+    protected BlockView getBlockView(ChunkPos cPos)
+    {
+        SchematicSaveWorldSelection sel = this.settings.worldSelection.getValue();
+
+        if (sel == SchematicSaveWorldSelection.SCHEMATIC_ONLY)
+        {
+            // TODO Swap this to a different SchematicWorldBlockView which supports the custom
+            //  block state that preserves the original state information
+            World world = SchematicWorldHandler.getSchematicWorld();
+            return new VanillaChunkBlockView(world, world.getChunk(cPos.x, cPos.z));
+        }
+        else if (sel == SchematicSaveWorldSelection.VANILLA_OR_SCHEMATIC)
+        {
+            World world1 = this.world;
+            World world2 = SchematicWorldHandler.getSchematicWorld();
+            return new VanillaChunkFallbackBlockView(world1, world2, world1.getChunk(cPos.x, cPos.z), world2.getChunk(cPos.x, cPos.z));
+        }
+        else if (sel == SchematicSaveWorldSelection.SCHEMATIC_OR_VANILLA)
+        {
+            World world1 = SchematicWorldHandler.getSchematicWorld();
+            World world2 = this.world;
+            return new VanillaChunkFallbackBlockView(world1, world2, world1.getChunk(cPos.x, cPos.z), world2.getChunk(cPos.x, cPos.z));
+        }
+
+        return new VanillaChunkBlockView(this.world, this.world.getChunk(cPos.x, cPos.z));
     }
 
     protected BlockContainer createBlockContainer(SelectionBox selectionBox)
@@ -359,8 +388,7 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         meta.setSchematicName(this.area.getName());
         meta.setOriginalOrigin(this.origin);
 
-        long time = System.currentTimeMillis();
-        meta.setTimeCreated(time);
+        meta.setTimeCreated(System.currentTimeMillis());
         meta.setMinecraftVersion(MinecraftVersion.CURRENT_VERSION);
     }
 
