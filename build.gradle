@@ -26,7 +26,13 @@ repositories {
 	// for more information about repositories.
 	// maven { url 'https://maven.terraformersmc.com/releases/' }
 
-	maven { url 'https://masa.dy.fi/maven' }
+	maven {
+		name = "masa"
+		url = 'https://masa.dy.fi/maven'
+		content {
+			includeGroupAndSubgroups("malilib")
+		}
+	}
 }
 
 dependencies {
