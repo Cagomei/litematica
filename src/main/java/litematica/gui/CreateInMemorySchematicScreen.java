@@ -11,6 +11,7 @@ import malilib.gui.widget.button.GenericButton;
 import malilib.gui.widget.button.OnOffButton;
 import malilib.input.Keys;
 import malilib.overlay.message.MessageDispatcher;
+import malilib.util.game.wrap.GameWrap;
 import litematica.config.Configs;
 import litematica.data.SchematicHolder;
 import litematica.gui.util.SchematicTypeIcons;
@@ -36,6 +37,7 @@ public class CreateInMemorySchematicScreen extends BaseScreen
     protected final BaseTextFieldWidget nameTextField;
     protected final BooleanConfigButton customSettingsButton;
     protected final GenericButton saveButton;
+    protected boolean supportServerSideSaving;
 
     public CreateInMemorySchematicScreen(AreaSelection selection)
     {
@@ -47,7 +49,7 @@ public class CreateInMemorySchematicScreen extends BaseScreen
         this.nameTextField = new BaseTextFieldWidget(240, 16, selection.getName());
         this.nameTextField.setFocused(true);
 
-        this.settingsWidget = new SchematicSaveSettingsWidget(190, 140, this.settings);
+        this.settingsWidget = new SchematicSaveSettingsWidget(180, 140, this.settings);
         this.schematicTypeDropdown = new DropDownListWidget<>(20, 6, SchematicType.KNOWN_TYPES, SchematicType::getDisplayName, t -> new IconWidget(SchematicTypeIcons.getIconForType(t)));
         this.schematicTypeDropdown.setSelectedEntry(SchematicType.LITEMATICA);
         this.saveButton = GenericButton.create(20, "litematica.button.schematic_save.create_schematic", this::createSchematic);
@@ -55,6 +57,13 @@ public class CreateInMemorySchematicScreen extends BaseScreen
         this.customSettingsEnabled.setBooleanValue(Configs.Internal.SAVE_WITH_CUSTOM_SETTINGS.getBooleanValue());
         this.customSettingsEnabled.setValueChangeCallback((n, o) -> this.onCustomSettingsToggled());
         this.customSettingsButton = new BooleanConfigButton(-1, 20, this.customSettingsEnabled, OnOffButton.OnOffStyle.TEXT_ON_OFF, "litematica.button.schematic_save.custom_settings");
+
+        this.supportServerSideSaving = false; // TODO
+
+        if (GameWrap.isSinglePlayer() == false && this.supportServerSideSaving == false)
+        {
+            this.settingsWidget.setClientOnlyWarnings(true);
+        }
 
         this.setTitle("litematica.title.screen.create_in_memory_schematic");
         this.addPreScreenCloseListener(this::saveSettings);

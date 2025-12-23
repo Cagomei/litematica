@@ -29,6 +29,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
     protected final SchematicSaveSettingsWidget settingsWidget;
     protected final BooleanConfigButton customSettingsButton;
+    protected boolean supportServerSideSaving;
 
     public SaveSchematicFromAreaScreen(AreaSelection selection)
     {
@@ -50,6 +51,12 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
         this.customSettingsButton = new BooleanConfigButton(-1, 18, this.customSettingsEnabled, OnOffButton.OnOffStyle.TEXT_ON_OFF, "litematica.button.schematic_save.custom_settings");
 
+        this.supportServerSideSaving = false; // TODO
+
+        if (GameWrap.isSinglePlayer() == false && this.supportServerSideSaving == false)
+        {
+            this.settingsWidget.setClientOnlyWarnings(true);
+        }
 
         this.addPreScreenCloseListener(this::saveSettings);
         this.setTitle("litematica.title.screen.save_schematic_from_area", areaName);

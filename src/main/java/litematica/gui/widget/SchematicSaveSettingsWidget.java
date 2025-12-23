@@ -22,6 +22,7 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
     protected final BooleanEditWidget exposedBlocksOnlyWidget;
     protected final LabelWidget worldSelectionLabel;
     protected final DropDownListWidget<SchematicSaveWorldSelection> worldSelectionDropdown;
+    protected boolean clientOnlyWarningsEnabled;
 
     public SchematicSaveSettingsWidget(int width, int height, SchematicSaveSettings settings)
     {
@@ -59,6 +60,7 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
 
         this.saveSideButton.setHoverInfoRequiresShift(true);
         this.saveSideButton.translateAndAddHoverString(hoverKey);
+        this.saveBlockTicksWidget.setShowAsOffIfDisabled(true);
 
         this.getBackgroundRenderer().getNormalSettings().setEnabledAndColor(true, 0xC0000000);
         this.getBorderRenderer().getNormalSettings().setBorderWidthAndColor(1, 0xFFC0C0C0);
@@ -78,6 +80,9 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
         this.addWidget(this.saveBlockTicksWidget);
         this.addWidget(this.saveEntitiesWidget);
         this.addWidget(this.exposedBlocksOnlyWidget);
+
+        // Apply to sub-widgets after their sub-widgets have been added first
+        this.setClientOnlyWarnings(this.clientOnlyWarningsEnabled);
     }
 
     @Override
@@ -114,5 +119,28 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
         effectiveSettings.schematicType = schematicType;
 
         return effectiveSettings;
+    }
+
+    public void setClientOnlyWarnings(boolean clientOnlyWarningsEnabled)
+    {
+        this.clientOnlyWarningsEnabled = clientOnlyWarningsEnabled;
+
+        int color = clientOnlyWarningsEnabled ? 0xFFFFAA00 : 0xFFFFFFFF;
+
+        this.saveBlockTicksWidget.setEnabled(! clientOnlyWarningsEnabled);
+        this.saveBlockEntitiesWidget.setNormalStateLabelColor(color);
+        this.saveEntitiesWidget.setNormalStateLabelColor(color);
+
+        // First remove possible already added hover strings
+        this.saveBlockTicksWidget.getHoverInfoFactory().removeAll();
+        this.saveBlockEntitiesWidget.getHoverInfoFactory().removeAll();
+        this.saveEntitiesWidget.getHoverInfoFactory().removeAll();
+
+        if (clientOnlyWarningsEnabled)
+        {
+            this.saveBlockTicksWidget.translateAndAddHoverString("litematica.hover.schematic_save_settings.multiplayer_warn.block_ticks");
+            this.saveBlockEntitiesWidget.translateAndAddHoverString("litematica.hover.schematic_save_settings.multiplayer_warn.block_entities");
+            this.saveEntitiesWidget.translateAndAddHoverString("litematica.hover.schematic_save_settings.multiplayer_warn.entities");
+        }
     }
 }
