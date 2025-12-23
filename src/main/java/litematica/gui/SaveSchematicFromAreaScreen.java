@@ -43,7 +43,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         this.fileNameTextField.setText(this.originalName);
 
         // TODO the dropdown widget hover overflow render does not account for going over the screen edge
-        this.settingsWidget = new SchematicSaveSettingsWidget(190, 140, this.settings);
+        this.settingsWidget = new SchematicSaveSettingsWidget(170, 140, this.settings);
 
         this.customSettingsEnabled.setBooleanValue(Configs.Internal.SAVE_WITH_CUSTOM_SETTINGS.getBooleanValue());
         this.customSettingsEnabled.setValueChangeCallback((n, o) -> this.onCustomSettingsToggled());
@@ -81,13 +81,13 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         //this.saveButton.setPosition(this.fileNameTextField.getX(), this.fileNameTextField.getBottom() + 2);
 
         int x = this.schematicInfoWidget.getX();
-        this.customSettingsButton.setPosition(x, this.y + 10);
+        this.customSettingsButton.setPosition(x, this.y + 4);
 
         if (this.customSettingsEnabled.getBooleanValue())
         {
             int gap = 1;
             this.settingsWidget.setPosition(x, this.customSettingsButton.getBottom() + gap);
-            this.schematicInfoWidget.setY(this.settingsWidget.getBottom() + 4);
+            this.schematicInfoWidget.setY(this.settingsWidget.getBottom() + 2);
             this.schematicInfoWidget.setHeight(this.getListHeight() - (this.schematicInfoWidget.getY() - this.getListY()));
         }
         else

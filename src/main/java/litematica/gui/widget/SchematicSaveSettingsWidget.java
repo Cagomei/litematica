@@ -41,6 +41,8 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
         this.worldSelectionDropdown.setSelectedEntry(settings.worldSelection.getValue());
         this.worldSelectionDropdown.setSelectionListener(this.settings.worldSelection::setValue);
         this.worldSelectionDropdown.setMaxWidth(180); // TODO the dropdown widget hover overflow render does not account for going over the screen edge
+        this.worldSelectionDropdown.setHoverInfoRequiresShift(true);
+        this.worldSelectionDropdown.translateAndAddHoverString("litematica.hover.schematic_save_settings.world_selection");
 
         String hoverKey;
 

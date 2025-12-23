@@ -208,6 +208,7 @@ litematica.hover.schematic_list.time_created=Created: §a%s§r
 litematica.hover.schematic_list.time_modified=Modified: §a%s§r
 litematica.hover.schematic_list.modified_since_saved=Modified @ §6%s§r
 litematica.hover.schematic_placement_settings.rename_placement=Rename the §eplacement§r.\nThis does not affect the schematic itself.
+litematica.hover.schematic_save_settings.world_selection=This option chooses where the schematic is saved from.\n\nThe normal common behavior is to save from the normal vanilla Minecraft world.\n\nIt's also possible to save from the "Schematic World" (where all enabled schematic placements will place the schematic to for rendering and other technical reasons), or from a combination of both.\n\nSaving from the schematic world allows you to create a new schematic from a loaded schematic without pasting it to a temporary world, if you for example want to only save a part of it, or combine parts of multiple loaded schematics into one.\n\nThe "A or B" options will first check the first world "A", and if it has an "air-like block" in a given position, then world "B" is checked. This allows you to for example save a new schematic of a build where the build is placed inside existing terrain.
 litematica.hover.schematic_verifier.color_config.overlay_color=Schematic Verifier §fOverlay§r color
 litematica.hover.schematic_verifier.color_config.text_color=Schematic Verifier §fScreen/HUD Text§r color
 litematica.hover.schematic_verifier.visible_categories.entry=<c=888>  %s
@@ -645,8 +646,8 @@ litematica.gui.label.schematic_projects.version_name=Version name:
 litematica.gui.label.schematic_save.from_world=From:
 litematica.gui.label.schematic_save_world.vanilla_only=Vanilla World
 litematica.gui.label.schematic_save_world.schematic_only=Schematic World
-litematica.gui.label.schematic_save_world.vanilla_or_schematic=Vanilla or else Schematic World
-litematica.gui.label.schematic_save_world.schematic_or_vanilla=Schematic or else Vanilla World
+litematica.gui.label.schematic_save_world.vanilla_or_schematic=Vanilla or Schematic World
+litematica.gui.label.schematic_save_world.schematic_or_vanilla=Schematic or Vanilla World
 
 litematica.gui.label.schematic_verifier.count=Count
 litematica.gui.label.schematic_verifier.expected=Expected
