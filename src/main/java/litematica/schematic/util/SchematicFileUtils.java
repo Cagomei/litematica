@@ -55,25 +55,24 @@ public class SchematicFileUtils
             return false;
         }
 
-        Optional<CompoundData> data;
-
         try
         {
-            data = schematic.write();
+            Optional<CompoundData> data = schematic.write();
+
+            if (data.isPresent() == false || data.get().size() == 0)
+            {
+                MessageDispatcher.error("litematica.message.error.schematic_save.serializing_failed.empty");
+                return false;
+            }
+
+            return DataFileUtils.writeCompoundDataToCompressedNbtFile(file, data.get(), schematic.getRootTagName());
         }
         catch (Exception e)
         {
             String key = "litematica.message.error.schematic_save.serializing_failed.exception";
             MessageDispatcher.error().console(e).translate(key, e.getMessage());
-            return false;
         }
 
-        if (data.isPresent() == false || data.get().size() == 0)
-        {
-            MessageDispatcher.error("litematica.message.error.schematic_save.serializing_failed.empty");
-            return false;
-        }
-
-        return DataFileUtils.writeCompoundDataToCompressedNbtFile(file, data.get(), schematic.getRootTagName());
+        return false;
     }
 }
