@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -29,6 +30,7 @@ public class SchematicType
         .setDataValidator(LitematicaSchematic::isValidData)
         .setExtension(LitematicaSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(LitematicaSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setDefaultSaveVersion(LitematicaSchematic.CURRENT_SCHEMATIC_VERSION)
         .setSupportsMultipleRegions(true)
         .setHasName(true)
         .build();
@@ -53,6 +55,8 @@ public class SchematicType
         .setDataValidator(SpongeSchematic::isValidData)
         .setExtension(SpongeSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(SpongeSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setSavableVersions(SpongeSchematic.SAVABLE_VERSIONS)
+        .setDefaultSaveVersion(SpongeSchematic.CURRENT_SCHEMATIC_VERSION)
         .build();
 
     public static final SchematicType VANILLA = SchematicType.builder()
@@ -75,6 +79,7 @@ public class SchematicType
         .setDataValidator(StructurizeSchematic::isValidData)
         .setExtension(StructurizeSchematic.FILE_NAME_EXTENSION)
         .setExtensionValidator(StructurizeSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setDefaultSaveVersion(StructurizeSchematic.CURRENT_SCHEMATIC_VERSION)
         .setHasName(true)
         .build();
 
@@ -91,9 +96,11 @@ public class SchematicType
     private final Function<ImmutableMap<String, SchematicRegion>, Optional<Schematic>> schematicFromRegionsFactory;
     private final Function<String, Boolean> extensionValidator;
     private final Function<DataView, Boolean> dataValidator;
+    private final ImmutableList<Integer> savableVersions;
     private final String translationKey;
-    private final boolean supportsMultipleRegions;
+    private final int defaultSaveVersion;
     private final boolean hasName;
+    private final boolean supportsMultipleRegions;
 
     private SchematicType(String translationKey,
                           BlockContainerFactory containerFactory,
@@ -103,8 +110,10 @@ public class SchematicType
                           Function<DataView, Boolean> dataValidator,
                           String extension,
                           Function<String, Boolean> extensionValidator,
-                          boolean supportsMultipleRegions,
-                          boolean hasName)
+                          @Nullable ImmutableList<Integer> savableVersions,
+                          int defaultSaveVersion,
+                          boolean hasName,
+                          boolean supportsMultipleRegions)
     {
         this.translationKey = translationKey;
         this.extension = extension;
@@ -114,8 +123,10 @@ public class SchematicType
         this.metadataFromDataFactory = metadataFromDataFactory;
         this.extensionValidator = extensionValidator;
         this.dataValidator = dataValidator;
-        this.supportsMultipleRegions = supportsMultipleRegions;
+        this.savableVersions = savableVersions != null ? savableVersions : ImmutableList.of();
+        this.defaultSaveVersion = defaultSaveVersion;
         this.hasName = hasName;
+        this.supportsMultipleRegions = supportsMultipleRegions;
     }
 
     public String getFileNameExtension()
@@ -128,14 +139,24 @@ public class SchematicType
         return StringUtils.translate(this.translationKey);
     }
 
-    public boolean getSupportsMultipleRegions()
-    {
-        return this.supportsMultipleRegions;
-    }
-
     public boolean getHasName()
     {
         return this.hasName;
+    }
+
+    public ImmutableList<Integer> getSavableVersions()
+    {
+        return this.savableVersions;
+    }
+
+    public int getDefaultSaveVersion()
+    {
+        return this.defaultSaveVersion;
+    }
+
+    public boolean getSupportsMultipleRegions()
+    {
+        return this.supportsMultipleRegions;
     }
 
     public boolean isValidExtension(String extension)
@@ -251,9 +272,11 @@ public class SchematicType
         private Function<DataView, Optional<SchematicMetadata>> metadataFromDataFactory;
         private Function<String, Boolean> extensionValidator;
         private Function<DataView, Boolean> dataValidator;
+        private ImmutableList<Integer> savableVersions;
         private String displayName = "?";
-        private boolean supportsMultipleRegions;
+        private int defaultSaveVersion = SchematicMetadata.DEFAULT_UNSET_VERSION;
         private boolean hasName;
+        private boolean supportsMultipleRegions;
 
         public SchematicType.Builder setDataValidator(Function<DataView, Boolean> dataValidator)
         {
@@ -315,6 +338,18 @@ public class SchematicType
             return this;
         }
 
+        public SchematicType.Builder setSavableVersions(ImmutableList<Integer> savableVersions)
+        {
+            this.savableVersions = savableVersions;
+            return this;
+        }
+        
+        public SchematicType.Builder setDefaultSaveVersion(int defaultSaveVersion)
+        {
+            this.defaultSaveVersion = defaultSaveVersion;
+            return this;
+        }
+
         public SchematicType build()
         {
             if (this.containerFactory == null ||
@@ -337,8 +372,10 @@ public class SchematicType
                                      this.dataValidator,
                                      this.extension,
                                      this.extensionValidator,
-                                     this.supportsMultipleRegions,
-                                     this.hasName);
+                                     this.savableVersions,
+                                     this.defaultSaveVersion,
+                                     this.hasName,
+                                     this.supportsMultipleRegions);
         }
     }
 }

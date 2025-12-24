@@ -2,8 +2,10 @@ package litematica.gui;
 
 import java.nio.file.Path;
 import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableList;
 
 import malilib.config.option.BooleanConfig;
+import malilib.gui.widget.DropDownListWidget;
 import malilib.gui.widget.button.BooleanConfigButton;
 import malilib.gui.widget.button.OnOffButton;
 import malilib.overlay.message.MessageDispatcher;
@@ -26,9 +28,11 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     protected final AreaSelection selection;
     protected final SchematicSaveSettings settings;
     protected final BooleanConfig customSettingsEnabled = new BooleanConfig("customSettings", false);
+    protected final DropDownListWidget<Integer> schematicVersionDropdown;
 
     protected final SchematicSaveSettingsWidget settingsWidget;
     protected final BooleanConfigButton customSettingsButton;
+    protected boolean hasSavableVersions;
     protected boolean supportServerSideSaving;
 
     public SaveSchematicFromAreaScreen(AreaSelection selection)
@@ -36,12 +40,16 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         super(10, 74, 20 + 170 + 2, 80, "save_schematic_from_area");
 
         this.selection = selection;
+
         this.settings = new SchematicSaveSettings();
         this.settings.tryLoad(Configs.Internal.SCHEMATIC_SAVE_SETTINGS.getValue());
 
         String areaName = selection.getName();
         this.originalName = getFileNameFromDisplayName(areaName);
         this.fileNameTextField.setText(this.originalName);
+
+        this.schematicTypeDropdown.setSelectionListener(this::onTypeSelected);
+        this.schematicVersionDropdown = new DropDownListWidget<>(18, 10, ImmutableList.of(), e -> String.format("v%d", e));
 
         // TODO the dropdown widget hover overflow render does not account for going over the screen edge
         this.settingsWidget = new SchematicSaveSettingsWidget(170, 140, this.settings);
@@ -72,6 +80,11 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         this.addWidget(this.schematicTypeDropdown);
         this.addWidget(this.saveButton);
 
+        if (this.hasSavableVersions)
+        {
+            this.addWidget(this.schematicVersionDropdown);
+        }
+
         if (this.customSettingsEnabled.getBooleanValue())
         {
             this.addWidget(this.settingsWidget);
@@ -83,11 +96,13 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     {
         super.updateWidgetPositions();
 
-        this.schematicTypeDropdown.setPosition(this.fileNameTextField.getX(), this.fileNameTextField.getBottom() + 2);
-        this.saveButton.setPosition(this.schematicTypeDropdown.getRight() + 2, this.fileNameTextField.getBottom() + 2);
-        //this.saveButton.setPosition(this.fileNameTextField.getX(), this.fileNameTextField.getBottom() + 2);
-
         int x = this.schematicInfoWidget.getX();
+        int y = this.fileNameTextField.getBottom() + 2;
+
+        this.saveButton.setPosition(this.fileNameTextField.getX(), y);
+        this.schematicTypeDropdown.setPosition(this.saveButton.getRight() + 2, y);
+        this.schematicVersionDropdown.setPosition(this.schematicTypeDropdown.getRight() + 2, y);
+
         this.customSettingsButton.setPosition(x, this.y + 4);
 
         if (this.customSettingsEnabled.getBooleanValue())
@@ -124,6 +139,25 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         {
             this.saveSchematicOnClient(effectiveSettings, file, overwrite);
         }
+    }
+
+    protected void onTypeSelected(SchematicType type)
+    {
+        if (type != null)
+        {
+            ImmutableList<Integer> list = type.getSavableVersions();
+            this.schematicVersionDropdown.replaceEntryList(list);
+            this.schematicVersionDropdown.setSelectedEntry(type.getDefaultSaveVersion());
+            this.hasSavableVersions = list.size() > 0;
+        }
+        else
+        {
+            this.schematicVersionDropdown.replaceEntryList(ImmutableList.of());
+            this.schematicVersionDropdown.setSelectedEntry(0);
+            this.hasSavableVersions = false;
+        }
+
+        this.reAddActiveWidgets();
     }
 
     public static boolean shouldSaveOnDedicatedServerSide(SaveSide side)
@@ -174,6 +208,16 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
     protected void writeSchematicToFile(Schematic schematic, Path file, boolean overwrite)
     {
+        if (this.hasSavableVersions)
+        {
+            int version = this.schematicVersionDropdown.getSelectedEntry();
+
+            if (schematic.getType().getSavableVersions().contains(version))
+            {
+                schematic.getMetadata().setSchematicVersion(version);
+            }
+        }
+
         if (SchematicFileUtils.writeToFile(schematic, file, overwrite))
         {
             this.onSchematicSaved(file);

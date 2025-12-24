@@ -101,10 +101,11 @@ public class CreateInMemorySchematicScreen extends BaseScreen
         this.nameTextField.setPosition(this.nameLabel.getRight() + 2, y);
 
         y = this.nameTextField.getBottom() + 4;
-        this.schematicTypeDropdown.setPosition(x, y);
 
-        this.saveButton.setPosition(this.schematicTypeDropdown.getRight() + 4, y);
-        this.customSettingsButton.setPosition(x, this.saveButton.getBottom() + 2);
+        this.saveButton.setPosition(x, y);
+        this.schematicTypeDropdown.setPosition(this.saveButton.getRight() + 4, y);
+
+        this.customSettingsButton.setPosition(x, this.saveButton.getBottom() + 10);
         this.settingsWidget.setPosition(x, this.customSettingsButton.getBottom() + 2);
     }
 

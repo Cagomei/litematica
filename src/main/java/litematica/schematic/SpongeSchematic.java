@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -38,6 +39,7 @@ public class SpongeSchematic extends BaseSchematic
 {
     public static final int CURRENT_SCHEMATIC_VERSION = 2;
     public static final String FILE_NAME_EXTENSION = "schem";
+    public static final ImmutableList<Integer> SAVABLE_VERSIONS = ImmutableList.of(1, 2, 3);
 
     protected CompoundData originalMetadataTag = new CompoundData();
 
@@ -77,8 +79,7 @@ public class SpongeSchematic extends BaseSchematic
             return Optional.empty();
         }
 
-        int version = CURRENT_SCHEMATIC_VERSION;    // TODO add a way to specify this
-        this.metadata.setSchematicVersion(version);
+        int version = this.metadata.getSchematicVersion();
 
         SchematicRegion region = ListUtils.getFirstEntry(this.regions.values());
         CompoundData rootTag = new CompoundData();

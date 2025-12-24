@@ -14,6 +14,7 @@ import malilib.util.position.Vec3i;
 public class SchematicMetadata
 {
     public static final String DEFAULT_NAME = "<no name>";
+    public static final int DEFAULT_UNSET_VERSION = -1;
 
     protected String schematicName = DEFAULT_NAME;
     protected String author = "";
@@ -23,7 +24,7 @@ public class SchematicMetadata
     @Nullable protected BlockPos originalOrigin;
     protected long timeCreated = -1;
     protected long timeModified = -1;
-    protected int schematicVersion = -1;
+    protected int schematicVersion = DEFAULT_UNSET_VERSION;
     protected int regionCount = -1;
     protected int entityCount = -1;
     protected long totalVolume = -1;
@@ -341,7 +342,7 @@ public class SchematicMetadata
 
         this.timeCreated = dataIn.getLongOrDefault("TimeCreated", -1);
         this.timeModified = dataIn.getLongOrDefault("TimeModified", -1);
-        this.schematicVersion = dataIn.getIntOrDefault("SchematicVersion", -1);
+        this.schematicVersion = dataIn.getIntOrDefault("SchematicVersion", DEFAULT_UNSET_VERSION);
 
         int mcDataVersion = dataIn.getIntOrDefault("McDataVersion", -1);
         this.minecraftVersion = MinecraftVersion.getOrCreateVersionFromDataVersion(mcDataVersion);
