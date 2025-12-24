@@ -31,8 +31,8 @@ public class SchematicBrowserScreen extends BaseSchematicBrowserScreen
         this.materialListButton     = GenericButton.create("litematica.button.misc.material_list", this::createMaterialList);
         this.materialListButton.translateAndAddHoverString("litematica.hover.button.schematic_browser.create_material_list");
         this.createPlacementCheckbox = new CheckBoxWidget("litematica.checkmark.schematic_browser.create_placement",
-                                                          "litematica.hover.schematic_browser.create_placement");
-        this.createPlacementCheckbox.setBooleanStorage(Configs.Internal.CREATE_PLACEMENT_ON_LOAD);
+                                                          "litematica.hover.schematic_browser.create_placement",
+                                                          Configs.Internal.CREATE_PLACEMENT_ON_LOAD);
 
         this.setTitle("litematica.title.screen.schematic_browser", Reference.MOD_VERSION);
     }
