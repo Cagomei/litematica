@@ -1,5 +1,6 @@
 package litematica.schematic;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +10,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.util.ResourceLocation;
 
 import malilib.config.option.OptionListConfig;
 import malilib.config.value.BaseOptionListConfigValue;
@@ -17,6 +21,7 @@ import malilib.util.data.json.JsonUtils;
 import malilib.util.game.BlockUtils;
 import malilib.util.game.wrap.RegistryUtils;
 import malilib.util.world.BlockState;
+import litematica.Litematica;
 import litematica.util.value.SchematicSaveWorldSelection;
 
 public class SchematicSaveSettings
@@ -26,11 +31,15 @@ public class SchematicSaveSettings
     public final SimpleBooleanStorageWithDefault saveScheduledBlockTicks = new SimpleBooleanStorageWithDefault(true);
     public final SimpleBooleanStorageWithDefault saveEntities            = new SimpleBooleanStorageWithDefault(true);
     public final SimpleBooleanStorageWithDefault exposedBlocksOnly       = new SimpleBooleanStorageWithDefault(false);
+    public final SimpleBooleanStorageWithDefault obeyIgnoredBlocks       = new SimpleBooleanStorageWithDefault(false);
+    public final SimpleBooleanStorageWithDefault obeyIgnoredBlockStates  = new SimpleBooleanStorageWithDefault(false);
+    public final SimpleBooleanStorageWithDefault obeyIgnoredEntities     = new SimpleBooleanStorageWithDefault(false);
     public final OptionListConfig<SchematicSaveWorldSelection> worldSelection = new OptionListConfig<>("-", SchematicSaveWorldSelection.VANILLA_ONLY, SchematicSaveWorldSelection.VALUES);
     public final OptionListConfig<SaveSide> saveSide = new OptionListConfig<>("-", SaveSide.AUTO, SaveSide.VALUES);
 
-    public final Set<Block> ignoreBlocks = new HashSet<>();
-    public final Set<BlockState> ignoreBlockStates = new HashSet<>();
+    public final Set<Block> ignoredBlocks = new HashSet<>();
+    public final Set<BlockState> ignoredBlockStates = new HashSet<>();
+    public final Set<Class<? extends Entity>> ignoredEntities = new HashSet<>();
 
     public SchematicType schematicType = SchematicType.LITEMATICA;
 
@@ -47,12 +56,35 @@ public class SchematicSaveSettings
         newSettings.worldSelection.setValue(this.worldSelection.getValue());
         newSettings.saveSide.setValue(this.saveSide.getValue());
 
-        newSettings.ignoreBlocks.addAll(this.ignoreBlocks);
-        newSettings.ignoreBlockStates.addAll(this.ignoreBlockStates);
+        newSettings.obeyIgnoredBlocks.setBooleanValue(this.obeyIgnoredBlocks.getBooleanValue());
+        newSettings.obeyIgnoredBlockStates.setBooleanValue(this.obeyIgnoredBlockStates.getBooleanValue());
+        newSettings.obeyIgnoredEntities.setBooleanValue(this.obeyIgnoredEntities.getBooleanValue());
+
+        newSettings.ignoredBlocks.addAll(this.ignoredBlocks);
+        newSettings.ignoredBlockStates.addAll(this.ignoredBlockStates);
+        newSettings.ignoredEntities.addAll(this.ignoredEntities);
 
         newSettings.schematicType = this.schematicType;
 
         return newSettings;
+    }
+
+    public void setIgnoredBlocks(Collection<Block> ignoredBlocks)
+    {
+        this.ignoredBlocks.clear();
+        this.ignoredBlocks.addAll(ignoredBlocks);
+    }
+
+    public void setIgnoredBlockStates(Collection<BlockState> ignoredBlockStates)
+    {
+        this.ignoredBlockStates.clear();
+        this.ignoredBlockStates.addAll(ignoredBlockStates);
+    }
+
+    public void setIgnoredEntities(Collection<Class<? extends Entity>> ignoredEntities)
+    {
+        this.ignoredEntities.clear();
+        this.ignoredEntities.addAll(ignoredEntities);
     }
 
     public JsonElement toJson()
@@ -67,8 +99,13 @@ public class SchematicSaveSettings
         obj.addProperty("world_selection", this.worldSelection.getValue().getName());
         obj.addProperty("save_side", this.saveSide.getValue().getName());
 
-        obj.add("ignore_blocks", this.getIgnoredBlocksAsJson());
-        obj.add("ignore_block_states", this.getIgnoredBlockStatesAsJson());
+        obj.addProperty("obey_ignored_blocks", this.obeyIgnoredBlocks.getBooleanValue());
+        obj.addProperty("obey_ignored_block_states", this.obeyIgnoredBlockStates.getBooleanValue());
+        obj.addProperty("obey_ignored_entities", this.obeyIgnoredEntities.getBooleanValue());
+
+        obj.add("ignored_blocks", this.getIgnoredBlocksAsJson());
+        obj.add("ignored_block_states", this.getIgnoredBlockStatesAsJson());
+        obj.add("ignored_entities", this.getIgnoredEntitiesAsJson());
 
         return obj;
     }
@@ -77,7 +114,7 @@ public class SchematicSaveSettings
     {
         JsonArray arr = new JsonArray();
 
-        for (Block block : this.ignoreBlocks)
+        for (Block block : this.ignoredBlocks)
         {
             arr.add(RegistryUtils.getBlockIdStr(block));
         }
@@ -89,9 +126,28 @@ public class SchematicSaveSettings
     {
         JsonArray arr = new JsonArray();
 
-        for (BlockState state : this.ignoreBlockStates)
+        for (BlockState state : this.ignoredBlockStates)
         {
             arr.add(state.getFullStateString());
+        }
+
+        return arr;
+    }
+
+    protected JsonElement getIgnoredEntitiesAsJson()
+    {
+        JsonArray arr = new JsonArray();
+
+        for (Class<? extends Entity> clazz : this.ignoredEntities)
+        {
+            ResourceLocation rl = EntityList.getKey(clazz);
+
+            if (rl == null)
+            {
+                continue;
+            }
+
+            arr.add(rl.toString());
         }
 
         return arr;
@@ -117,17 +173,24 @@ public class SchematicSaveSettings
         this.worldSelection.setValue(SchematicSaveWorldSelection.findValueByName(JsonUtils.getStringOrDefault(obj, "world_selection", ""), SchematicSaveWorldSelection.VALUES));
         this.saveSide.setValue(SaveSide.findValueByName(JsonUtils.getStringOrDefault(obj, "save_side", ""), SaveSide.VALUES));
 
-        this.ignoreBlocks.clear();
-        JsonUtils.getArrayElementsIfExists(obj, "ignore_blocks", this::parseBlock);
+        this.obeyIgnoredBlocks.setBooleanValue(JsonUtils.getBooleanOrDefault(obj, "obey_ignored_blocks", false));
+        this.obeyIgnoredBlockStates.setBooleanValue(JsonUtils.getBooleanOrDefault(obj, "obey_ignored_block_states", false));
+        this.obeyIgnoredEntities.setBooleanValue(JsonUtils.getBooleanOrDefault(obj, "obey_ignored_entities", false));
 
-        this.ignoreBlockStates.clear();
-        JsonUtils.getArrayElementsIfExists(obj, "ignore_block_states", this::parseBlockState);
+        this.ignoredBlocks.clear();
+        JsonUtils.getArrayElementsIfExists(obj, "ignored_blocks", this::parseBlock);
+
+        this.ignoredBlockStates.clear();
+        JsonUtils.getArrayElementsIfExists(obj, "ignored_block_states", this::parseBlockState);
+
+        this.ignoredEntities.clear();
+        JsonUtils.getArrayElementsIfExists(obj, "ignored_entities", this::parseEntity);
     }
 
     protected void parseBlock(JsonElement el)
     {
         Block block = RegistryUtils.getBlockByIdStr(el.getAsString());
-        this.ignoreBlocks.add(block);
+        this.ignoredBlocks.add(block);
     }
 
     protected void parseBlockState(JsonElement el)
@@ -136,7 +199,25 @@ public class SchematicSaveSettings
 
         if (stateOpt.isPresent())
         {
-            this.ignoreBlockStates.add(stateOpt.get());
+            this.ignoredBlockStates.add(stateOpt.get());
+        }
+    }
+
+    protected void parseEntity(JsonElement el)
+    {
+        try
+        {
+            String str = el.getAsString();
+            Class<? extends Entity> clazz = EntityList.getClassFromName(str);
+
+            if (clazz != null)
+            {
+                this.ignoredEntities.add(clazz);
+            }
+        }
+        catch (Exception e)
+        {
+            Litematica.LOGGER.warn("Failed to parse ignored entity type: {}", el);
         }
     }
 

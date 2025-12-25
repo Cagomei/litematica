@@ -49,7 +49,7 @@ public class CreateInMemorySchematicScreen extends BaseScreen
         this.nameTextField = new BaseTextFieldWidget(240, 16, selection.getName());
         this.nameTextField.setFocused(true);
 
-        this.settingsWidget = new SchematicSaveSettingsWidget(180, 140, this.settings);
+        this.settingsWidget = new SchematicSaveSettingsWidget(180, 170, this.settings);
         this.schematicTypeDropdown = new DropDownListWidget<>(20, 6, SchematicType.KNOWN_TYPES, SchematicType::getDisplayName, t -> new IconWidget(SchematicTypeIcons.getIconForType(t)));
         this.schematicTypeDropdown.setSelectedEntry(SchematicType.LITEMATICA);
         this.saveButton = GenericButton.create(20, "litematica.button.schematic_save.create_schematic", this::createSchematic);
@@ -64,6 +64,8 @@ public class CreateInMemorySchematicScreen extends BaseScreen
         {
             this.settingsWidget.setClientOnlyWarnings(true);
         }
+
+        this.useTitleHierarchy = false;
 
         this.setTitle("litematica.title.screen.create_in_memory_schematic");
         this.addPreScreenCloseListener(this::saveSettings);

@@ -65,6 +65,9 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
     protected final Map<String, List<EntityData>> entityLists = new HashMap<>();
     protected final Set<UUID> existingEntities = new HashSet<>();
     protected final Consumer<Schematic> schematicListener;
+    protected final boolean obeyIgnoredBlocks;
+    protected final boolean obeyIgnoredBlockStates;
+    protected final boolean obeyIgnoredEntities;
     protected long totalBlocks;
     protected int totalEntities;
     protected long totalBlockEntities;
@@ -84,6 +87,9 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
         this.origin = area.getEffectiveOrigin();
         this.subRegions = area.getAllSelectionBoxesMap();
         this.selectionBoxesPerChunk = PositionUtils.getPerChunkBoxes(allBoxes);
+        this.obeyIgnoredBlocks = settings.obeyIgnoredBlocks.getBooleanValue() && settings.ignoredBlocks.isEmpty() == false;
+        this.obeyIgnoredBlockStates = settings.obeyIgnoredBlockStates.getBooleanValue() && settings.ignoredBlockStates.isEmpty() == false;
+        this.obeyIgnoredEntities = settings.obeyIgnoredEntities.getBooleanValue() && settings.ignoredEntities.isEmpty() == false;
 
         this.setCompletionListener(this::onDataCollected);
         this.addPerChunkBoxes(allBoxes);
@@ -253,8 +259,8 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
             return false;
         }
 
-        if (this.settings.ignoreBlockStates.contains(state) ||
-            this.settings.ignoreBlocks.contains(state.getBlock()))
+        if ((this.obeyIgnoredBlocks && this.settings.ignoredBlocks.contains(state.getBlock())) ||
+            (this.obeyIgnoredBlockStates && this.settings.ignoredBlockStates.contains(state)))
         {
             return false;
         }
@@ -287,6 +293,12 @@ public class LocalCreateSchematicTask extends TaskProcessChunkBase
 
             // This entity was already saved to some region
             if (existingEntities.contains(uuid))
+            {
+                continue;
+            }
+
+            if (this.obeyIgnoredEntities &&
+                this.settings.ignoredEntities.contains(entity.getClass()))
             {
                 continue;
             }

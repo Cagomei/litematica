@@ -37,7 +37,7 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
 
     public SaveSchematicFromAreaScreen(AreaSelection selection)
     {
-        super(10, 74, 20 + 170 + 2, 80, "save_schematic_from_area");
+        super(4, 74, 20 + 164 + 2, 80, "save_schematic_from_area");
 
         this.selection = selection;
 
@@ -52,7 +52,8 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
         this.schematicVersionDropdown = new DropDownListWidget<>(18, 10, ImmutableList.of(), e -> String.format("v%d", e));
 
         // TODO the dropdown widget hover overflow render does not account for going over the screen edge
-        this.settingsWidget = new SchematicSaveSettingsWidget(170, 140, this.settings);
+        this.settingsWidget = new SchematicSaveSettingsWidget(176, 170, this.settings);
+        this.schematicInfoWidget.setWidth(176);
 
         this.customSettingsEnabled.setBooleanValue(Configs.Internal.SAVE_WITH_CUSTOM_SETTINGS.getBooleanValue());
         this.customSettingsEnabled.setValueChangeCallback((n, o) -> this.onCustomSettingsToggled());
@@ -95,6 +96,8 @@ public class SaveSchematicFromAreaScreen extends BaseSaveSchematicScreen
     protected void updateWidgetPositions()
     {
         super.updateWidgetPositions();
+
+        this.schematicInfoWidget.setRight(this.getRight() - 4);
 
         int x = this.schematicInfoWidget.getX();
         int y = this.fileNameTextField.getBottom() + 2;
