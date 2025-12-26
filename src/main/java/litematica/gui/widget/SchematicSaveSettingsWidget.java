@@ -246,11 +246,24 @@ public class SchematicSaveSettingsWidget extends ContainerWidget
     {
         this.clientOnlyWarningsEnabled = clientOnlyWarningsEnabled;
 
-        int color = clientOnlyWarningsEnabled ? 0xFFFFAA00 : 0xFFFFFFFF;
+        this.saveBlockTicksWidget.setEnabled(!clientOnlyWarningsEnabled);
 
-        this.saveBlockTicksWidget.setEnabled(! clientOnlyWarningsEnabled);
-        this.saveBlockEntitiesWidget.setNormalStateLabelColor(color);
-        this.saveEntitiesWidget.setNormalStateLabelColor(color);
+        if (clientOnlyWarningsEnabled)
+        {
+            int color = 0xFFFFAA00;
+            this.saveBlockEntitiesWidget.setNormalStateOnAndOffLabelColor(color);
+            this.saveEntitiesWidget.setNormalStateOnAndOffLabelColor(color);
+        }
+        else
+        {
+            int color = 0xFFF0F0F0;
+            this.saveBlockEntitiesWidget.setNormalStateOnLabelColor(color);
+            this.saveEntitiesWidget.setNormalStateOnLabelColor(color);
+
+            color = 0xFFD0D0D0;
+            this.saveBlockEntitiesWidget.setNormalStateOffLabelColor(color);
+            this.saveEntitiesWidget.setNormalStateOffLabelColor(color);
+        }
 
         // First remove possible already added hover strings
         this.saveBlockTicksWidget.getHoverInfoFactory().removeAll();
