@@ -40,7 +40,7 @@ public abstract class BaseSaveSchematicScreen extends BaseSchematicBrowserScreen
         this.revertNameButton = GenericButton.create(DefaultIcons.RESET_12, this::revertName);
         this.saveButton = GenericButton.create(18, "litematica.button.save_schematic.save_schematic", this::saveSchematic);
 
-        this.schematicTypeDropdown = new DropDownListWidget<>(18, 6, SchematicType.KNOWN_TYPES, SchematicType::getDisplayName, t -> new IconWidget(SchematicTypeIcons.getIconForType(t)));
+        this.schematicTypeDropdown = new DropDownListWidget<>(18, 6, SchematicType.getSavableTypes(), SchematicType::getDisplayName, t -> new IconWidget(SchematicTypeIcons.getIconForType(t)));
         this.schematicTypeDropdown.setSelectedEntry(SchematicType.LITEMATICA);
 
         this.revertNameButton.translateAndAddHoverString("litematica.hover.button.save_schematic.revert_name");

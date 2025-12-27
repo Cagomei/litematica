@@ -16,6 +16,7 @@ import malilib.util.FileNameUtils;
 import malilib.util.StringUtils;
 import malilib.util.data.tag.DataView;
 import malilib.util.position.Vec3i;
+import litematica.config.Configs;
 import litematica.schematic.container.BlockContainer;
 import litematica.schematic.container.BlockContainerFactory;
 
@@ -83,7 +84,9 @@ public class SchematicType
         .setHasName(true)
         .build();
 
-    public static ImmutableList<SchematicType> KNOWN_TYPES = ImmutableList.of(LITEMATICA, SPONGE, SCHEMATICA, VANILLA, STRUCTURIZE);
+    private static ImmutableList<SchematicType> COMMON_TYPES = ImmutableList.of(LITEMATICA, SPONGE, SCHEMATICA, VANILLA, STRUCTURIZE);
+    private static ImmutableList<SchematicType> EXTRA_TYPES = ImmutableList.of();
+    private static ImmutableList<SchematicType> ALL_TYPES = buildAllTypesList();
 
     public static final Predicate<Path> SCHEMATIC_FILE_FILTER = p -> Files.isRegularFile(p) &&
                                                                      Files.isReadable(p) &&
@@ -189,6 +192,16 @@ public class SchematicType
         return this.metadataFromDataFactory.apply(data);
     }
 
+    public static ImmutableList<SchematicType> getSavableTypes()
+    {
+        if (Configs.Generic.SHOW_EXTRA_SCHEMATIC_TYPES.getBooleanValue())
+        {
+            return ALL_TYPES;
+        }
+
+        return COMMON_TYPES;
+    }
+
     public static List<SchematicType> getPossibleTypesFromFileName(Path file)
     {
         return getPossibleTypesFromFileName(file.getFileName().toString());
@@ -199,7 +212,7 @@ public class SchematicType
         String extension = FileNameUtils.getFileNameExtension(fileName.toLowerCase(Locale.ROOT));
         List<SchematicType> list = new ArrayList<>();
 
-        for (SchematicType type : KNOWN_TYPES)
+        for (SchematicType type : ALL_TYPES)
         {
             if (type.isValidExtension(extension))
             {
@@ -214,7 +227,7 @@ public class SchematicType
     {
         List<SchematicType> possibleTypes = SchematicType.getPossibleTypesFromFileName(file);
 
-        for (SchematicType type : SchematicType.KNOWN_TYPES)
+        for (SchematicType type : SchematicType.ALL_TYPES)
         {
             if (possibleTypes.contains(type))
             {
@@ -246,16 +259,49 @@ public class SchematicType
         return Optional.empty();
     }
 
-    public static void registerType(SchematicType type)
+    /**
+     * Register a new "common" SchematicType, which should always be available.
+     */
+    public static void registerCommonType(SchematicType type)
     {
-        if (KNOWN_TYPES.contains(type))
+        if (COMMON_TYPES.contains(type))
         {
             return;
         }
 
-        ArrayList<SchematicType> types = new ArrayList<>(KNOWN_TYPES);
-        types.add(type);
-        KNOWN_TYPES = ImmutableList.copyOf(types);
+        ImmutableList.Builder<SchematicType> builder = ImmutableList.builder();
+        builder.addAll(COMMON_TYPES);
+        builder.add(type);
+        COMMON_TYPES = builder.build();
+        ALL_TYPES = buildAllTypesList();
+    }
+
+    /**
+     * Register a new "extra / gimmick" SchematicType, which are only available as savable formats
+     * when the config option "SHOW_EXTRA_SCHEMATIC_TYPES" is enabled.
+     */
+    public static void registerExtraType(SchematicType type)
+    {
+        if (EXTRA_TYPES.contains(type))
+        {
+            return;
+        }
+
+        ImmutableList.Builder<SchematicType> builder = ImmutableList.builder();
+        builder.addAll(EXTRA_TYPES);
+        builder.add(type);
+        EXTRA_TYPES = builder.build();
+        ALL_TYPES = buildAllTypesList();
+    }
+
+    public static ImmutableList<SchematicType> buildAllTypesList()
+    {
+        ImmutableList.Builder<SchematicType> builder = ImmutableList.builder();
+
+        builder.addAll(COMMON_TYPES);
+        builder.addAll(EXTRA_TYPES);
+
+        return builder.build();
     }
 
     public static SchematicType.Builder builder()
