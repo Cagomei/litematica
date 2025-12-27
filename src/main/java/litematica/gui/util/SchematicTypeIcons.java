@@ -56,6 +56,8 @@ public class SchematicTypeIcons
         this.register(SchematicType.SCHEMATICA,  LitematicaIcons.SCHEMATIC_SCHEMATICA,  LitematicaIcons.SCHEMATIC_IN_MEMORY_SCHEMATICA);
         this.register(SchematicType.STRUCTURIZE, LitematicaIcons.SCHEMATIC_STRUCTURIZE, LitematicaIcons.SCHEMATIC_IN_MEMORY_STRUCTURIZE);
         this.register(SchematicType.VANILLA,     LitematicaIcons.SCHEMATIC_VANILLA,     LitematicaIcons.SCHEMATIC_IN_MEMORY_VANILLA);
+
+        this.register(SchematicType.INDEV_WORLD, LitematicaIcons.SCHEMATIC_INDEV_WORLD, LitematicaIcons.SCHEMATIC_IN_MEMORY_INDEV_WORLD);
     }
 
     public static Icon getIconForType(SchematicType type)

@@ -19,10 +19,11 @@ public class LitematicaIcons
     public static final BaseIcon SCHEMATIC_SPONGE               = register(144,  24, 12, 12,  0,  0);
     public static final BaseIcon SCHEMATIC_VANILLA              = register(144,  36, 12, 12,  0,  0);
     public static final BaseIcon SCHEMATIC_STRUCTURIZE          = register(144,  48, 12, 12,  0,  0);
+    public static final BaseIcon SCHEMATIC_INDEV_WORLD          = register(144,  60, 12, 12,  0,  0);
 
     /*
-    public static final BaseIcon SCHEMATIC_MCEDIT               = register(144,  60, 12, 12,  0,  0);
-    public static final BaseIcon FILE_ICON_JSON                 = register(144,  72, 12, 12,  0,  0);
+    public static final BaseIcon SCHEMATIC_MCEDIT               = register(144,  72, 12, 12,  0,  0);
+    public static final BaseIcon FILE_ICON_JSON                 = register(144,  84, 12, 12,  0,  0);
 
     public static final BaseIcon SCHEMATIC_TYPE_MEMORY          = register(168,   0, 12, 12,  0,  0);
     public static final BaseIcon IN_MEMORY_OVERLAY              = register(168,  12, 12, 12,  0,  0);
@@ -33,6 +34,7 @@ public class LitematicaIcons
     public static final BaseIcon SCHEMATIC_IN_MEMORY_SPONGE     = register(156,  24, 12, 12,  0,  0);
     public static final BaseIcon SCHEMATIC_IN_MEMORY_VANILLA    = register(156,  36, 12, 12,  0,  0);
     public static final BaseIcon SCHEMATIC_IN_MEMORY_STRUCTURIZE= register(156,  48, 12, 12,  0,  0);
+    public static final BaseIcon SCHEMATIC_IN_MEMORY_INDEV_WORLD= register(156,  60, 12, 12,  0,  0);
 
     /*
     public static final BaseIcon SCHEMATIC_IN_MEMORY_MCEDIT     = register(156,  60, 12, 12,  0,  0);

@@ -84,8 +84,20 @@ public class SchematicType
         .setHasName(true)
         .build();
 
+    public static final SchematicType INDEV_WORLD = SchematicType.builder()
+        .setTranslationKey("litematica.schematic.type.indev_world")
+        .setBlockContainerFactory(IndevWorldSchematic::createDefaultBlockContainer)
+        .setSchematicFromDataFactory(IndevWorldSchematic::fromData)
+        .setSchematicFromRegionsFactory(IndevWorldSchematic::fromRegions)
+        .setMetadataFromDataFactory(IndevWorldSchematic::createAndReadMetadata)
+        .setDataValidator(IndevWorldSchematic::isValidData)
+        .setExtension(IndevWorldSchematic.FILE_NAME_EXTENSION)
+        .setExtensionValidator(IndevWorldSchematic.FILE_NAME_EXTENSION::equalsIgnoreCase)
+        .setHasName(true)
+        .build();
+
     private static ImmutableList<SchematicType> COMMON_TYPES = ImmutableList.of(LITEMATICA, SPONGE, SCHEMATICA, VANILLA, STRUCTURIZE);
-    private static ImmutableList<SchematicType> EXTRA_TYPES = ImmutableList.of();
+    private static ImmutableList<SchematicType> EXTRA_TYPES = ImmutableList.of(INDEV_WORLD);
     private static ImmutableList<SchematicType> ALL_TYPES = buildAllTypesList();
 
     public static final Predicate<Path> SCHEMATIC_FILE_FILTER = p -> Files.isRegularFile(p) &&

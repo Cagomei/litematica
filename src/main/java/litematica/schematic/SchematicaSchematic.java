@@ -147,7 +147,7 @@ public class SchematicaSchematic extends BaseSchematic
         // No mapping, use the current registry IDs directly
         else
         {
-            mapping = this.createRegistryBasedPalette();
+            mapping = createRegistryBasedPalette();
         }
 
         return mapping;
@@ -245,7 +245,7 @@ public class SchematicaSchematic extends BaseSchematic
         return mapping;
     }
 
-    protected Int2ObjectOpenHashMap<BlockState> createRegistryBasedPalette()
+    public static Int2ObjectOpenHashMap<BlockState> createRegistryBasedPalette()
     {
         Int2ObjectOpenHashMap<BlockState> mapping = new Int2ObjectOpenHashMap<>();
         List<Identifier> blockIds = RegistryUtils.getRegisteredBlockIds();

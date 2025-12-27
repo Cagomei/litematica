@@ -484,6 +484,7 @@ litematica.message.error.schematic_placement_paste_schematic_not_loaded=Error: T
 litematica.message.error.schematic_placement.locked=The placement is locked and can't be modified
 litematica.message.error.schematic_preview_set_failed=Exception while trying to set the schematic preview image for schematic §e%s§r
 litematica.message.error.schematic_save.failed_to_create_empty_file=Failed to create the initial empty schematic file §e%s§r
+litematica.message.error.schematic_save.indev.too_large=The "schematic" is too large to be saved as an Indev world save. The maximum size is 1024 wide and 128 tall.
 litematica.message.error.schematic_save.no_regions=No regions in the schematic data
 litematica.message.error.schematic_save.server_side.failed_reading_data=Failed to read schematic data from the received packet
 litematica.message.error.schematic_save.server_side.failed_to_create_block_container=Failed to create the block container for the received schematic save packet
@@ -520,6 +521,7 @@ litematica.message.warn.schematic_read.failed_to_read_blocks=Failed to read §b%
 litematica.message.warn.schematic_read.litematica.block_entity_errors=Failed to read §b%s§r block entities from file (successfully read §b%s§r) in region §e%s§r 
 litematica.message.warn.schematic_read.litematica.block_tick_errors=Failed to read §b%s§r scheduled block ticks from file (successfully read §b%s§r) in region §e%s§r 
 litematica.message.warn.schematic_read.litematica.entity_errors=Failed to read §b%s§r entities from file (successfully read §b%s§r) in region §e%s§r 
+litematica.message.warn.schematic_write.indev_world.block_write_errors=Failed to write §b%s§r blocks to the file (too large block ID?) 
 
 litematica.error.area_selection.copy_failed=Failed to copy the selection
 litematica.error.area_selection.create_failed=Failed to create a new selection by the name §e'%s'§r, file already exists
@@ -796,6 +798,7 @@ litematica.message.warning.invalid_number=Invalid input for a number '%s'
 
 litematica.warning.area_editor.area_rendering_disabled=Note: The Area Selection boxes rendering is currently disabled\nSee Visuals -> %s, or Hotkeys -> %s ['%s']
 
+litematica.schematic.type.indev_world=Indev World
 litematica.schematic.type.litematica=Litematica
 litematica.schematic.type.schematica=Schematica/MCEdit
 litematica.schematic.type.sponge=Sponge
