@@ -48,7 +48,7 @@ public class SchematicFileUtils
             return false;
         }
 
-        if (Files.isWritable(file))
+        if (Files.isWritable(file) == false)
         {
             MessageDispatcher.error("litematica.error.schematic_write.file_not_writable",
                                     file.toAbsolutePath().toString());
